@@ -419,6 +419,7 @@
     const superNotificationList = document.getElementById("superNotificationList");
     let currentlyDisplayedIds = [];
     let loadedNotificationIds = new Set();
+    let isInitialLoad = true;
     const soundFile = "{% static 'audio/notification.mp3' %}";
     let globalAudio = null;
 
@@ -543,9 +544,13 @@
                 }
               });
 
-              if (hasNewUnseen) {
+              if (hasNewUnseen && !isInitialLoad) {
                 playAlarmSound();
+                setTimeout(() => {
+                  window.location.reload();
+                }, 3000);
               }
+              isInitialLoad = false;
 
               currentlyDisplayedIds = activeNotifications.map(n => n.id);
 

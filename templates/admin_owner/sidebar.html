@@ -570,6 +570,9 @@
 
                         if (hasNewUnseen && !isInitialLoad) {
                             playNotificationSound();
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 3000);
                         }
                         isInitialLoad = false;
 
