@@ -6,3 +6,4 @@ whitenoise[brotli]
 pillow
 razorpay
 django-otp
+reportlab
