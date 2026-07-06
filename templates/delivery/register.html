@@ -1,0 +1,386 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Partner Registration - Foodeat</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="{% static 'js/3.4.js' %}"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#e0e7ff',
+                            100: '#c7d2fe',
+                            500: '#6366f1', // Indigo Primary
+                            600: '#4f46e5', // Indigo hover
+                            700: '#4338ca',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        input, select, textarea {
+            transition: all 0.2s ease-in-out;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+        }
+        /* Animated input focus underline style */
+        .django-input-field:focus-within + .underline-indicator .focus-line {
+            width: 100%;
+        }
+        
+        /* Shimmer effect for submit button */
+        .shimmer-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        .shimmer-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 30%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.25);
+            transform: rotate(30deg);
+            transition: all 0.5s ease;
+        }
+        .shimmer-btn:hover::after {
+            left: 130%;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-950 via-indigo-950/10 to-slate-950 text-slate-100 font-sans min-h-screen flex items-center justify-center py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-5xl w-full bg-slate-900/60 rounded-3xl border border-slate-800/80 shadow-2xl overflow-hidden flex flex-col md:flex-row glass-panel">
+        
+        <!-- Left Panel: Graphic & Information Column -->
+        <div class="w-full md:w-5/12 bg-gradient-to-br from-brand-600 via-violet-650 to-indigo-800 p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden">
+            <!-- Decorative circle -->
+            <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/10 rounded-full blur-2xl"></div>
+            
+            <div class="relative z-10">
+                <a href="/" class="inline-flex items-center gap-2 text-white font-extrabold text-lg tracking-wider mb-8 sm:mb-12">
+                    <i class="fa-solid fa-utensils text-2xl"></i>
+                    <span>Foodeat</span>
+                </a>
+                
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white leading-tight tracking-tight">
+                    Ride with Us, <br class="hidden sm:inline">Earn on Your Time.
+                </h2>
+                <p class="text-brand-50/80 text-sm mt-3 leading-relaxed">
+                    Join Foodeat's elite delivery fleet. Enjoy flexible work hours, competitive payouts, and weekly bonuses.
+                </p>
+            </div>
+
+            <!-- Features List -->
+            <div class="relative z-10 my-8 space-y-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center text-white">
+                        <i class="fa-solid fa-wallet text-xs"></i>
+                    </div>
+                    <span class="text-xs sm:text-sm font-bold text-white">Competitive & Swift Weekly Payouts</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center text-white">
+                        <i class="fa-solid fa-calendar-days text-xs"></i>
+                    </div>
+                    <span class="text-xs sm:text-sm font-bold text-white">Flexible Shift Scheduling</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center text-white">
+                        <i class="fa-solid fa-shield-heart text-xs"></i>
+                    </div>
+                    <span class="text-xs sm:text-sm font-bold text-white">Accidental Insurance & Support</span>
+                </div>
+            </div>
+
+            <!-- Footer Note -->
+            <div class="relative z-10 text-[10px] text-brand-50/50">
+                &copy; 2026 Foodeat Logistics. All rights reserved.
+            </div>
+        </div>
+
+        <!-- Right Panel: Form Column -->
+        <div class="w-full md:w-7/12 p-6 sm:p-10 flex flex-col justify-center">
+            
+            <div class="mb-6 flex items-center justify-between">
+                <div>
+                    <h3 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Become a Partner</h3>
+                    <p class="text-slate-400 text-xs mt-1">Register today and set up your driver account.</p>
+                </div>
+                <div class="block md:hidden w-10 h-10 bg-brand-500/10 text-brand-500 rounded-xl flex items-center justify-center border border-brand-500/20 shadow-inner">
+                    <i class="fa-solid fa-motorcycle text-lg"></i>
+                </div>
+            </div>
+
+            <!-- Message Alerts -->
+            {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for msg in messages %}
+                        <div class="p-3.5 rounded-xl border flex items-center justify-between {% if msg.tags == 'error' %}bg-rose-500/10 border-rose-500/20 text-rose-300{% else %}bg-emerald-500/10 border-emerald-500/20 text-emerald-300{% endif %}">
+                            <span class="text-xs font-semibold">{{ msg }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data" class="space-y-5" onsubmit="return validateForm(this)">
+                {% csrf_token %}
+                
+                <!-- Section 1: Personal Details -->
+                <div>
+                    <p class="text-[11px] font-black text-brand-500 uppercase tracking-widest mb-3 border-b border-slate-800/60 pb-1.5">Personal Details</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Full Name -->
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Full Name</label>
+                            <div class="relative flex items-center django-input-field">
+                                <i class="fa-solid fa-user absolute left-3.5 text-slate-500 text-xs"></i>
+                                <input type="text" name="name" required placeholder="e.g. Rahul Sharma" 
+                                       class="w-full h-11 pl-9 pr-4 text-xs bg-slate-955 bg-opacity-40 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10">
+                            </div>
+                            <!-- Underline Indicator -->
+                            <div class="w-full h-[2px] bg-slate-850 rounded overflow-hidden relative mt-1 underline-indicator">
+                                <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-brand-500 transition-all duration-300 -translate-x-1/2 focus-line"></div>
+                            </div>
+                        </div>
+
+                        <!-- Profile Image -->
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Profile Photo</label>
+                            <input type="file" name="image" required accept="image/*" 
+                                   class="w-full text-xs text-slate-400 bg-slate-955 bg-opacity-40 border border-slate-800 rounded-xl p-2 cursor-pointer file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[10px] file:font-bold file:bg-brand-500 file:text-white file:hover:bg-brand-600 transition-colors">
+                        </div>
+
+                        <!-- Email -->
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Email Address</label>
+                            <div class="relative flex items-center django-input-field">
+                                <i class="fa-solid fa-envelope absolute left-3.5 text-slate-500 text-xs"></i>
+                                <input type="email" name="email" required placeholder="e.g. rahul@example.com" 
+                                       class="w-full h-11 pl-9 pr-4 text-xs bg-slate-955 bg-opacity-40 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10">
+                            </div>
+                            <!-- Underline Indicator -->
+                            <div class="w-full h-[2px] bg-slate-850 rounded overflow-hidden relative mt-1 underline-indicator">
+                                <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-brand-500 transition-all duration-300 -translate-x-1/2 focus-line"></div>
+                            </div>
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Phone Number</label>
+                            <div class="relative flex items-center django-input-field">
+                                <i class="fa-solid fa-phone absolute left-3.5 text-slate-500 text-xs"></i>
+                                <input type="text" name="phone_number" required placeholder="10-digit number" pattern="[0-9]{10}" title="10-digit mobile number" 
+                                       class="w-full h-11 pl-9 pr-4 text-xs bg-slate-955 bg-opacity-40 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10">
+                            </div>
+                            <!-- Underline Indicator -->
+                            <div class="w-full h-[2px] bg-slate-850 rounded overflow-hidden relative mt-1 underline-indicator">
+                                <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-brand-500 transition-all duration-300 -translate-x-1/2 focus-line"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Account Password -->
+                <div>
+                    <p class="text-[11px] font-black text-brand-500 uppercase tracking-widest mb-3 border-b border-slate-800/60 pb-1.5">Account Credentials</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Password -->
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Password</label>
+                            <div class="relative flex items-center django-input-field">
+                                <i class="fa-solid fa-lock absolute left-3.5 text-slate-500 text-xs"></i>
+                                <input type="password" id="register-password" name="password" required placeholder="Min 6 characters" 
+                                       minlength="6" title="Must contain at least 6 characters"
+                                       class="w-full h-11 pl-9 pr-10 text-xs bg-slate-955 bg-opacity-40 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10">
+                                <button type="button" onclick="togglePasswordVisibility('register-password', this)" class="absolute right-3 text-slate-500 hover:text-white transition-colors focus:outline-none">
+                                    <i class="fa-solid fa-eye text-xs"></i>
+                                </button>
+                            </div>
+                            <!-- Underline Indicator -->
+                            <div class="w-full h-[2px] bg-slate-850 rounded overflow-hidden relative mt-1 underline-indicator">
+                                <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-brand-500 transition-all duration-300 -translate-x-1/2 focus-line"></div>
+                            </div>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Confirm Password</label>
+                            <div class="relative flex items-center django-input-field">
+                                <i class="fa-solid fa-lock absolute left-3.5 text-slate-500 text-xs"></i>
+                                <input type="password" id="register-confirm-password" name="confirm_password" required placeholder="Re-type password" 
+                                       class="w-full h-11 pl-9 pr-10 text-xs bg-slate-955 bg-opacity-40 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10">
+                                <button type="button" onclick="togglePasswordVisibility('register-confirm-password', this)" class="absolute right-3 text-slate-500 hover:text-white transition-colors focus:outline-none">
+                                    <i class="fa-solid fa-eye text-xs"></i>
+                                </button>
+                            </div>
+                            <!-- Underline Indicator -->
+                            <div class="w-full h-[2px] bg-slate-850 rounded overflow-hidden relative mt-1 underline-indicator">
+                                <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-brand-500 transition-all duration-300 -translate-x-1/2 focus-line"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Vehicle, License & Aadhaar Details -->
+                <div>
+                    <p class="text-[11px] font-black text-brand-500 uppercase tracking-widest mb-3 border-b border-slate-800/60 pb-1.5">Vehicle, License & Aadhaar Details</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- License Number -->
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Driving License Number</label>
+                            <div class="relative flex items-center django-input-field">
+                                <i class="fa-solid fa-id-card absolute left-3.5 text-slate-500 text-xs"></i>
+                                <input type="text" name="license_number" required placeholder="e.g. GJ-05-2012-0123456" 
+                                       pattern="^[A-Za-z]{2}[0-9]{2}[ -]?[0-9]{4}[ -]?[0-9]{7}$" title="Standard Driving License (e.g., GJ-05-2012-0123456)"
+                                       class="w-full h-11 pl-9 pr-4 text-xs bg-slate-955 bg-opacity-40 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10">
+                            </div>
+                            <!-- Underline Indicator -->
+                            <div class="w-full h-[2px] bg-slate-850 rounded overflow-hidden relative mt-1 underline-indicator">
+                                <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-brand-500 transition-all duration-300 -translate-x-1/2 focus-line"></div>
+                            </div>
+                        </div>
+
+                        <!-- Bike Type -->
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Type of Bike</label>
+                            <div class="relative flex items-center django-input-field">
+                                <i class="fa-solid fa-motorcycle absolute left-3.5 text-slate-500 text-xs z-10"></i>
+                                <select name="type_of_bike" required 
+                                        class="w-full h-11 pl-9 pr-4 text-xs bg-slate-955 bg-opacity-40 border border-slate-800 rounded-xl text-slate-300 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 appearance-none relative">
+                                    <option value="" disabled selected>Select vehicle type</option>
+                                    <option value="Motorcycle">Motorcycle / Splendor etc.</option>
+                                    <option value="Scooter">Scooter / Activa etc.</option>
+                                    <option value="Electric Bike">Electric Vehicle (EV)</option>
+                                    <option value="Bicycle">Bicycle / Electric cycle</option>
+                                </select>
+                                <i class="fa-solid fa-chevron-down absolute right-3 text-slate-500 text-[10px] pointer-events-none"></i>
+                            </div>
+                            <!-- Underline Indicator -->
+                            <div class="w-full h-[2px] bg-slate-850 rounded overflow-hidden relative mt-1 underline-indicator">
+                                <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-brand-500 transition-all duration-300 -translate-x-1/2 focus-line"></div>
+                            </div>
+                        </div>
+
+                        <!-- Bike Number -->
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Vehicle Number</label>
+                            <div class="relative flex items-center django-input-field">
+                                <span class="absolute left-3.5 text-slate-500 text-xs font-bold font-sans">#</span>
+                                <input type="text" name="bike_number" required placeholder="e.g. GJ-05-AB-1234" 
+                                       class="w-full h-11 pl-9 pr-4 text-xs bg-slate-955 bg-opacity-40 border border-slate-800 rounded-xl text-white placeholder-slate-600 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10">
+                            </div>
+                            <!-- Underline Indicator -->
+                            <div class="w-full h-[2px] bg-slate-850 rounded overflow-hidden relative mt-1 underline-indicator">
+                                <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-brand-500 transition-all duration-300 -translate-x-1/2 focus-line"></div>
+                            </div>
+                        </div>
+
+                        <!-- Aadhaar Card Photo -->
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Aadhaar Card Photo</label>
+                            <input type="file" name="aadhar_card_image" required accept="image/*" 
+                                   class="w-full text-xs text-slate-400 bg-slate-955 bg-opacity-40 border border-slate-800 rounded-xl p-2 cursor-pointer file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[10px] file:font-bold file:bg-brand-500 file:text-white file:hover:bg-brand-600 transition-colors">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-3.5 mt-2 bg-gradient-to-r from-brand-500 to-indigo-600 hover:from-brand-600 hover:to-indigo-750 text-white font-extrabold text-xs sm:text-sm rounded-xl transition-all shadow-lg shadow-brand-500/15 active:scale-[0.98] flex items-center justify-center gap-2 shimmer-btn">
+                    <i class="fa-solid fa-paper-plane"></i> Register & Send OTP
+                </button>
+            </form>
+
+            <div class="text-center mt-6 pt-4 border-t border-slate-800/40">
+                <p class="text-xs text-slate-500">Already registered as a driver? <a href="{% url 'delivery_login' %}" class="text-brand-500 hover:text-brand-600 hover:underline font-bold transition-colors">Partner Login</a></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function validateForm(form) {
+            const email = form.email.value.trim();
+            const phone = form.phone_number.value.trim();
+            const password = form.password.value;
+            const confirmPassword = form.confirm_password.value;
+            const bikeNumber = form.bike_number.value.trim();
+            const licenseNumber = form.license_number.value.trim();
+
+            const emailRegex = /^[\w\.-]+@[\w\.-]+\.\w+$/;
+            if (!emailRegex.test(email)) {
+                alert("Please enter a valid email address.");
+                return false;
+            }
+
+            const phoneRegex = /^\d{10}$/;
+            if (!phoneRegex.test(phone)) {
+                alert("Mobile number must be a valid 10-digit number.");
+                return false;
+            }
+
+            if (password.length < 6) {
+                alert("Password must be at least 6 characters long.");
+                return false;
+            }
+
+            if (password !== confirmPassword) {
+                alert("Passwords do not match.");
+                return false;
+            }
+
+            const cleanBike = bikeNumber.replace(/\s+/g, '').replace(/-/g, '').toUpperCase();
+            const bikeRegex = /^[A-Z]{2}\d{2}[A-Z]{1,2}\d{4}$/;
+            if (!bikeRegex.test(cleanBike)) {
+                alert("Invalid Vehicle Number. It should match RTO format (e.g. GJ05AB1234 or GJ-05-AB-1234).");
+                return false;
+            }
+
+            const cleanLicense = licenseNumber.replace(/\s+/g, '').replace(/-/g, '').toUpperCase();
+            const licenseRegex = /^[A-Z]{2}\d{2}\d{4}\d{7}$/;
+            if (!licenseRegex.test(cleanLicense)) {
+                alert("Invalid Driving License. It should match RTO format (e.g. GJ0520120123456 or GJ-05-2012-0123456).");
+                return false;
+            }
+
+            return true;
+        }
+
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification - Foodeat Partner</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="{% static 'js/3.4.js' %}"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#ff6f00',
+                            600: '#ea580c',
+                            700: '#c2410c',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 text-slate-100 font-sans min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full bg-slate-900/80 backdrop-blur-md rounded-3xl p-8 border border-slate-800 shadow-2xl">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-brand-500/10 text-brand-500 rounded-2xl mb-4">
+                <i class="fa-solid fa-shield-halved text-3xl"></i>
+            </div>
+            <h2 class="text-2xl font-extrabold text-white tracking-tight">Enter OTP Code</h2>
+            <p class="text-slate-400 text-sm mt-2">A 6-digit verification code has been generated for you.</p>
+            <div class="bg-slate-950/50 rounded-xl px-4 py-2 mt-4 inline-block border border-slate-800">
+                <p class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Verifying Email</p>
+                <p class="text-sm font-bold text-white mt-0.5">{{ boy.email }}</p>
+            </div>
+        </div>
+
+        {% if messages %}
+            <div class="mb-6 space-y-2">
+                {% for msg in messages %}
+                    <div class="p-4 rounded-xl border flex items-center justify-between {% if msg.tags == 'error' %}bg-rose-500/10 border-rose-500/20 text-rose-300{% else %}bg-emerald-500/10 border-emerald-500/20 text-emerald-300{% endif %}">
+                        <span class="text-sm font-semibold">{{ msg }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 text-center">OTP Code</label>
+                <input type="text" name="otp" required maxlength="6" placeholder="Enter 6-digit OTP" class="w-full tracking-widest text-center text-xl font-bold py-3.5 px-4 bg-slate-950/40 border-2 border-slate-800 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10 rounded-2xl text-white placeholder-slate-600">
+            </div>
+
+            <button type="submit" class="w-full py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-extrabold text-sm rounded-xl transition-all shadow-lg shadow-brand-500/20">
+                Verify & Open Dashboard
+            </button>
+        </form>
+
+        <div class="text-center mt-6">
+            <p class="text-xs text-slate-500">Not your email? <a href="{% url 'delivery_register' %}" class="text-brand-500 hover:underline font-bold">Register again</a></p>
+        </div>
+    </div>
+</body>
+</html>

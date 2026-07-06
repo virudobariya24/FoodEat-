@@ -1,0 +1,286 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Discount - GJ3 Admin</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#ff6f00', // Orange matching theme
+                            600: '#ea580c',
+                            700: '#c2410c',
+                        },
+                        navy: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Premium field styling to override default widget rendering */
+        input:not([type="radio"]):not([type="checkbox"]),
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            color: #334155;
+            background-color: #f8fafc;
+            transition: all 0.2s ease-in-out;
+        }
+        input:not([type="radio"]):not([type="checkbox"]):focus,
+        select:focus,
+        textarea:focus {
+            border-color: #ff6f00;
+            background-color: #ffffff;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(255, 111, 0, 0.15);
+        }
+
+        /* Radio option select cards design */
+        .product-card input[type="radio"]:checked ~ .checkmark {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .product-card input[type="radio"]:checked ~ .product-card-body {
+            border-color: #ff6f00;
+            background-color: #fff9f5;
+            box-shadow: 0 4px 15px rgba(255, 111, 0, 0.15);
+        }
+
+        /* Prevent HTML5 date picker inputs from truncating the year on mobile screens */
+        .date-picker-input {
+            width: 100% !important;
+            min-height: 48px !important;
+            line-height: normal !important;
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+            box-sizing: border-box !important;
+            font-size: 1rem !important; /* Prevents auto-zoom and text clipping on mobile browsers */
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex">
+    {% include 'admin_owner/sidebar.html' %}
+
+    <div class="w-full md:w-[calc(100%-70px)] lg:w-[calc(100%-260px)] md:ml-[70px] lg:ml-[260px] min-h-screen flex flex-col transition-all duration-300">
+        <!-- Top Header -->
+        <header class="bg-white border-b border-slate-200 h-20 px-6 md:px-8 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+            <!-- Left Side: Page Title -->
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">Add Discount</h1>
+                <p class="text-xs md:text-sm text-slate-500 hidden sm:block">Apply limited-time promotion discounts to menu items.</p>
+            </div>
+
+            <!-- Right Side: User Profile Dropdown -->
+            <div class="relative" id="adminProfileDropdownContainer">
+                <button id="adminProfileBtn" class="flex items-center gap-3 p-1.5 pr-3 hover:bg-slate-100 rounded-full transition-all duration-200 focus:outline-none">
+                    <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-brand-500 shadow-sm flex-shrink-0">
+                        {% if admin_user.profile_image %}
+                            <img src="{{ admin_user.profile_image.url }}" alt="Admin Profile" class="w-full h-full object-cover">
+                        {% else %}
+                            <img src="{% static 'images/default-profile.png' %}" alt="Default Profile" class="w-full h-full object-cover">
+                        {% endif %}
+                    </div>
+                    <div class="text-left hidden sm:block">
+                        <p class="text-sm font-semibold text-slate-800 leading-tight">{{ admin_user.full_name }}</p>
+                        <p class="text-xs text-slate-400 font-medium leading-none mt-0.5">{{ admin_user.restaurant_name|default:"No Restaurant" }}</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 hidden sm:block transition-transform duration-200" id="dropdownArrow"></i>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div id="adminDropdownMenu" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-100 py-2 z-50 transform origin-top-right transition-all duration-200">
+                    <div class="px-4 py-2 border-b border-slate-50 md:hidden">
+                        <p class="text-sm font-semibold text-slate-800">{{ admin_user.full_name }}</p>
+                        <p class="text-xs text-slate-400 font-medium">{{ admin_user.restaurant_name|default:"No Restaurant" }}</p>
+                    </div>
+                    <a href="{% url 'admin_profile' %}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-brand-600 transition-colors">
+                        <i class="fa-solid fa-user text-slate-400 w-5"></i>
+                        <span>My Profile</span>
+                    </a>
+                    <hr class="my-1 border-slate-100">
+                    <a href="/admin_logout/" class="flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors">
+                        <i class="fa-solid fa-right-from-bracket w-5"></i>
+                        <span>Log Out</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow p-6 md:p-8 max-w-4xl w-full mx-auto">
+            <div class="bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+                <div class="bg-gradient-to-r from-brand-500 to-orange-600 p-6 text-white flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-2xl">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg md:text-xl font-bold">Create Discount Offer</h2>
+                        <p class="text-xs text-brand-100">Set discount percentage and durations for products.</p>
+                    </div>
+                </div>
+
+                <form method="post" class="p-6 md:p-8 space-y-6">
+                    {% csrf_token %}
+
+                    <!-- Product Select -->
+                    <div class="flex flex-col">
+                        <label class="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
+                            <i class="fas fa-box text-brand-500"></i> Select Product
+                        </label>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                            {% for product in products %}
+                            <label class="product-card relative cursor-pointer group">
+                                <input type="radio" name="product" value="{{ product.id }}" class="sr-only" required />
+                                <div class="product-card-body border-2 border-slate-200 rounded-2xl p-4 flex flex-col items-center justify-between min-h-[140px] bg-white group-hover:border-brand-500 transition-all duration-200">
+                                    <div class="w-16 h-16 rounded-full overflow-hidden border border-slate-100 bg-slate-50 flex-shrink-0">
+                                        <img src="{{ product.food_image.url }}" alt="{{ product.food_name }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" />
+                                    </div>
+                                    <span class="text-xs font-semibold text-slate-600 text-center truncate w-full mt-2" title="{{ product.food_name }}">{{ product.food_name }}</span>
+                                </div>
+                                <div class="checkmark opacity-0 scale-70 transition-all duration-200 absolute -top-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs shadow-md">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                            </label>
+                            {% empty %}
+                            <p class="text-sm text-slate-400 col-span-full">No products available. Add some products first.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Discount Percentage -->
+                        <div class="flex flex-col">
+                            <label class="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                <i class="fas fa-percent text-brand-500"></i> {{ form.discount_percentage.label }}
+                            </label>
+                            {{ form.discount_percentage }}
+                            {% for error in form.discount_percentage.errors %}
+                                <div class="text-rose-500 text-xs font-medium mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Start Date -->
+                        <div class="flex flex-col">
+                            <label class="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                <i class="fas fa-calendar-alt text-brand-500"></i> {{ form.start_date.label }}
+                            </label>
+                            {{ form.start_date }}
+                            {% for error in form.start_date.errors %}
+                                <div class="text-rose-500 text-xs font-medium mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- End Date -->
+                        <div class="flex flex-col">
+                            <label class="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                <i class="fas fa-calendar-alt text-brand-500"></i> {{ form.end_date.label }}
+                            </label>
+                            {{ form.end_date }}
+                            {% for error in form.end_date.errors %}
+                                <div class="text-rose-500 text-xs font-medium mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="pt-6 border-t border-slate-100 flex justify-end">
+                        <button type="submit" class="w-full sm:w-auto px-8 py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold shadow-md shadow-brand-500/20 hover:shadow-lg hover:shadow-brand-500/30 transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2">
+                            <i class="fas fa-plus"></i> Add Discount
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Dropdown & Date Constraints Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileBtn = document.getElementById('adminProfileBtn');
+            const dropdownMenu = document.getElementById('adminDropdownMenu');
+            const dropdownArrow = document.getElementById('dropdownArrow');
+
+            if (profileBtn && dropdownMenu) {
+                profileBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdownMenu.classList.toggle('hidden');
+                    if (dropdownArrow) {
+                        dropdownArrow.classList.toggle('rotate-180');
+                    }
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                        dropdownMenu.classList.add('hidden');
+                        if (dropdownArrow) {
+                            dropdownArrow.classList.remove('rotate-180');
+                        }
+                    }
+                });
+            }
+
+            // Frontend Date Input Validation Constraints
+            const startDateInput = document.querySelector('input[name="start_date"]');
+            const endDateInput = document.querySelector('input[name="end_date"]');
+
+            if (startDateInput && endDateInput) {
+                // Compute today's date in YYYY-MM-DD format (local timezone)
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                const todayStr = `${year}-${month}-${day}`;
+
+                // Set min attribute to prevent selecting past dates
+                startDateInput.min = todayStr;
+                endDateInput.min = todayStr;
+
+                // Adjust min limit of end date dynamically when start date is modified
+                startDateInput.addEventListener('change', function() {
+                    if (this.value) {
+                        endDateInput.min = this.value;
+                        // If the currently selected end date is prior to the new start date, auto-align it
+                        if (endDateInput.value && endDateInput.value < this.value) {
+                            endDateInput.value = this.value;
+                        }
+                    } else {
+                        endDateInput.min = todayStr;
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,110 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Charges Config - Super Admin</title>
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="{% static 'js/3.4.js' %}"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        brand: { 50:'#fff7ed', 100:'#ffedd5', 500:'#ff6f00', 600:'#ea580c', 700:'#c2410c' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen text-slate-800">
+
+    <!-- Sidebar & Header -->
+    {% include 'super_admin/super_sidebar.html' %}
+
+    <!-- Main Content Wrapper -->
+    <div class="main-content min-h-screen flex flex-col transition-colors duration-200">
+        <main class="p-4 md:p-8 lg:p-10 max-w-[800px] w-full mx-auto space-y-6">
+            
+            <!-- Page Header -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-black text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-brand-500"></i> Platform Charges Configuration
+                    </h2>
+                    <p class="text-xs text-slate-400 font-semibold mt-1">Configure base delivery fees, rider payout distributions, and restaurant commission rates.</p>
+                </div>
+            </div>
+
+            <!-- Settings Form Card -->
+            <div class="bg-white border border-slate-200/60 shadow-sm rounded-2xl p-6 md:p-8">
+                <form method="POST" class="space-y-6">
+                    {% csrf_token %}
+                    
+                    <!-- 1. Base Delivery Charge -->
+                    <div class="space-y-2">
+                        <label for="base_delivery_charge" class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+                            Base Delivery Charge (₹)
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">₹</span>
+                            <input type="number" step="0.01" name="base_delivery_charge" id="base_delivery_charge" required
+                                   value="{{ settings.base_delivery_charge }}"
+                                   class="w-full h-11 pl-8 pr-4 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:border-brand-500 focus:outline-none transition-all" />
+                        </div>
+                        <p class="text-[10px] text-slate-400">The fixed delivery fee added to the customer's bill at checkout.</p>
+                    </div>
+
+                    <!-- 2. Rider Payout Percentage -->
+                    <div class="space-y-2">
+                        <label for="rider_share_percentage" class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+                            Rider Payout Share (%)
+                        </label>
+                        <div class="relative">
+                            <input type="number" step="0.01" name="rider_share_percentage" id="rider_share_percentage" required
+                                   value="{{ settings.rider_share_percentage }}" max="100" min="0"
+                                   class="w-full h-11 px-4 pr-8 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:border-brand-500 focus:outline-none transition-all" />
+                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">%</span>
+                        </div>
+                        <p class="text-[10px] text-slate-400">The percentage of the customer's delivery charge that is credited directly to the rider's earnings (the remainder stays with the platform).</p>
+                    </div>
+
+                    <!-- 3. Restaurant Commission Percentage -->
+                    <div class="space-y-2">
+                        <label for="restaurant_commission_percentage" class="block text-xs font-bold text-slate-500 uppercase tracking-wider">
+                            Restaurant Commission Fee (%)
+                        </label>
+                        <div class="relative">
+                            <input type="number" step="0.01" name="restaurant_commission_percentage" id="restaurant_commission_percentage" required
+                                   value="{{ settings.restaurant_commission_percentage }}" max="100" min="0"
+                                   class="w-full h-11 px-4 pr-8 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:bg-white focus:border-brand-500 focus:outline-none transition-all" />
+                            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">%</span>
+                        </div>
+                        <p class="text-[10px] text-slate-400">The percentage deducted as commission from the restaurant owner's total menu food sales per order.</p>
+                    </div>
+
+
+
+                    <!-- Action Buttons -->
+                    <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+                        <a href="/super_dashboard/" class="px-5 py-2.5 bg-slate-50 border border-slate-200 hover:bg-slate-100 text-slate-700 font-bold rounded-xl text-xs transition-colors">
+                            Cancel
+                        </a>
+                        <button type="submit" class="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-bold rounded-xl text-xs transition-all shadow-md shadow-brand-500/10">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </main>
+    </div>
+
+</body>
+</html>

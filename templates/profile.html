@@ -1,0 +1,849 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile - Foodeat</title>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- Leaflet CSS & JS for Interactive Map Selection -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind Play CDN -->
+    <script src="{% static 'js/3.4.js' %}"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fff3f0',
+                            100: '#ffe4dd',
+                            500: '#FF4D30',
+                            600: '#e53b1e',
+                            700: '#c22d14',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .profile-card {
+            background-color: var(--card-bg) !important;
+            border: 1px solid var(--border-color) !important;
+            box-shadow: 0 20px 40px var(--shadow-color) !important;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .text-main {
+            color: var(--main-text) !important;
+        }
+        .text-secondary-custom {
+            color: var(--secondary-text) !important;
+        }
+        .bg-custom-bg {
+            background-color: var(--body-bg) !important;
+        }
+        .border-custom {
+            border-color: var(--border-color) !important;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen bg-custom-bg text-main transition-colors duration-300">
+    {% include 'header.html' %}
+
+    <!-- Main Content Container -->
+    <main class="flex-grow flex items-center justify-center px-4 py-16 mt-8">
+        <div class="max-w-md w-full profile-card rounded-3xl overflow-hidden">
+            <!-- Top Banner Accent -->
+            <div class="h-28 bg-gradient-to-r from-[#FF4D30] to-[#D4AF37] relative">
+                <!-- Decorative design -->
+                <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+            </div>
+
+            <!-- Profile Content -->
+            <div class="px-6 pb-8 text-center relative">
+                <!-- Avatar Frame -->
+                <div class="relative -mt-16 inline-block">
+                    <div class="w-32 h-32 rounded-full p-1.5 bg-custom-bg border-custom border shadow-xl overflow-hidden">
+                        {% if user.profile_image %}
+                            <img src="{{ user.profile_image.url }}" alt="Profile Image" class="w-full h-full object-cover rounded-full">
+                        {% else %}
+                            <img src="{% static 'img/default-user.png' %}" alt="Profile Image" class="w-full h-full object-cover rounded-full">
+                        {% endif %}
+                    </div>
+                    <!-- Active Status Badge -->
+                    <span class="absolute bottom-2 right-2 w-4 h-4 rounded-full bg-emerald-500 border-2 border-custom"></span>
+                </div>
+
+                <!-- Username and Email Header -->
+                <div class="mt-4">
+                    <h2 class="text-2xl font-bold tracking-tight text-main">
+                        {{ user.first_name }} {{ user.last_name }}
+                    </h2>
+                    <p class="text-xs text-secondary-custom font-medium tracking-wide flex items-center justify-center gap-1.5 mt-1">
+                        <i class="fa-solid fa-envelope text-secondary-custom"></i>
+                        {{ user.email }}
+                    </p>
+                </div>
+
+                <!-- Profile Completeness Progress Bar -->
+                <div class="mt-6 bg-custom-bg rounded-2xl p-4 border border-custom">
+                    <div class="flex items-center justify-between text-xs font-bold mb-2">
+                        <span class="text-secondary-custom">Profile Completeness</span>
+                        <span id="completeness-percentage" class="text-[#FF4D30]">0%</span>
+                    </div>
+                    <div class="w-full bg-custom-bg border-custom border h-2.5 rounded-full overflow-hidden">
+                        <div id="completeness-bar" class="h-full bg-gradient-to-r from-[#FF4D30] to-[#D4AF37] transition-all duration-1000 w-0"></div>
+                    </div>
+                    <p id="completeness-tip" class="text-[10px] text-secondary-custom mt-2 text-center"></p>
+                </div>
+
+                <!-- Gamified Foodie Counters -->
+                <div class="mt-5 grid grid-cols-3 gap-2.5 bg-custom-bg p-2.5 rounded-2xl border border-custom">
+                    <a href="{% url 'my_orders' %}" class="text-center py-2 bg-custom-bg rounded-xl border border-custom hover:bg-slate-100 dark:hover:bg-slate-800 transition-all block">
+                        <p class="text-base font-extrabold text-[#FF4D30]">{{ orders_count }}</p>
+                        <p class="text-[9px] font-bold text-secondary-custom uppercase tracking-wider">Orders</p>
+                    </a>
+                    <a href="{% url 'my_booking' %}" class="text-center py-2 bg-custom-bg rounded-xl border border-custom hover:bg-slate-100 dark:hover:bg-slate-800 transition-all block">
+                        <p class="text-base font-extrabold text-[#D4AF37]">{{ bookings_count }}</p>
+                        <p class="text-[9px] font-bold text-secondary-custom uppercase tracking-wider">Bookings</p>
+                    </a>
+                    <div class="text-center py-2 bg-custom-bg rounded-xl border border-custom">
+                        <p class="text-xs font-extrabold text-[#FF4D30] flex items-center justify-center gap-0.5 mt-0.5">Gold <i class="fa-solid fa-crown text-[9px]"></i></p>
+                        <p class="text-[9px] font-bold text-secondary-custom uppercase tracking-wider">Badge</p>
+                    </div>
+                </div>
+
+                <!-- Info List Grid -->
+                <div class="mt-6 space-y-3 text-left border-t border-custom pt-5">
+                    <!-- Wallet Balance -->
+                    <div class="flex items-center justify-between bg-gradient-to-r from-emerald-500/10 to-teal-500/10 px-4 py-4 rounded-2xl border border-emerald-500/20 shadow-sm">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/20">
+                                <i class="fa-solid fa-wallet text-base"></i>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-extrabold uppercase tracking-wider">Foodeat Wallet Balance</p>
+                                <p class="text-lg font-black text-emerald-600 dark:text-emerald-400 mt-0.5">₹{{ user.wallet_balance|floatformat:2 }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="flex items-center gap-4 bg-custom-bg px-4 py-3 rounded-2xl border border-custom">
+                        <div class="w-9 h-9 rounded-xl bg-custom-bg text-[#FF4D30] border border-custom flex items-center justify-center">
+                            <i class="fa-solid fa-phone text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-secondary-custom font-bold uppercase tracking-wider">Phone Number</p>
+                            <p class="text-xs font-semibold text-main mt-0.5">{{ user.phone }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Gender -->
+                    <div class="flex items-center gap-4 bg-custom-bg px-4 py-3 rounded-2xl border border-custom">
+                        <div class="w-9 h-9 rounded-xl bg-custom-bg text-[#D4AF37] border border-custom flex items-center justify-center">
+                            <i class="fa-solid fa-venus-mars text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-secondary-custom font-bold uppercase tracking-wider">Gender</p>
+                            <p class="text-xs font-semibold text-main mt-0.5">
+                                {% if user.gender == 'M' %}Male{% elif user.gender == 'F' %}Female{% else %}Other{% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- City -->
+                    <div class="flex items-center gap-4 bg-custom-bg px-4 py-3 rounded-2xl border border-custom">
+                        <div class="w-9 h-9 rounded-xl bg-custom-bg text-[#FF4D30] border border-custom flex items-center justify-center">
+                            <i class="fa-solid fa-location-dot text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-secondary-custom font-bold uppercase tracking-wider">City</p>
+                            <p class="text-xs font-semibold text-main mt-0.5">{{ user.city|default:"Not specified" }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Saved Addresses Section -->
+                    <div class="bg-custom-bg px-4 py-3 rounded-2xl border border-custom">
+                        <div class="flex items-center justify-between border-b border-custom pb-2.5 mb-3">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-map-location-dot text-[#D4AF37] text-sm"></i>
+                                <p class="text-[10px] text-secondary-custom font-bold uppercase tracking-wider">Saved Addresses</p>
+                            </div>
+                            <button type="button" id="openMapBtn" class="text-xs font-extrabold text-[#FF4D30] hover:text-[#e53b1e] hover:underline flex items-center gap-1 focus:outline-none">
+                                <i class="fa-solid fa-plus"></i> Add Address
+                            </button>
+                        </div>
+                        
+                        <!-- List of saved addresses -->
+                        <div class="space-y-2.5 max-h-[220px] overflow-y-auto pr-1 text-left" id="saved-addresses-list">
+                            {% if saved_addresses %}
+                                {% for addr in saved_addresses %}
+                                    <div class="p-3 bg-custom-bg border border-custom rounded-xl flex items-start justify-between gap-3 text-xs" data-address-id="{{ addr.id }}">
+                                        <div class="flex items-start gap-2.5">
+                                            <span class="w-7 h-7 rounded-lg bg-custom-bg border border-custom flex items-center justify-center text-slate-500 flex-shrink-0 mt-0.5">
+                                                {% if addr.address_type == 'Home' %}
+                                                    <i class="fa-solid fa-house text-[#FF4D30]"></i>
+                                                {% elif addr.address_type == 'Work' %}
+                                                    <i class="fa-solid fa-briefcase text-[#D4AF37]"></i>
+                                                {% else %}
+                                                    <i class="fa-solid fa-map-pin text-[#FF4D30]"></i>
+                                                {% endif %}
+                                            </span>
+                                             <div>
+                                                 <div class="font-bold text-main flex items-center gap-1.5">
+                                                     {{ addr.address_type }}
+                                                 </div>
+                                                 <p class="text-[11px] text-secondary-custom mt-0.5 leading-relaxed">{{ addr.full_address }}</p>
+                                             </div>
+                                         </div>
+                                         <div class="flex items-center gap-1 flex-shrink-0">
+                                             <button type="button" class="edit-addr-btn text-slate-400 hover:text-blue-500 p-1.5 hover:bg-blue-50 dark:hover:bg-blue-950/20 rounded-lg transition-all" 
+                                                     data-id="{{ addr.id }}" 
+                                                     data-type="{{ addr.address_type }}" 
+                                                     data-lat="{{ addr.latitude }}" 
+                                                     data-lng="{{ addr.longitude }}"
+                                                     data-house="{{ addr.house_no|default:'' }}"
+                                                     data-building="{{ addr.building_name|default:'' }}"
+                                                     data-floor="{{ addr.floor|default:'' }}"
+                                                     data-landmark="{{ addr.landmark|default:'' }}"
+                                                     data-complete="{{ addr.complete_address|escapejs }}">
+                                                 <i class="fa-solid fa-pencil text-sm"></i>
+                                             </button>
+                                             <button type="button" class="delete-addr-btn text-slate-400 hover:text-red-500 p-1.5 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all" data-id="{{ addr.id }}">
+                                                 <i class="fa-solid fa-trash-can text-sm"></i>
+                                             </button>
+                                         </div>
+                                     </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-xs text-secondary-custom text-center py-4">No saved addresses. Add a location to get started!</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Button Row -->
+                <div class="flex items-center gap-3 mt-8">
+                    <!-- Home/Back -->
+                    <button class="flex-1 h-12 rounded-2xl bg-custom-bg hover:opacity-80 border-custom border text-main font-bold text-sm transition-all flex items-center justify-center gap-2" onclick="window.location.href='/'">
+                        <i class="fa-solid fa-arrow-left text-xs"></i> Back to Home
+                    </button>
+
+                    <!-- Edit Profile -->
+                    <a href="{% url 'edit_profile' %}" class="flex-1 h-12 rounded-2xl bg-gradient-to-r from-[#FF4D30] to-[#D4AF37] hover:opacity-90 text-white font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-500/15">
+                        <i class="fa-solid fa-user-gear text-xs"></i> Edit Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    {% include 'footer.html' %}
+
+    <!-- SweetAlert2 CDN for modern notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Map Selection Modal -->
+    <div id="mapModal" class="fixed inset-0 z-[99999] hidden justify-center items-start p-4 pt-20 sm:pt-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl w-full max-w-lg shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col transform transition-all duration-300 scale-95 opacity-0 max-h-[85vh] sm:max-h-[90vh] my-auto">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between flex-shrink-0">
+                <div class="text-left">
+                    <h3 class="text-lg font-bold text-slate-800 dark:text-white flex items-center gap-2" id="modalTitle">
+                        <i class="fa-solid fa-map-location-dot text-[#FF4D30]"></i> Select Delivery Location
+                    </h3>
+                    <p class="text-xs text-slate-400 font-semibold mt-0.5" id="modalSubtitle">Click or drag the marker to pinpoint your delivery address.</p>
+                </div>
+                <button type="button" id="closeMapBtn" class="text-slate-400 hover:text-slate-650 p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-all">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Body (Step 1: Map Selection) -->
+            <div class="p-6 flex flex-col gap-4 overflow-y-auto max-h-[60vh] sm:max-h-[65vh] flex-grow" id="step1MapSelection">
+                <div class="flex gap-2 flex-shrink-0">
+                    <input type="text" id="mapSearchInput" placeholder="Search area, city, street..." 
+                           class="flex-grow px-4 py-2.5 text-sm rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:border-[#FF4D30]">
+                    <button type="button" id="mapSearchBtn" 
+                            class="px-4 py-2.5 bg-[#FF4D30] hover:bg-[#e53b1e] text-white rounded-xl text-sm font-bold shadow-md shadow-brand-500/20 transition-all flex items-center gap-1.5 whitespace-nowrap flex-shrink-0">
+                        <i class="fa-solid fa-magnifying-glass"></i> Search
+                    </button>
+                </div>
+                
+                <!-- Map Container -->
+                <div id="leafletMap" class="w-full h-64 sm:h-80 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-inner z-10 flex-shrink-0"></div>
+                
+                <!-- Selected Address View -->
+                <div class="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 text-left flex-shrink-0">
+                    <p class="text-[10px] text-slate-400 uppercase font-extrabold tracking-wider">Pinpointed Address</p>
+                    <p id="selectedAddressText" class="text-xs font-semibold text-slate-700 dark:text-slate-200 mt-1">Geocoding your coordinates...</p>
+                </div>
+            </div>
+
+            <!-- Modal Body (Step 2: Address Details Form) -->
+            <div class="p-6 flex flex-col gap-4 hidden overflow-y-auto max-h-[60vh] sm:max-h-[65vh] flex-grow" id="step2DetailsForm">
+                <div class="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 text-left mb-2 flex-shrink-0">
+                    <p class="text-[10px] text-slate-400 uppercase font-extrabold tracking-wider">Selected Location</p>
+                    <p id="detailsAddressDisplay" class="text-xs font-semibold text-slate-600 dark:text-slate-300 mt-1"></p>
+                </div>
+
+                <div class="text-left space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Address Type</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button type="button" id="typeHomeBtn" class="addr-type-btn py-2.5 px-3 border rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all bg-[#FF4D30] text-white border-[#FF4D30]">
+                                <i class="fa-solid fa-house"></i> Home
+                            </button>
+                            <button type="button" id="typeWorkBtn" class="addr-type-btn py-2.5 px-3 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-700 dark:text-slate-300">
+                                <i class="fa-solid fa-briefcase"></i> Work
+                            </button>
+                            <button type="button" id="typeOtherBtn" class="addr-type-btn py-2.5 px-3 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-700 dark:text-slate-300">
+                                <i class="fa-solid fa-map-pin"></i> Other
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Fields -->
+                    <!-- Home -->
+                    <div id="homeFields" class="space-y-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">House / Flat No.</label>
+                                <input type="text" id="houseNoInput" placeholder="e.g. Flat 101" class="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:border-[#FF4D30]">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Apartment / Building Name</label>
+                                <input type="text" id="buildingNameInput" placeholder="e.g. Galaxy Heights" class="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:border-[#FF4D30]">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Work -->
+                    <div id="workFields" class="space-y-3 hidden">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Office / Company Name</label>
+                                <input type="text" id="officeNameInput" placeholder="e.g. Infosys Corp" class="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:border-[#FF4D30]">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Floor / Suite No.</label>
+                                <input type="text" id="floorNoInput" placeholder="e.g. 5th Floor" class="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:border-[#FF4D30]">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Other -->
+                    <div id="otherFields" class="space-y-3 hidden">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Label Name</label>
+                                <input type="text" id="otherLabelInput" placeholder="e.g. Friend's House, Gym" class="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:border-[#FF4D30]">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Details (Optional)</label>
+                                <input type="text" id="otherDetailsInput" placeholder="e.g. Flat/Gate number" class="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:border-[#FF4D30]">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Landmark -->
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Landmark / Nearby Area (Optional)</label>
+                        <input type="text" id="landmarkInput" placeholder="e.g. Near Sunrise Park" class="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-white focus:outline-none focus:border-[#FF4D30]">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/20 flex justify-end gap-3 flex-shrink-0">
+                <button type="button" id="backToMapBtn" class="px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all hidden">
+                    Back to Map
+                </button>
+                <button type="button" id="cancelMapSelection" class="px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-all">
+                    Cancel
+                </button>
+                <button type="button" id="confirmMapSelection" class="px-5 py-2.5 bg-[#FF4D30] hover:bg-[#e53b1e] text-white rounded-xl text-xs font-bold shadow-md shadow-brand-500/20 transition-all">
+                    Confirm Location
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Display Django messages via SweetAlert
+            {% if messages %}
+                {% for message in messages %}
+                    Swal.fire({
+                        icon: "{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% else %}info{% endif %}",
+                        title: "{{ message }}",
+                        confirmButtonColor: '#FF4D30',
+                    });
+                {% endfor %}
+            {% endif %}
+
+            // Calculate profile completeness based on user details
+            function calculateCompleteness() {
+                let percent = 0;
+                const missing = [];
+                
+                {% if user.first_name %} percent += 20; {% else %} missing.push("First Name"); {% endif %}
+                {% if user.last_name %} percent += 20; {% else %} missing.push("Last Name"); {% endif %}
+                {% if user.phone %} percent += 20; {% else %} missing.push("Phone"); {% endif %}
+                {% if user.city %} percent += 20; {% else %} missing.push("City"); {% endif %}
+                
+                const savedAddressesList = document.getElementById('saved-addresses-list');
+                const hasAddress = savedAddressesList && savedAddressesList.querySelector('[data-address-id]') !== null;
+                if (hasAddress) {
+                    percent += 20;
+                } else {
+                    missing.push("Delivery Address");
+                }
+
+                const bar = document.getElementById('completeness-bar');
+                const text = document.getElementById('completeness-percentage');
+                const tip = document.getElementById('completeness-tip');
+
+                if (bar && text && tip) {
+                    bar.style.width = percent + '%';
+                    text.textContent = percent + '%';
+                    
+                    if (percent === 100) {
+                        tip.innerHTML = '<span class="text-emerald-500 font-bold"><i class="fa-solid fa-circle-check"></i> Profile is 100% complete!</span>';
+                    } else {
+                        tip.innerHTML = `Tip: Add <strong>${missing[0]}</strong> to make it 100% complete`;
+                    }
+                }
+            }
+            
+            calculateCompleteness();
+
+            // Interactive Leaflet Map logic
+            const mapModal = document.getElementById('mapModal');
+            const modalContent = mapModal.querySelector('.transform');
+            const openMapBtn = document.getElementById('openMapBtn');
+            const closeMapBtn = document.getElementById('closeMapBtn');
+            const cancelMapSelection = document.getElementById('cancelMapSelection');
+            const confirmMapSelection = document.getElementById('confirmMapSelection');
+            
+            const mapSearchInput = document.getElementById('mapSearchInput');
+            const mapSearchBtn = document.getElementById('mapSearchBtn');
+            const selectedAddressText = document.getElementById('selectedAddressText');
+            
+            let map;
+            let marker;
+            
+            let currentLatLng = {
+                lat: parseFloat("{{ user.latitude|default:'21.1702' }}") || 21.1702,
+                lng: parseFloat("{{ user.longitude|default:'72.8311' }}") || 72.8311
+            };
+            
+            let currentAddress = "{{ user.address|escapejs }}" || "No address selected.";
+
+            function initMap() {
+                if (map) {
+                    setTimeout(() => { map.invalidateSize(); }, 100);
+                    return;
+                }
+                map = L.map('leafletMap').setView([currentLatLng.lat, currentLatLng.lng], 13);
+                
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+                
+                marker = L.marker([currentLatLng.lat, currentLatLng.lng], {
+                    draggable: true
+                }).addTo(map);
+                
+                if (currentAddress && currentAddress !== "No address selected." && currentAddress !== "No delivery location set.") {
+                    selectedAddressText.textContent = currentAddress;
+                } else {
+                    updateAddress(currentLatLng.lat, currentLatLng.lng);
+                }
+                
+                marker.on('dragend', function() {
+                    const position = marker.getLatLng();
+                    currentLatLng = { lat: position.lat, lng: position.lng };
+                    updateAddress(position.lat, position.lng);
+                });
+                
+                map.on('click', function(event) {
+                    const position = event.latlng;
+                    marker.setLatLng(position);
+                    currentLatLng = { lat: position.lat, lng: position.lng };
+                    updateAddress(position.lat, position.lng);
+                });
+            }
+            
+            function updateAddress(lat, lng) {
+                selectedAddressText.textContent = "Geocoding address...";
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+                    .then(res => res.json())
+                    .then(data => {
+                        currentAddress = data.display_name || `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+                        selectedAddressText.textContent = currentAddress;
+                    })
+                    .catch(err => {
+                        currentAddress = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+                        selectedAddressText.textContent = currentAddress;
+                    });
+            }
+            
+            function searchPlace() {
+                const query = mapSearchInput.value.trim();
+                if (!query) return;
+                
+                selectedAddressText.textContent = "Searching...";
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`)
+                    .then(res => res.json())
+                    .then(results => {
+                        if (results && results.length > 0) {
+                            const result = results[0];
+                            const lat = parseFloat(result.lat);
+                            const lon = parseFloat(result.lon);
+                            
+                            currentLatLng = { lat, lng: lon };
+                            map.setView([lat, lon], 15);
+                            marker.setLatLng([lat, lon]);
+                            currentAddress = result.display_name;
+                            selectedAddressText.textContent = currentAddress;
+                        } else {
+                            selectedAddressText.textContent = "Place not found.";
+                        }
+                    })
+                    .catch(err => {
+                        selectedAddressText.textContent = "Search error.";
+                    });
+            }
+            
+            mapSearchBtn.addEventListener('click', searchPlace);
+            mapSearchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') searchPlace();
+            });
+            
+            const hasSavedLocation = {% if user.latitude and user.longitude %}true{% else %}false{% endif %};
+
+            function showModal() {
+                mapModal.classList.remove('hidden');
+                mapModal.classList.add('flex');
+                
+                // Reset to Step 1
+                document.getElementById('step1MapSelection').classList.remove('hidden');
+                document.getElementById('step2DetailsForm').classList.add('hidden');
+                document.getElementById('backToMapBtn').classList.add('hidden');
+                confirmMapSelection.textContent = "Confirm Location";
+                document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-map-location-dot text-[#FF4D30]"></i> Select Delivery Location';
+                document.getElementById('modalSubtitle').textContent = "Click or drag the marker to pinpoint your delivery address.";
+                currentStep = 1;
+
+                setTimeout(() => {
+                    modalContent.classList.remove('scale-95', 'opacity-0');
+                    modalContent.classList.add('scale-100', 'opacity-100');
+                    
+                    if (!hasSavedLocation && navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition((position) => {
+                            currentLatLng = {
+                                lat: position.coords.latitude,
+                                lng: position.coords.longitude
+                            };
+                            if (map) {
+                                map.setView([currentLatLng.lat, currentLatLng.lng], 15);
+                                marker.setLatLng([currentLatLng.lat, currentLatLng.lng]);
+                                updateAddress(currentLatLng.lat, currentLatLng.lng);
+                            } else {
+                                initMap();
+                            }
+                        }, (error) => {
+                            console.warn("Geolocation access denied or failed.", error);
+                            initMap();
+                        }, {
+                            enableHighAccuracy: true,
+                            timeout: 5000,
+                            maximumAge: 0
+                        });
+                    } else {
+                        initMap();
+                    }
+                }, 50);
+            }
+            
+            function hideModal() {
+                modalContent.classList.remove('scale-100', 'opacity-100');
+                modalContent.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    mapModal.classList.remove('flex');
+                    mapModal.classList.add('hidden');
+                }, 200);
+            }
+            
+            let editingAddressId = null;
+
+            openMapBtn.addEventListener('click', () => {
+                editingAddressId = null;
+                // Clear all input values
+                document.getElementById('houseNoInput').value = '';
+                document.getElementById('buildingNameInput').value = '';
+                document.getElementById('officeNameInput').value = '';
+                document.getElementById('floorNoInput').value = '';
+                document.getElementById('otherLabelInput').value = '';
+                document.getElementById('otherDetailsInput').value = '';
+                document.getElementById('landmarkInput').value = '';
+                
+                selectAddressType('Home');
+                showModal();
+            });
+
+            closeMapBtn.addEventListener('click', hideModal);
+            cancelMapSelection.addEventListener('click', hideModal);
+
+            // Step 2 Address Type Buttons
+            let selectedType = 'Home';
+            const typeHomeBtn = document.getElementById('typeHomeBtn');
+            const typeWorkBtn = document.getElementById('typeWorkBtn');
+            const typeOtherBtn = document.getElementById('typeOtherBtn');
+            
+            const homeFields = document.getElementById('homeFields');
+            const workFields = document.getElementById('workFields');
+            const otherFields = document.getElementById('otherFields');
+
+            function selectAddressType(type) {
+                selectedType = type;
+                [typeHomeBtn, typeWorkBtn, typeOtherBtn].forEach(btn => {
+                    btn.className = "addr-type-btn py-2.5 px-3 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-slate-700 dark:text-slate-300 bg-transparent";
+                });
+                
+                homeFields.classList.add('hidden');
+                workFields.classList.add('hidden');
+                otherFields.classList.add('hidden');
+
+                if (type === 'Home') {
+                    typeHomeBtn.className = "addr-type-btn py-2.5 px-3 border rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all bg-[#FF4D30] text-white border-[#FF4D30]";
+                    homeFields.classList.remove('hidden');
+                } else if (type === 'Work') {
+                    typeWorkBtn.className = "addr-type-btn py-2.5 px-3 border rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all bg-[#FF4D30] text-white border-[#FF4D30]";
+                    workFields.classList.remove('hidden');
+                } else {
+                    typeOtherBtn.className = "addr-type-btn py-2.5 px-3 border rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all bg-[#FF4D30] text-white border-[#FF4D30]";
+                    otherFields.classList.remove('hidden');
+                }
+            }
+
+            typeHomeBtn.addEventListener('click', () => selectAddressType('Home'));
+            typeWorkBtn.addEventListener('click', () => selectAddressType('Work'));
+            typeOtherBtn.addEventListener('click', () => selectAddressType('Other'));
+
+            // Step Navigation Logic
+            let currentStep = 1;
+            const backToMapBtn = document.getElementById('backToMapBtn');
+
+            backToMapBtn.addEventListener('click', () => {
+                currentStep = 1;
+                document.getElementById('step1MapSelection').classList.remove('hidden');
+                document.getElementById('step2DetailsForm').classList.add('hidden');
+                backToMapBtn.classList.add('hidden');
+                confirmMapSelection.textContent = "Confirm Location";
+                document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-map-location-dot text-[#FF4D30]"></i> Select Delivery Location';
+                document.getElementById('modalSubtitle').textContent = "Click or drag the marker to pinpoint your delivery address.";
+            });
+            
+            confirmMapSelection.addEventListener('click', () => {
+                if (currentStep === 1) {
+                    // Go to Step 2
+                    currentStep = 2;
+                    document.getElementById('step1MapSelection').classList.add('hidden');
+                    document.getElementById('step2DetailsForm').classList.remove('hidden');
+                    backToMapBtn.classList.remove('hidden');
+                    confirmMapSelection.textContent = "Save Address";
+                    document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-house-chimney text-[#FF4D30]"></i> Add Address Details';
+                    document.getElementById('modalSubtitle').textContent = "Complete your address details to save the location.";
+                    document.getElementById('detailsAddressDisplay').textContent = currentAddress;
+                } else {
+                    // Save the Address
+                    let house_no = '';
+                    let building_name = '';
+                    let floor = '';
+                    let other_label = '';
+                    
+                    if (selectedType === 'Home') {
+                        house_no = document.getElementById('houseNoInput').value.trim();
+                        building_name = document.getElementById('buildingNameInput').value.trim();
+                        if (!house_no) {
+                            Swal.fire('Required', 'Please enter your House or Flat number', 'warning');
+                            return;
+                        }
+                    } else if (selectedType === 'Work') {
+                        building_name = document.getElementById('officeNameInput').value.trim();
+                        floor = document.getElementById('floorNoInput').value.trim();
+                        if (!building_name) {
+                            Swal.fire('Required', 'Please enter your Office or Building name', 'warning');
+                            return;
+                        }
+                    } else {
+                        other_label = document.getElementById('otherLabelInput').value.trim();
+                        house_no = document.getElementById('otherDetailsInput').value.trim();
+                        if (!other_label) {
+                            Swal.fire('Required', 'Please enter a custom label name', 'warning');
+                            return;
+                        }
+                    }
+
+                    const landmark = document.getElementById('landmarkInput').value.trim();
+
+                    confirmMapSelection.disabled = true;
+                    confirmMapSelection.textContent = "Saving...";
+
+                    const url = editingAddressId 
+                        ? `/profile/edit_address/${editingAddressId}/` 
+                        : "{% url 'add_user_address' %}";
+
+                    fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: JSON.stringify({
+                            address_type: selectedType,
+                            latitude: currentLatLng.lat,
+                            longitude: currentLatLng.lng,
+                            house_no: house_no,
+                            building_name: building_name,
+                            floor: floor,
+                            other_label: other_label,
+                            landmark: landmark,
+                            complete_address: currentAddress
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        confirmMapSelection.disabled = false;
+                        if (data.status === 'success') {
+                            hideModal();
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Saved!',
+                                text: 'Your address has been saved successfully.',
+                                confirmButtonColor: '#FF4D30'
+                            }).then(() => {
+                                window.location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error', data.message || 'Error saving address', 'error');
+                            confirmMapSelection.textContent = "Save Address";
+                        }
+                    })
+                    .catch(err => {
+                        confirmMapSelection.disabled = false;
+                        confirmMapSelection.textContent = "Save Address";
+                        console.error('Error saving location:', err);
+                        Swal.fire('Error', 'Network error saving address', 'error');
+                    });
+                }
+            });
+
+            // Edit Saved Address Event Handlers
+            const editButtons = document.querySelectorAll('.edit-addr-btn');
+            editButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    editingAddressId = btn.dataset.id;
+                    
+                    const type = btn.dataset.type;
+                    const lat = parseFloat(btn.dataset.lat);
+                    const lng = parseFloat(btn.dataset.lng);
+                    
+                    currentLatLng = { lat, lng };
+                    currentAddress = btn.dataset.complete;
+                    selectedAddressText.textContent = currentAddress;
+                    
+                    // Fill inputs
+                    document.getElementById('houseNoInput').value = btn.dataset.house;
+                    document.getElementById('buildingNameInput').value = btn.dataset.building;
+                    document.getElementById('officeNameInput').value = btn.dataset.building;
+                    document.getElementById('floorNoInput').value = btn.dataset.floor;
+                    document.getElementById('otherLabelInput').value = btn.dataset.building; // label was mapped to building_name
+                    document.getElementById('otherDetailsInput').value = btn.dataset.house; // details were mapped to house_no
+                    document.getElementById('landmarkInput').value = btn.dataset.landmark;
+                    
+                    selectAddressType(type);
+                    
+                    // Open map modal
+                    showModal();
+                    
+                    // Position marker and set view after map is initialized
+                    setTimeout(() => {
+                        if (map && marker) {
+                            map.setView([lat, lng], 15);
+                            marker.setLatLng([lat, lng]);
+                            updateAddress(lat, lng);
+                        }
+                    }, 200);
+                });
+            });
+
+            // Delete Saved Address Event Handlers
+            const deleteButtons = document.querySelectorAll('.delete-addr-btn');
+            deleteButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const addrId = btn.dataset.id;
+                    
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "Do you want to delete this saved address?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#FF4D30',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch(`/profile/delete_address/${addrId}/`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRFToken': '{{ csrf_token }}'
+                                }
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.status === 'success') {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Deleted!',
+                                        text: 'The address has been removed.',
+                                        confirmButtonColor: '#FF4D30'
+                                    }).then(() => {
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    Swal.fire('Error', data.message || 'Could not delete address', 'error');
+                                }
+                            })
+                            .catch(err => {
+                                console.error('Error:', err);
+                                Swal.fire('Error', 'Network error occurred.', 'error');
+                            });
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

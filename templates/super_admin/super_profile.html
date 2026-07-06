@@ -1,0 +1,251 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Profile - Foodeat</title>
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="{% static 'js/3.4.js' %}"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        brand: { 50:'#fff7ed', 100:'#ffedd5', 500:'#ff6f00', 600:'#ea580c', 700:'#c2410c' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glow-orange {
+            box-shadow: 0 10px 30px -10px rgba(255, 111, 0, 0.2);
+        }
+        .active-tab-indicator {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex min-h-screen font-sans">
+
+    <!-- Top Full-Width Header Bar -->
+    <header class="fixed left-0 top-0 z-50 flex h-16 w-full items-center justify-between px-6 md:px-8 bg-white/80 backdrop-blur-md border-b border-slate-200/50 shadow-sm">
+        <div class="flex items-center gap-3">
+            <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/10 text-orange-600">
+                <i class="fa-solid fa-user-gear text-sm"></i>
+            </span>
+            <span class="text-sm font-extrabold tracking-tight text-slate-800 md:text-lg">My Profile</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="/super_dashboard/" class="flex items-center gap-1.5 px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50 transition">
+                <i class="fa-solid fa-arrow-left text-[10px]"></i> Dashboard
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Centered Content Container -->
+    <div class="main-content flex-1 min-h-screen pt-20 flex items-center justify-center p-4 md:p-8 relative">
+        <!-- Floating Subtle Glows -->
+        <div class="absolute w-96 h-96 rounded-full bg-brand-500/5 blur-[120px] top-1/4 left-1/3 pointer-events-none"></div>
+        <div class="absolute w-96 h-96 rounded-full bg-amber-500/5 blur-[120px] bottom-1/4 right-1/4 pointer-events-none"></div>
+
+        <div class="w-full max-w-5xl space-y-6 relative z-10">
+            <!-- Header Section -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-200 pb-5">
+                <div>
+                    <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">Super Admin Command Center</h1>
+                    <p class="text-xs font-semibold text-slate-400 uppercase tracking-widest mt-1">Superuser Security & Access Settings</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">System Status: Active</span>
+                </div>
+            </div>
+
+            <!-- Two Column Main Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Left Column: Identity Card -->
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="bg-white rounded-3xl border border-slate-100 shadow-xl overflow-hidden glow-orange">
+                        <!-- Colored Top Cover -->
+                        <div class="h-24 bg-gradient-to-r from-brand-500 to-amber-500 relative"></div>
+                        
+                        <!-- Content -->
+                        <div class="px-6 pb-6 pt-0 flex flex-col items-center text-center relative">
+                            <!-- Avatar Frame -->
+                            <div class="relative -mt-12 mb-4 w-28 h-28 rounded-full p-1 bg-white border border-slate-100 shadow-md">
+                                <div class="w-full h-full rounded-full overflow-hidden border-2 border-brand-500 bg-slate-50 flex items-center justify-center">
+                                    {% if super_user.profile_img %}
+                                        <img src="{{ super_user.profile_img.url }}" alt="{{ super_user.full_name }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                        <div class="text-3xl text-slate-400 font-bold">👤</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- User Info -->
+                            <h2 class="text-lg font-extrabold text-slate-800 tracking-tight leading-tight">{{ super_user.full_name }}</h2>
+                            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 mt-2">
+                                <i class="fa-solid fa-shield-halved text-[9px]"></i> {{ super_user.role|default:"Super Admin" }}
+                            </span>
+
+                            <div class="w-full h-px bg-slate-100 my-5"></div>
+
+                            <!-- Meta details list -->
+                            <div class="w-full space-y-2 text-left text-xs font-semibold text-slate-500">
+                                <div class="flex justify-between">
+                                    <span>Authority level:</span>
+                                    <span class="text-slate-800 font-bold">Level 1 (Full Access)</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Console status:</span>
+                                    <span class="text-emerald-600 font-bold">Connected</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Joined Console:</span>
+                                    <span class="text-slate-800 font-bold">Recent Session</span>
+                                </div>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="w-full space-y-2 mt-5">
+                                <a href="/super_profile_edit/" class="w-full h-11 bg-gradient-to-r from-brand-500 to-amber-500 hover:scale-[1.02] active:scale-[0.98] text-white font-bold text-xs rounded-xl transition-all duration-200 flex items-center justify-center gap-2 shadow-md shadow-brand-500/10">
+                                    <i class="fa-solid fa-user-pen text-[10px]"></i> Edit Profile
+                                </a>
+                                <a href="/super_dashboard/" class="w-full h-11 bg-slate-50 hover:bg-slate-100 text-slate-600 font-bold text-xs rounded-xl border border-slate-200 transition-all flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-gauge-high text-[10px]"></i> Main Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Interactive Details Panel -->
+                <div class="lg:col-span-2 space-y-6">
+                    <div class="bg-white rounded-3xl border border-slate-100 shadow-xl overflow-hidden flex flex-col h-full glow-orange">
+                        
+                        <!-- Navigation Tabs -->
+                        <div class="bg-slate-50/50 border-b border-slate-100 px-6 flex gap-6 relative">
+                            <button onclick="switchTab('profile-details', this)" class="tab-btn py-4 text-xs font-bold text-brand-500 border-b-2 border-brand-500 focus:outline-none transition-colors relative z-10">
+                                Account Details
+                            </button>
+                            <button onclick="switchTab('system-stats', this)" class="tab-btn py-4 text-xs font-bold text-slate-400 hover:text-slate-600 focus:outline-none transition-colors relative z-10">
+                                Command Stats
+                            </button>
+                            <button onclick="switchTab('security-logs', this)" class="tab-btn py-4 text-xs font-bold text-slate-400 hover:text-slate-600 focus:outline-none transition-colors relative z-10">
+                                Access Activity
+                            </button>
+                        </div>
+
+                        <!-- Tab Content Body -->
+                        <div class="p-6 flex-grow">
+                            
+                            <!-- Tab 1: Account Details -->
+                            <div id="profile-details" class="tab-pane space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Full Name</label>
+                                        <p class="text-sm font-bold text-slate-700 mt-1">{{ super_user.full_name }}</p>
+                                    </div>
+                                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">System Role</label>
+                                        <p class="text-sm font-bold text-slate-700 mt-1">{{ super_user.role|default:"Super Admin" }}</p>
+                                    </div>
+                                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 md:col-span-2">
+                                        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Business Email</label>
+                                        <p class="text-sm font-bold text-slate-700 mt-1">{{ super_user.email }}</p>
+                                    </div>
+                                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 md:col-span-2">
+                                        <label class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Phone Contact</label>
+                                        <p class="text-sm font-bold text-slate-700 mt-1">{{ super_user.phone|default:"Not Configured" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tab 2: Command Stats -->
+                            <div id="system-stats" class="tab-pane hidden space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div class="p-5 bg-gradient-to-br from-brand-50 to-orange-50 rounded-2xl border border-orange-100 text-center">
+                                        <span class="text-2xl font-extrabold text-brand-600 block">Active</span>
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1 block">Database State</span>
+                                    </div>
+                                    <div class="p-5 bg-gradient-to-br from-amber-50 to-yellow-50 rounded-2xl border border-amber-100 text-center">
+                                        <span class="text-2xl font-extrabold text-amber-600 block">Verified</span>
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1 block">Security Credentials</span>
+                                    </div>
+                                    <div class="p-5 bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl border border-slate-200 text-center">
+                                        <span class="text-2xl font-extrabold text-slate-700 block">Console</span>
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1 block">Active Device</span>
+                                    </div>
+                                </div>
+                                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-xs font-semibold text-slate-500 leading-relaxed">
+                                    <i class="fa-solid fa-circle-info text-brand-500 mr-1.5"></i> 
+                                    This console session is cryptographically signed and secured using secure session cookies. Super admins can monitor registrations, toggle blocks, and inspect orders dynamically across the network.
+                                </div>
+                            </div>
+
+                            <!-- Tab 3: Security Logs -->
+                            <div id="security-logs" class="tab-pane hidden space-y-3">
+                                <div class="space-y-2">
+                                    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs">
+                                        <div class="flex items-center gap-3">
+                                            <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                                            <span class="font-bold text-slate-700">Superuser Session Initiated</span>
+                                        </div>
+                                        <span class="text-slate-400 font-semibold">Just now</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs">
+                                        <div class="flex items-center gap-3">
+                                            <span class="h-2 w-2 rounded-full bg-orange-500"></span>
+                                            <span class="font-bold text-slate-700">Security Credentials Verified</span>
+                                        </div>
+                                        <span class="text-slate-400 font-semibold">5 mins ago</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs">
+                                        <div class="flex items-center gap-3">
+                                            <span class="h-2 w-2 rounded-full bg-amber-500"></span>
+                                            <span class="font-bold text-slate-700">Super Admin Database Connected</span>
+                                        </div>
+                                        <span class="text-slate-400 font-semibold">10 mins ago</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- JS for switching tabs -->
+    <script>
+        function switchTab(tabId, btn) {
+            // Hide all tab panes
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.add('hidden');
+            });
+            
+            // Show the target pane
+            document.getElementById(tabId).classList.remove('hidden');
+
+            // Reset all tab buttons classes
+            document.querySelectorAll('.tab-btn').forEach(button => {
+                button.classList.remove('text-brand-500', 'border-brand-500');
+                button.classList.add('text-slate-400', 'hover:text-slate-600');
+            });
+
+            // Set current button active classes
+            btn.classList.remove('text-slate-400', 'hover:text-slate-600');
+            btn.classList.add('text-brand-500', 'border-brand-500');
+        }
+    </script>
+</body>
+</html>

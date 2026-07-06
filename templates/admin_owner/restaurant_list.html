@@ -1,0 +1,353 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant List - GJ3 Admin</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- jsPDF & AutoTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#ff6f00', // Orange matching theme
+                            600: '#ea580c',
+                            700: '#c2410c',
+                        },
+                        navy: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex">
+    {% include 'admin_owner/sidebar.html' %}
+
+    <div class="w-full md:w-[calc(100%-70px)] lg:w-[calc(100%-260px)] md:ml-[70px] lg:ml-[260px] min-h-screen flex flex-col transition-all duration-300">
+        <!-- Top Header -->
+        <header class="bg-white border-b border-slate-200 h-20 px-6 md:px-8 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+            <!-- Left Side: Page Title -->
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">Restaurant List</h1>
+                <p class="text-xs md:text-sm text-slate-500 hidden sm:block">View, manage, and delete your registered restaurant locations.</p>
+            </div>
+
+            <!-- Right Side: User Profile Dropdown -->
+            <div class="relative" id="adminProfileDropdownContainer">
+                <button id="adminProfileBtn" class="flex items-center gap-3 p-1.5 pr-3 hover:bg-slate-100 rounded-full transition-all duration-200 focus:outline-none">
+                    <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-brand-500 shadow-sm flex-shrink-0">
+                        {% if admin_user.profile_image %}
+                            <img src="{{ admin_user.profile_image.url }}" alt="Admin Profile" class="w-full h-full object-cover">
+                        {% else %}
+                            <img src="{% static 'images/default-profile.png' %}" alt="Default Profile" class="w-full h-full object-cover">
+                        {% endif %}
+                    </div>
+                    <div class="text-left hidden sm:block">
+                        <p class="text-sm font-semibold text-slate-800 leading-tight">{{ admin_user.full_name }}</p>
+                        <p class="text-xs text-slate-400 font-medium leading-none mt-0.5">{{ admin_user.restaurant_name|default:"No Restaurant" }}</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 hidden sm:block transition-transform duration-200" id="dropdownArrow"></i>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div id="adminDropdownMenu" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-100 py-2 z-50 transform origin-top-right transition-all duration-200">
+                    <div class="px-4 py-2 border-b border-slate-50 md:hidden">
+                        <p class="text-sm font-semibold text-slate-800">{{ admin_user.full_name }}</p>
+                        <p class="text-xs text-slate-400 font-medium">{{ admin_user.restaurant_name|default:"No Restaurant" }}</p>
+                    </div>
+                    <a href="{% url 'admin_profile' %}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-brand-600 transition-colors">
+                        <i class="fa-solid fa-user text-slate-400 w-5"></i>
+                        <span>My Profile</span>
+                    </a>
+                    <hr class="my-1 border-slate-100">
+                    <a href="/admin_logout/" class="flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors">
+                        <i class="fa-solid fa-right-from-bracket w-5"></i>
+                        <span>Log Out</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow p-6 md:p-8 max-w-7xl w-full mx-auto space-y-6">
+            <!-- Action Bar -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                <!-- Search -->
+                <div class="relative w-full sm:max-w-md">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="searchInput" oninput="filterGrid()" placeholder="Search by restaurant name..." class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all">
+                </div>
+
+                <!-- Export & Add -->
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <button class="w-1/2 sm:w-auto px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition-colors flex items-center justify-center gap-2" onclick="exportPDF()">
+                        <i class="fas fa-file-pdf text-red-500"></i> Export PDF
+                    </button>
+                    <a href="{% url 'add_restaurant' %}" class="w-1/2 sm:w-auto px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl text-sm shadow-md shadow-brand-500/10 hover:shadow-lg transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-plus"></i> Add Restaurant
+                    </a>
+                </div>
+            </div>
+
+            <!-- Hidden Table for PDF Export -->
+            <table id="restaurantsTable" class="hidden">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Address</th>
+                        <th>Capacity</th>
+                        <th>Opening Time</th>
+                        <th>Closing Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for resto in restos %}
+                    <tr>
+                        <td>{{ resto.id }}</td>
+                        <td>{{ resto.name }}</td>
+                        <td>{{ resto.email }}</td>
+                        <td>{{ resto.address }}</td>
+                        <td>{{ resto.seating_capacity }}</td>
+                        <td>{{ resto.opening_time|time:"h:i A" }}</td>
+                        <td>{{ resto.closing_time|time:"h:i A" }}</td>
+                        <td>{% if resto.is_accepting_orders %}Open{% else %}Closed{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- ── Restaurant Cards Grid ── -->
+            <div id="restaurantsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {% for resto in restos %}
+                <div class="resto-card bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col transition-all duration-300 hover:shadow-lg"
+                     data-name="{{ resto.name|lower }}">
+
+                    <!-- Image -->
+                    <div class="relative w-full" style="height:180px; overflow:hidden;">
+                        {% if resto.image %}
+                            <img src="{{ resto.image.url }}" alt="{{ resto.name }}" class="w-full h-full object-cover transition-transform duration-300 hover:scale-105 zoomable-img cursor-pointer" data-src="{{ resto.image.url }}">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center bg-slate-150 text-slate-400 text-sm">No Image</div>
+                        {% endif %}
+
+                        <!-- Seating Capacity Badge top-left -->
+                        <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm border border-slate-100 text-slate-800 text-xs font-bold px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1">
+                            <i class="fa-solid fa-chair text-brand-500 text-[10px]"></i> Capacity: {{ resto.seating_capacity }}
+                        </span>
+
+                        <!-- Closed Overlay -->
+                        {% if not resto.is_accepting_orders %}
+                        <div class="absolute inset-0 bg-slate-900/60 flex items-center justify-center">
+                            <span class="bg-rose-500 text-white text-xs font-extrabold px-3 py-1.5 rounded-full shadow-md uppercase tracking-wider">Closed</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Content -->
+                    <div class="flex flex-col flex-1 p-4">
+                        <!-- Name & Email -->
+                        <div class="mb-2">
+                            <h3 class="font-bold text-slate-800 text-base leading-snug truncate" title="{{ resto.name }}">{{ resto.name }}</h3>
+                            <p class="text-xs text-slate-400 mt-0.5 truncate"><i class="fa-solid fa-envelope mr-1 text-[10px] text-slate-400"></i>{{ resto.email }}</p>
+                        </div>
+
+                        <!-- Address -->
+                        <p class="text-xs text-slate-500 leading-relaxed line-clamp-2 mb-3 h-8" title="{{ resto.address }}">
+                            <i class="fa-solid fa-location-dot text-brand-500 mr-1 text-[10px]"></i>{{ resto.address }}
+                        </p>
+
+                        <!-- Timings -->
+                        <div class="flex items-center justify-between text-xs text-slate-600 mb-4 pt-2.5 border-t border-slate-50">
+                            <span class="font-medium text-slate-400 uppercase tracking-wider text-[9px] font-bold">Timings</span>
+                            <span class="font-extrabold text-slate-700 bg-slate-50 px-2 py-0.5 rounded border border-slate-100">
+                                <i class="fa-regular fa-clock mr-1 text-[10px]"></i>{{ resto.opening_time|time:"h:i A" }} - {{ resto.closing_time|time:"h:i A" }}
+                            </span>
+                        </div>
+
+                        <!-- Toggle Status & Menu Row -->
+                        <div class="flex items-center justify-between mb-4">
+                            <!-- Toggle status: Open / Closed -->
+                            <form method="POST" action="{% url 'toggle_resto_status' resto.id %}" class="inline-flex items-center gap-1.5">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="group inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 transition-all text-xs font-bold
+                                        {% if resto.is_accepting_orders %}border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100{% else %}border-slate-200 bg-slate-100 text-slate-500 hover:bg-slate-200{% endif %}"
+                                        title="Toggle booking status">
+                                    <span class="relative inline-flex h-5 w-9 items-center rounded-full transition {% if resto.is_accepting_orders %}bg-emerald-500{% else %}bg-slate-300{% endif %}">
+                                        <span class="inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform {% if resto.is_accepting_orders %}translate-x-5{% else %}translate-x-0.5{% endif %}"></span>
+                                    </span>
+                                    {% if resto.is_accepting_orders %}Open{% else %}Closed{% endif %}
+                                </button>
+                            </form>
+
+                            <!-- Menu Image link -->
+                            {% if resto.menu %}
+                                <button type="button" class="text-xs font-bold text-brand-500 hover:text-brand-600 transition-colors flex items-center gap-1 zoomable-img cursor-pointer" data-src="{{ resto.menu.url }}">
+                                    <i class="fa-solid fa-book-open text-[10px]"></i> View Menu
+                                </button>
+                            {% else %}
+                                <span class="text-[10px] font-bold text-slate-400 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-full">No Menu</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- Action buttons -->
+                        <div class="flex gap-2 mt-auto">
+                            <a href="{% url 'edit_restaurant' resto.id %}"
+                               class="flex-1 py-2 bg-slate-50 hover:bg-brand-50 border border-slate-200 hover:border-brand-400 text-slate-650 hover:text-brand-650 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <form method="POST" action="{% url 'delete_restaurant' resto.id %}" class="flex-1" onsubmit="return confirm('Delete {{ resto.name }}? This cannot be undone.');">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="w-full py-2 bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-400 text-slate-650 hover:text-rose-650 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5">
+                                    <i class="fas fa-trash-alt"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-full py-16 text-center">
+                    <div class="text-5xl mb-3">🏢</div>
+                    <p class="text-slate-500 font-semibold text-lg">No restaurants registered yet</p>
+                    <p class="text-slate-400 text-sm mt-1">Click "Add Restaurant" to add your first restaurant location.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Dropdown & Filter Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Dropdown Script
+            const profileBtn = document.getElementById('adminProfileBtn');
+            const dropdownMenu = document.getElementById('adminDropdownMenu');
+            const dropdownArrow = document.getElementById('dropdownArrow');
+
+            if (profileBtn && dropdownMenu) {
+                profileBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdownMenu.classList.toggle('hidden');
+                    if (dropdownArrow) {
+                        dropdownArrow.classList.toggle('rotate-180');
+                    }
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                        dropdownMenu.classList.add('hidden');
+                        if (dropdownArrow) {
+                            dropdownArrow.classList.remove('rotate-180');
+                        }
+                    }
+                });
+            }
+        });
+
+        // Search Filter
+        function filterGrid() {
+            let input = document.getElementById("searchInput").value.toLowerCase();
+            let cards = document.querySelectorAll("#restaurantsGrid > div:not(#emptyState)");
+
+            cards.forEach(card => {
+                let name = card.getAttribute('data-name');
+                if (name) {
+                    if (name.includes(input)) {
+                        card.style.display = "";
+                    } else {
+                        card.style.display = "none";
+                    }
+                }
+            });
+        }
+
+        // Export PDF
+        function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF('landscape');
+            doc.text("Restaurant List", 14, 15);
+            doc.autoTable({
+                html: '#restaurantsTable',
+                startY: 20,
+                theme: 'grid',
+                headStyles: { fillColor: [44, 62, 80] }
+            });
+            doc.save("restaurant-list.pdf");
+        }
+
+        // Image zoom modal handlers
+        function openZoomModal(src) {
+            const modal = document.getElementById('imageZoomModal');
+            const img = document.getElementById('zoomedImage');
+            if (modal && img) {
+                img.src = src;
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                }, 50);
+            }
+        }
+
+        function closeZoomModal() {
+            const modal = document.getElementById('imageZoomModal');
+            if (modal) {
+                modal.classList.add('opacity-0');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.zoomable-img').forEach(element => {
+                element.addEventListener('click', function() {
+                    const src = this.getAttribute('data-src');
+                    if (src) {
+                        openZoomModal(src);
+                    }
+                });
+            });
+        });
+    </script>
+
+    <!-- Zoom Image Modal Overlay -->
+    <div id="imageZoomModal" class="fixed inset-0 bg-slate-950/80 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300 backdrop-blur-sm cursor-zoom-out" onclick="closeZoomModal()">
+        <button class="absolute top-6 right-6 text-white text-4xl font-light hover:text-brand-500 transition-colors focus:outline-none" onclick="event.stopPropagation(); closeZoomModal();">&times;</button>
+        <div class="max-w-[90vw] max-h-[85vh] p-1.5 bg-white rounded-2xl shadow-2xl relative" onclick="event.stopPropagation();">
+            <img id="zoomedImage" src="" alt="Zoomed Image" class="max-w-full max-h-[80vh] rounded-xl object-contain">
+        </div>
+    </div>
+</body>
+
+</html>

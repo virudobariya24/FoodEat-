@@ -1,0 +1,210 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Partners - Super Admin</title>
+
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="{% static 'js/3.4.js' %}"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        brand: { 50:'#fff7ed', 100:'#ffedd5', 500:'#ff6f00', 600:'#ea580c', 700:'#c2410c' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen">
+
+    <!-- Sidebar & Header -->
+    {% include 'super_admin/super_sidebar.html' %}
+
+    <!-- Main Content Wrapper -->
+    <div class="main-content min-h-screen flex flex-col transition-colors duration-200">
+        <main class="p-4 md:p-8 lg:p-10 max-w-[1400px] w-full mx-auto space-y-6">
+            
+            <!-- Messages -->
+            {% if messages %}
+                <div class="space-y-2">
+                    {% for msg in messages %}
+                        <div class="p-4 rounded-xl border flex items-center justify-between {% if msg.tags == 'error' %}bg-rose-500/10 border-rose-500/20 text-rose-700{% else %}bg-emerald-500/10 border-emerald-500/20 text-emerald-700{% endif %}">
+                            <span class="text-sm font-semibold">{{ msg }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Page Header -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-black text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-motorcycle text-brand-500"></i> Delivery Partners
+                    </h2>
+                    <p class="text-xs text-slate-400 font-semibold mt-1">Manage, verify, and track status of all registered delivery boys on the platform.</p>
+                </div>
+                <div class="bg-slate-100 px-4 py-2 rounded-xl text-slate-700 font-bold text-xs">
+                    Total: {{ delivery_boys|length }} Partners
+                </div>
+            </div>
+
+            <!-- Responsive Table / Card List -->
+            <div class="bg-white border border-slate-200/60 shadow-sm rounded-2xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-full md:min-w-[1000px] block md:table">
+                        <thead class="hidden md:table-header-group">
+                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-400 text-xs font-bold uppercase tracking-wider">
+                                <th class="py-4 px-6 w-20">ID</th>
+                                <th class="py-4 px-4 w-24">Photo</th>
+                                <th class="py-4 px-6">Partner Details</th>
+                                <th class="py-4 px-6">License & Vehicle</th>
+                                <th class="py-4 px-6">Aadhaar Card</th>
+                                <th class="py-4 px-6 text-center">Duty Status</th>
+                                <th class="py-4 px-6 text-center">Verification</th>
+                                <th class="py-4 px-6 text-center w-36">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-sm block md:table-row-group">
+                            {% for boy in delivery_boys %}
+                            <tr class="hover:bg-slate-50/40 transition-colors block md:table-row p-4 md:p-0 space-y-2 md:space-y-0 relative border-b md:border-b-0 border-slate-100">
+                                <!-- ID -->
+                                <td class="py-2 md:py-5 px-0 md:px-6 font-bold text-slate-400 flex md:table-cell justify-between items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="ID">
+                                    #{{ boy.id }}
+                                </td>
+                                
+                                <!-- Photo -->
+                                <td class="py-2 md:py-5 px-0 md:px-4 flex md:table-cell justify-between items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="Photo">
+                                    {% if boy.image %}
+                                        <div class="w-12 h-12 rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
+                                            <img src="{{ boy.image.url }}" class="w-full h-full object-cover" alt="Partner Profile">
+                                        </div>
+                                    {% else %}
+                                        <div class="w-12 h-12 rounded-xl border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-slate-400">
+                                            <i class="fa-solid fa-bicycle text-sm"></i>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                
+                                <!-- Partner Details -->
+                                <td class="py-2 md:py-5 px-0 md:px-6 flex md:table-cell justify-between items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="Partner Details">
+                                    <div class="text-left md:text-left">
+                                        <div class="font-bold text-slate-800 leading-snug">{{ boy.name }}</div>
+                                        <div class="text-xs text-slate-400 mt-1 flex flex-col gap-0.5">
+                                            <span class="flex items-center gap-1.5"><i class="fa-solid fa-envelope text-[10px] text-slate-300"></i>{{ boy.email }}</span>
+                                            <span class="flex items-center gap-1.5">
+                                                <i class="fa-solid fa-phone text-[10px] text-slate-300"></i>{{ boy.phone_number }}
+                                                <a href="https://wa.me/91{{ boy.phone_number }}" target="_blank" class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-bold transition-all shadow-sm" title="Chat on WhatsApp">
+                                                    <i class="fa-brands fa-whatsapp"></i> Chat
+                                                </a>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+                                
+                                <!-- License & Vehicle -->
+                                <td class="py-2 md:py-5 px-0 md:px-6 flex md:table-cell justify-between items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="License & Vehicle">
+                                    <div class="text-left">
+                                        <div class="text-xs font-semibold text-slate-700">License: <span class="font-bold text-slate-900">{{ boy.license_number }}</span></div>
+                                        <div class="text-xs text-slate-500 mt-1">Vehicle: <span class="font-bold text-slate-800">{{ boy.bike_number }}</span></div>
+                                        <div class="text-[10px] text-brand-600 bg-brand-50 font-bold px-1.5 py-0.5 mt-1 rounded w-fit uppercase">{{ boy.type_of_bike }}</div>
+                                    </div>
+                                </td>
+                                
+                                <!-- Aadhaar Card -->
+                                <td class="py-2 md:py-5 px-0 md:px-6 flex md:table-cell justify-between items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="Aadhaar Card">
+                                    {% if boy.aadhar_card_image %}
+                                        <a href="{{ boy.aadhar_card_image.url }}" target="_blank" class="text-brand-600 hover:text-brand-700 hover:underline font-bold flex items-center gap-1.5">
+                                            <i class="fa-solid fa-address-card text-lg"></i>
+                                            <span>View Aadhaar Card</span>
+                                        </a>
+                                    {% else %}
+                                        <span class="text-slate-400 italic">No Aadhaar Uploaded</span>
+                                    {% endif %}
+                                </td>
+                                
+                                <!-- Duty Status -->
+                                <td class="py-2 md:py-5 px-0 md:px-6 flex md:table-cell justify-between items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="Duty Status">
+                                    {% if boy.status == 'Off-duty' %}
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span> Offline
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Active
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <!-- Verification Status -->
+                                <td class="py-2 md:py-5 px-0 md:px-6 flex md:table-cell justify-between items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="Verification">
+                                    <div class="flex flex-col gap-1 items-start md:items-center">
+                                        {% if boy.is_verified %}
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                                                <i class="fa-solid fa-circle-check"></i> Verified
+                                            </span>
+                                        {% else %}
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-100">
+                                                <i class="fa-solid fa-triangle-exclamation"></i> Unverified
+                                            </span>
+                                        {% endif %}
+                                        
+                                        {% if boy.is_blocked %}
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-100 mt-1">
+                                                <i class="fa-solid fa-ban"></i> Blocked
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                
+                                <!-- Actions -->
+                                <td class="py-2 md:py-5 px-0 md:px-6 flex md:table-cell justify-between items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="Actions">
+                                    <div class="flex items-center justify-end md:justify-center gap-2">
+                                         <!-- Verify button (only if not verified yet) -->
+                                         {% if not boy.is_verified %}
+                                             <a href="{% url 'super_toggle_verify_boy' boy.id %}" class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white rounded-lg text-xs font-extrabold transition-all border border-emerald-100" title="Verify Partner Profile">
+                                                 Verify
+                                             </a>
+                                         {% endif %}
+
+                                        <!-- Toggle Block/Unblock -->
+                                        <a href="{% url 'super_toggle_block_boy' boy.id %}" class="px-2.5 py-1.5 rounded-lg text-xs font-extrabold transition-all border
+                                            {% if boy.is_blocked %}
+                                                bg-emerald-50 border-emerald-250 text-emerald-700 hover:bg-emerald-600 hover:text-white
+                                            {% else %}
+                                                bg-amber-50 border-amber-250 text-amber-700 hover:bg-amber-500 hover:text-white
+                                            {% endif %}" title="Toggle Block Status">
+                                            {% if boy.is_blocked %}Unblock{% else %}Block{% endif %}
+                                        </a>
+
+                                        <!-- Delete button -->
+                                        <a href="{% url 'super_delete_boy' boy.id %}" onclick="return confirm('Are you sure you want to delete this delivery partner?');" class="p-1.5 bg-rose-50 hover:bg-rose-500 text-rose-600 hover:text-white rounded-lg transition-colors border border-rose-100" title="Delete Delivery Boy">
+                                            <i class="fa-solid fa-trash-can text-xs"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8" class="py-12 text-center text-slate-400 block md:table-cell">
+                                    <div class="text-3xl">🚴</div>
+                                    <div class="mt-2 font-medium">No registered delivery boys yet</div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </main>
+    </div>
+</body>
+</html>

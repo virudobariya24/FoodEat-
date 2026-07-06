@@ -1,0 +1,6 @@
+<form method="post" action="{% url 'send_otp' %}">
+    {% csrf_token %}
+    <label>Email:</label>
+    <input type="email" name="email" required>
+    <button type="submit">Send OTP</button>
+</form>

@@ -1,0 +1,1199 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Foodeat - Our Menu</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="{% static 'js/3.4.js' %}"></script>
+
+  <style>
+    :root {
+      --page-bg: #FCFAF8;
+      --surface: #ffffff;
+      --surface-soft: #F7F2EB;
+      --ink: #19202E;
+      --muted: #62728D;
+      --line: #F1EBE4;
+      --brand: #FF4D30;
+      --brand-dark: #ea361b;
+      --accent: #D4AF37;
+      --success: #10B981;
+      --shadow: 0 18px 45px rgba(164, 132, 98, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(212, 175, 55, 0.08), transparent 26rem),
+        linear-gradient(180deg, #FCFAF8 0%, #F7F2EB 52%, #FCFAF8 100%);
+      min-height: 100vh;
+    }
+
+    .page-container {
+      width: min(1280px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0 56px;
+    }
+
+    .menu-hero {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: end;
+      margin-bottom: 24px;
+      animation: heroIn 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .menu-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border: 1px solid rgba(240, 89, 65, 0.18);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--brand-dark);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      animation: softPop 560ms ease 120ms both;
+    }
+
+    .menu-eyebrow i {
+      animation: utensilBounce 1.8s ease-in-out infinite;
+    }
+
+    .menu-title {
+      margin: 12px 0 8px;
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.2rem, 5vw, 4.4rem);
+      line-height: 0.95;
+      color: #1f2937;
+      animation: titleReveal 620ms ease 80ms both;
+    }
+
+    .menu-subtitle {
+      margin: 0;
+      max-width: 680px;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.7;
+      animation: sectionIn 520ms ease 180ms both;
+    }
+
+    .menu-count {
+      min-width: 128px;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(254, 215, 170, 0.9);
+      box-shadow: var(--shadow);
+      text-align: center;
+      animation: countFloat 3.2s ease-in-out infinite;
+    }
+
+    .menu-count strong {
+      display: block;
+      font-size: 2rem;
+      line-height: 1;
+      color: var(--brand);
+    }
+
+    .menu-count span {
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .menu-toolbar {
+      position: sticky;
+      top: 76px;
+      z-index: 30;
+      display: grid;
+      grid-template-columns: minmax(240px, 1fr) auto auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px;
+      margin-bottom: 18px;
+      border: 1px solid rgba(254, 215, 170, 0.9);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.86);
+      box-shadow: 0 14px 35px rgba(120, 53, 15, 0.08);
+      backdrop-filter: blur(12px);
+    }
+
+    .search-field {
+      position: relative;
+      min-width: 0;
+    }
+
+    .search-field i {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #fb923c;
+    }
+
+    #search-bar {
+      width: 100%;
+      height: 46px;
+      padding: 0 44px;
+      border: 1px solid #fed7aa;
+      border-radius: 14px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      outline: none;
+      transition: border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    #search-bar:focus {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 4px rgba(240, 89, 65, 0.12);
+    }
+
+    .clear-search {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      display: none;
+      width: 32px;
+      height: 32px;
+      border: 0;
+      border-radius: 10px;
+      background: #fff7ed;
+      color: var(--muted);
+      cursor: pointer;
+      transform: translateY(-50%);
+    }
+
+    .clear-search.is-visible {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .filter-toggle-btn,
+    .sort-select {
+      height: 46px;
+      border: 1px solid #fed7aa;
+      border-radius: 14px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+      font-weight: 700;
+    }
+
+    .filter-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 0 18px;
+      cursor: pointer;
+      transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+    }
+
+    .filter-toggle-btn:hover {
+      transform: translateY(-1px);
+      border-color: var(--brand);
+      box-shadow: 0 10px 24px rgba(240, 89, 65, 0.14);
+    }
+
+    .sort-select {
+      min-width: 164px;
+      padding: 0 12px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .category-strip {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 4px 2px 18px;
+      scrollbar-width: none;
+    }
+
+    .category-strip::-webkit-scrollbar {
+      display: none;
+    }
+
+    .category-pill {
+      flex: 0 0 auto;
+      border: 1px solid #fed7aa;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78);
+      color: #9a3412;
+      padding: 9px 14px;
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background 180ms ease, color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .category-pill:hover,
+    .category-pill.is-active {
+      background: var(--brand);
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(240, 89, 65, 0.18);
+    }
+
+    .filter-panel {
+      display: none;
+      grid-template-columns: repeat(4, minmax(120px, 1fr)) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px;
+      margin-bottom: 26px;
+      border: 1px solid rgba(254, 215, 170, 0.9);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 14px 35px rgba(120, 53, 15, 0.08);
+      animation: panelIn 220ms ease both;
+    }
+
+    .filter-panel.is-open {
+      display: grid;
+    }
+
+    .filter-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 42px;
+      padding: 9px 12px;
+      border: 1px solid #ffedd5;
+      border-radius: 13px;
+      background: var(--surface-soft);
+      color: #374151;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .filter-chip input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--brand);
+    }
+
+    .reset-btn {
+      min-height: 42px;
+      border: 0;
+      border-radius: 13px;
+      background: #1f2937;
+      color: #fff;
+      padding: 0 16px;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .menu-category {
+      margin: 18px 0 42px;
+      animation: sectionIn 360ms ease both;
+    }
+
+    .category-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .category-header h2 {
+      margin: 0;
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+    }
+
+    .category-header span {
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+
+    .card-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 22px;
+    }
+
+    .menu-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      min-height: 362px;
+      overflow: hidden;
+      border: 1px solid rgba(254, 215, 170, 0.86);
+      border-radius: 20px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      transform: translateY(0);
+      animation: cardIn 420ms ease both;
+      transition: transform 220ms ease, box-shadow 220ms ease, border-color 220ms ease;
+    }
+
+    .menu-card:hover {
+      border-color: rgba(240, 89, 65, 0.42);
+      box-shadow: 0 22px 55px rgba(120, 53, 15, 0.16);
+      transform: translateY(-5px);
+    }
+
+    .card-image-container {
+      position: relative;
+      height: 172px;
+      overflow: hidden;
+      background: #ffedd5;
+    }
+
+    .card-image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transform: scale(1);
+      transition: transform 360ms ease;
+    }
+
+    .menu-card:hover .card-image-container img {
+      transform: scale(1.06);
+    }
+
+    .offer-badge,
+    .type-badge,
+    .availability-badge {
+      position: absolute;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      line-height: 1;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
+    }
+
+    .offer-badge {
+      left: 12px;
+      top: 12px;
+      padding: 8px 10px;
+      background: linear-gradient(135deg, var(--brand), var(--accent));
+      color: #fff;
+    }
+
+    .type-badge {
+      right: 12px;
+      top: 12px;
+      padding: 7px 9px;
+      background: rgba(255, 255, 255, 0.92);
+      color: #166534;
+    }
+
+    .type-badge.spicy {
+      color: #b91c1c;
+    }
+
+    .availability-badge {
+      left: 12px;
+      bottom: 12px;
+      padding: 7px 9px;
+      background: rgba(22, 163, 74, 0.94);
+      color: #fff;
+    }
+
+    .availability-badge.off {
+      background: rgba(75, 85, 99, 0.94);
+    }
+
+    .card-content {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      padding: 16px;
+    }
+
+    .card-content h3 {
+      margin: 0;
+      color: var(--ink);
+      font-size: 1.08rem;
+      line-height: 1.35;
+    }
+
+    .food-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .food-description {
+      display: -webkit-box;
+      min-height: 42px;
+      margin: 10px 0 14px;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 0.88rem;
+      line-height: 1.55;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: auto;
+    }
+
+    .price-container {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .discounted-price {
+      color: #111827;
+      font-size: 1.12rem;
+      font-weight: 800;
+    }
+
+    .original-price {
+      color: #ef4444;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-decoration: line-through;
+    }
+
+    .add-to-cart-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-width: 92px;
+      height: 40px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--brand);
+      color: #fff;
+      font: inherit;
+      font-size: 0.9rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease;
+    }
+
+    .add-to-cart-btn:hover {
+      background: var(--brand-dark);
+      box-shadow: 0 12px 26px rgba(240, 89, 65, 0.28);
+      transform: translateY(-1px);
+    }
+
+    .add-to-cart-btn:hover i {
+      animation: cartNudge 420ms ease both;
+    }
+
+    .unavailable-pill {
+      display: inline-flex;
+      align-items: center;
+      height: 38px;
+      padding: 0 13px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      color: #6b7280;
+      font-size: 0.86rem;
+      font-weight: 800;
+    }
+
+    .no-results-message {
+      display: none;
+      padding: 70px 20px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .no-results-message.is-visible {
+      display: block;
+    }
+
+    .no-results-message i {
+      margin-bottom: 16px;
+      color: #fdba74;
+      font-size: 3rem;
+    }
+
+    .no-results-message h2 {
+      margin: 0 0 8px;
+      color: var(--ink);
+    }
+
+    @keyframes panelIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes heroIn {
+      from { opacity: 0; transform: translateY(18px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes softPop {
+      from { opacity: 0; transform: scale(0.94); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes titleReveal {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes utensilBounce {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-2px) rotate(-7deg); }
+    }
+
+    @keyframes countFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    @keyframes sectionIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes cartNudge {
+      0% { transform: translateX(0); }
+      45% { transform: translateX(3px) rotate(-8deg); }
+      100% { transform: translateX(0); }
+    }
+
+    @media (max-width: 900px) {
+      .menu-hero {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .menu-count {
+        justify-self: start;
+      }
+
+      .menu-toolbar {
+        top: 62px !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+
+      .search-field {
+        grid-column: span 2;
+      }
+
+      .sort-select,
+      .filter-toggle-btn {
+        width: 100%;
+      }
+
+      .filter-panel {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 560px) {
+      body {
+        padding-top: 62px !important;
+      }
+      
+      .page-container {
+        width: min(100% - 22px, 1280px);
+        padding-top: 18px;
+      }
+
+      .menu-toolbar {
+        top: 62px !important;
+        padding: 10px;
+        border-radius: 16px;
+      }
+
+      .filter-panel {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .card-container {
+        grid-template-columns: 1fr;
+      }
+
+      .card-footer {
+        align-items: center !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+      }
+
+      .add-to-cart-btn,
+      .unavailable-pill {
+        width: auto !important;
+      }
+    }
+
+    /* --- Menu Page Dark Mode Overrides --- */
+    body[data-theme="dark"] {
+      --page-bg: #0A0F1D;
+      --surface: #121A2E;
+      --surface-soft: #1B2544;
+      --ink: #F1F5F9;
+      --muted: #8FA0DD;
+      --line: #1E294B;
+      --shadow: 0 18px 45px rgba(0, 0, 0, 0.4);
+      background:
+        radial-gradient(circle at top left, rgba(212, 175, 55, 0.04), transparent 26rem),
+        linear-gradient(180deg, #0A0F1D 0%, #121A2E 52%, #0A0F1D 100%) !important;
+      color: var(--ink) !important;
+    }
+
+    body[data-theme="dark"] .menu-title {
+      color: var(--ink) !important;
+    }
+
+    body[data-theme="dark"] .menu-eyebrow,
+    body[data-theme="dark"] .menu-count,
+    body[data-theme="dark"] .menu-toolbar,
+    body[data-theme="dark"] #search-bar,
+    body[data-theme="dark"] .clear-search,
+    body[data-theme="dark"] .filter-toggle-btn,
+    body[data-theme="dark"] .sort-select,
+    body[data-theme="dark"] .category-pill,
+    body[data-theme="dark"] .filter-panel,
+    body[data-theme="dark"] .filter-chip,
+    body[data-theme="dark"] .menu-card {
+      background: var(--surface) !important;
+      border-color: var(--line) !important;
+      color: var(--ink) !important;
+      box-shadow: var(--shadow) !important;
+    }
+
+    body[data-theme="dark"] .clear-search,
+    body[data-theme="dark"] .filter-chip {
+      background: var(--surface-soft) !important;
+    }
+
+    body[data-theme="dark"] .card-image-container {
+      background: #27211d !important;
+    }
+
+    body[data-theme="dark"] .type-badge {
+      background: rgba(43, 43, 43, 0.92) !important;
+      color: #86efac !important;
+    }
+
+    body[data-theme="dark"] .type-badge.spicy {
+      color: #fca5a5 !important;
+    }
+  </style>
+</head>
+<body>
+  {% include 'header.html' %}
+
+  <main class="page-container">
+
+
+
+    {% regroup food_items|dictsort:"category" by category as categories %}
+
+    <section class="menu-toolbar" aria-label="Menu search and filters">
+      <div class="search-field">
+        <i class="fas fa-search"></i>
+        <input type="search" id="search-bar" placeholder="Search food, category, restaurant..." autocomplete="off">
+        <button type="button" class="clear-search" id="clear-search" aria-label="Clear search">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <button class="filter-toggle-btn" id="filter-toggle-btn" type="button" aria-expanded="false" aria-controls="filter-panel">
+        <i class="fas fa-sliders"></i>
+        Filters
+        <span id="filter-count"></span>
+      </button>
+
+      <select id="sort-select" class="sort-select" aria-label="Sort menu">
+        <option value="default">Sort: Default</option>
+        <option value="price-low">Price: Low to High</option>
+        <option value="price-high">Price: High to Low</option>
+        <option value="name">Name: A to Z</option>
+      </select>
+    </section>
+
+    <div class="category-strip" aria-label="Categories">
+      <button type="button" class="category-pill is-active" data-category-filter="all">All</button>
+      {% for category in categories %}
+      <button type="button" class="category-pill" data-category-filter="{{ category.grouper|slugify }}">{{ category.grouper }}</button>
+      {% endfor %}
+    </div>
+
+    <section class="filter-panel" id="filter-panel">
+      <label class="filter-chip"><input type="checkbox" id="veg-filter"> Veg only</label>
+      <label class="filter-chip"><input type="checkbox" id="spicy-filter"> Spicy only</label>
+      <label class="filter-chip"><input type="checkbox" id="available-filter"> Available only</label>
+      <label class="filter-chip"><input type="checkbox" id="offer-filter"> Offers only</label>
+      <button type="button" class="reset-btn" id="reset-filters">Reset</button>
+    </section>
+
+    <div id="menu-grid-container">
+      {% for category in categories %}
+      <section class="menu-category" data-category-section="{{ category.grouper|slugify }}">
+        <div class="category-header">
+          <h2>{{ category.grouper }}</h2>
+          <span class="category-visible-count"></span>
+        </div>
+        <div class="card-container">
+          {% for p in category.list %}
+          <article class="menu-card"
+            data-food-id="{{ p.id }}"
+            data-food-image="{% if p.food_image %}{{ p.food_image.url }}{% endif %}"
+            data-name="{{ p.food_name|lower }}"
+            data-category="{{ p.category|slugify }}"
+            data-category-name="{{ p.category|lower }}"
+            data-restaurant="{{ p.restaurant_name|lower }}"
+            data-description="{{ p.description|default:''|lower }}"
+            data-price="{{ p.discounted_price|default:p.price }}"
+            data-is-veg="{% if p.is_veg %}true{% else %}false{% endif %}"
+            data-is-spicy="{% if p.is_spicy %}true{% else %}false{% endif %}"
+            data-is-available="{% if p.is_available %}true{% else %}false{% endif %}"
+            data-has-offer="{% if p.active_discount %}true{% else %}false{% endif %}">
+
+            <div class="card-image-container">
+              <img src="{{ p.food_image.url }}" alt="{{ p.food_name }}">
+              {% if p.active_discount %}
+              <span class="offer-badge"><i class="fa-solid fa-tag"></i>{{ p.active_discount.discount_percentage }}% OFF</span>
+              {% endif %}
+
+              {% if p.is_spicy %}
+              <span class="type-badge spicy"><i class="fa-solid fa-pepper-hot"></i> Spicy</span>
+              {% elif p.is_veg %}
+              <span class="type-badge"><i class="fa-solid fa-leaf"></i> Veg</span>
+              {% endif %}
+
+              <span class="availability-badge {% if not p.is_available or not p.restaurant_is_accepting_orders %}off{% endif %}">
+                {% if not p.restaurant_is_accepting_orders %}
+                  <i class="fa-solid fa-power-off"></i> Restaurant Closed
+                {% elif p.is_available %}
+                  <i class="fa-solid fa-check"></i> Available
+                {% else %}
+                  <i class="fa-solid fa-clock"></i> Unavailable
+                {% endif %}
+              </span>
+            </div>
+
+            <div class="card-content">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <h3 style="margin: 0; font-size: 16px; font-weight: 700; color: #1e293b;">{{ p.food_name }}</h3>
+                {% if p.average_rating %}
+                  <span style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 6px; padding: 2px 6px; font-size: 11px; font-weight: 900; display: inline-flex; align-items: center; gap: 3px;">
+                    <i class="fa-solid fa-star" style="font-size: 9px;"></i> {{ p.average_rating }}
+                  </span>
+                {% endif %}
+              </div>
+              <div class="food-meta">
+                <span><i class="fa-solid fa-bowl-food"></i> {{ p.category }}</span>
+              </div>
+              <p class="food-description">{{ p.description }}</p>
+
+              <div class="card-footer">
+                <div class="price-container">
+                  {% if p.active_discount %}
+                  <span class="discounted-price">Rs. {{ p.discounted_price|floatformat:2 }}</span>
+                  <span class="original-price">Rs. {{ p.price|floatformat:2 }}</span>
+                  {% else %}
+                  <span class="discounted-price">Rs. {{ p.price|floatformat:2 }}</span>
+                  {% endif %}
+                </div>
+
+                {% if p.is_available and p.restaurant_is_accepting_orders %}
+                <form action="{% url 'add_to_cart' p.id %}" method="post">
+                  {% csrf_token %}
+                  <button type="submit" class="add-to-cart-btn">
+                    <i class="fas fa-cart-plus"></i> Add
+                  </button>
+                </form>
+                {% elif not p.restaurant_is_accepting_orders %}
+                <span class="unavailable-pill">Closed</span>
+                {% else %}
+                <span class="unavailable-pill">Unavailable</span>
+                {% endif %}
+              </div>
+            </div>
+          </article>
+          {% endfor %}
+        </div>
+      </section>
+      {% empty %}
+      <div class="no-results-message is-visible">
+        <i class="fas fa-utensils"></i>
+        <h2>No dishes found</h2>
+        <p>There are no items on the menu yet.</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="no-results-message" id="filter-no-results">
+      <i class="fas fa-search"></i>
+      <h2>No matching dishes</h2>
+      <p>Try a different search term or clear some filters.</p>
+    </div>
+  </main>
+
+  <!-- Surprise Me Roulette FAB -->
+  <button id="surprise-me-fab" class="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-5 py-3.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-extrabold rounded-full shadow-lg shadow-orange-500/20 hover:scale-105 active:scale-95 transition-all text-sm group">
+      <i class="fa-solid fa-dice-five animate-bounce text-lg group-hover:rotate-180 transition-transform duration-500"></i>
+      <span>Surprise Me!</span>
+  </button>
+
+  <!-- Surprise Modal Overlay -->
+  <div id="surprise-modal" class="fixed inset-0 z-[2000] hidden items-center justify-center bg-slate-950/80 backdrop-blur-md p-4">
+      <div class="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-2xl p-6 relative space-y-6 transform scale-95 opacity-0 transition-all duration-300" id="surprise-modal-content">
+          <!-- Close -->
+          <button id="close-surprise-modal" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-slate-650 flex items-center justify-center transition-colors">
+              <i class="fa-solid fa-xmark"></i>
+          </button>
+          
+          <!-- Heading -->
+          <div class="text-center space-y-1">
+              <span class="text-xs font-bold uppercase tracking-wider text-amber-500">Decide What to Eat</span>
+              <h3 class="text-2xl font-extrabold tracking-tight">Food Roulette ✨</h3>
+          </div>
+          
+          <!-- Spinner Reel Box -->
+          <div class="h-48 relative flex items-center justify-center border border-slate-100 dark:border-slate-850 bg-slate-50 dark:bg-slate-950 rounded-2xl overflow-hidden" id="spinner-box">
+              <div id="spinner-reel" class="text-center space-y-3 px-4 transition-all duration-300">
+                  <i class="fa-solid fa-cookie-bite text-5xl text-amber-500 animate-spin"></i>
+                  <p class="text-xs text-slate-400 font-bold uppercase">Spinning the kitchen...</p>
+              </div>
+          </div>
+          
+          <!-- Actions -->
+          <div class="flex items-center gap-3 pt-2">
+              <button id="spin-again-btn" class="flex-1 py-3 border border-slate-200 dark:border-slate-700 font-bold rounded-xl text-xs hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                  <i class="fa-solid fa-rotate-right me-1"></i> Spin Again
+              </button>
+              <div id="surprise-add-to-cart-wrapper" class="flex-1">
+                  <!-- Add to cart button mounted dynamically -->
+              </div>
+          </div>
+      </div>
+  </div>
+
+  {% include 'footer.html' %}
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const searchInput = document.getElementById('search-bar');
+      const clearSearch = document.getElementById('clear-search');
+      const menuCards = Array.from(document.querySelectorAll('.menu-card'));
+      const categories = Array.from(document.querySelectorAll('.menu-category'));
+      const filterPanel = document.getElementById('filter-panel');
+      const filterBtn = document.getElementById('filter-toggle-btn');
+      const filterCount = document.getElementById('filter-count');
+      const visibleCount = document.getElementById('visible-count');
+      const noResults = document.getElementById('filter-no-results');
+      const sortSelect = document.getElementById('sort-select');
+      const resetFilters = document.getElementById('reset-filters');
+      const categoryButtons = Array.from(document.querySelectorAll('.category-pill'));
+
+      const filters = {
+        veg: document.getElementById('veg-filter'),
+        spicy: document.getElementById('spicy-filter'),
+        available: document.getElementById('available-filter'),
+        offer: document.getElementById('offer-filter')
+      };
+
+      let activeCategory = 'all';
+
+      function activeFilterTotal() {
+        return Object.values(filters).filter(function(input) { return input.checked; }).length + (activeCategory !== 'all' ? 1 : 0);
+      }
+
+      function updateFilterCount() {
+        const total = activeFilterTotal();
+        filterCount.textContent = total ? '(' + total + ')' : '';
+      }
+
+      function getSearchText(card) {
+        return [
+          card.dataset.name,
+          card.dataset.categoryName,
+          card.dataset.restaurant,
+          card.dataset.description
+        ].join(' ');
+      }
+
+      function sortVisibleCards() {
+        const mode = sortSelect.value;
+        categories.forEach(function(category) {
+          const container = category.querySelector('.card-container');
+          const sortedCards = Array.from(container.querySelectorAll('.menu-card')).sort(function(a, b) {
+            if (mode === 'price-low') return Number(a.dataset.price) - Number(b.dataset.price);
+            if (mode === 'price-high') return Number(b.dataset.price) - Number(a.dataset.price);
+            if (mode === 'name') return a.dataset.name.localeCompare(b.dataset.name);
+            return 0;
+          });
+          sortedCards.forEach(function(card) { container.appendChild(card); });
+        });
+      }
+
+      function applyFilters() {
+        const search = searchInput.value.trim().toLowerCase();
+        let totalVisible = 0;
+
+        clearSearch.classList.toggle('is-visible', search.length > 0);
+
+        categories.forEach(function(category) {
+          let categoryVisible = 0;
+          const cards = Array.from(category.querySelectorAll('.menu-card'));
+
+          cards.forEach(function(card, index) {
+            const matchesSearch = !search || getSearchText(card).includes(search);
+            const matchesCategory = activeCategory === 'all' || card.dataset.category === activeCategory;
+            const matchesVeg = !filters.veg.checked || card.dataset.isVeg === 'true';
+            const matchesSpicy = !filters.spicy.checked || card.dataset.isSpicy === 'true';
+            const matchesAvailable = !filters.available.checked || card.dataset.isAvailable === 'true';
+            const matchesOffer = !filters.offer.checked || card.dataset.hasOffer === 'true';
+            const isVisible = matchesSearch && matchesCategory && matchesVeg && matchesSpicy && matchesAvailable && matchesOffer;
+
+            card.hidden = !isVisible;
+            if (isVisible) {
+              card.style.animationDelay = Math.min(index * 35, 280) + 'ms';
+              categoryVisible += 1;
+              totalVisible += 1;
+            }
+          });
+
+          category.hidden = categoryVisible === 0;
+          const countLabel = category.querySelector('.category-visible-count');
+          if (countLabel) {
+            countLabel.textContent = categoryVisible ? categoryVisible + ' item' + (categoryVisible > 1 ? 's' : '') : '';
+          }
+        });
+
+        visibleCount.textContent = totalVisible;
+        noResults.classList.toggle('is-visible', totalVisible === 0 && menuCards.length > 0);
+        updateFilterCount();
+      }
+
+      filterBtn.addEventListener('click', function() {
+        const isOpen = filterPanel.classList.toggle('is-open');
+        filterBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      });
+
+      clearSearch.addEventListener('click', function() {
+        searchInput.value = '';
+        searchInput.focus();
+        applyFilters();
+      });
+
+      categoryButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
+          activeCategory = button.dataset.categoryFilter;
+          categoryButtons.forEach(function(item) { item.classList.remove('is-active'); });
+          button.classList.add('is-active');
+          applyFilters();
+        });
+      });
+
+      Object.values(filters).forEach(function(input) {
+        input.addEventListener('change', applyFilters);
+      });
+
+      searchInput.addEventListener('input', applyFilters);
+      sortSelect.addEventListener('change', function() {
+        sortVisibleCards();
+        applyFilters();
+      });
+
+      resetFilters.addEventListener('click', function() {
+        searchInput.value = '';
+        sortSelect.value = 'default';
+        activeCategory = 'all';
+        Object.values(filters).forEach(function(input) { input.checked = false; });
+        categoryButtons.forEach(function(item) { item.classList.remove('is-active'); });
+        categoryButtons[0].classList.add('is-active');
+        sortVisibleCards();
+        applyFilters();
+      });
+
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && filterPanel.classList.contains('is-open')) {
+          filterPanel.classList.remove('is-open');
+          filterBtn.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      // --- Surprise Me Food Roulette Logic ---
+      const surpriseFab = document.getElementById('surprise-me-fab');
+      const surpriseModal = document.getElementById('surprise-modal');
+      const surpriseModalContent = document.getElementById('surprise-modal-content');
+      const closeSurpriseModal = document.getElementById('close-surprise-modal');
+      const spinnerReel = document.getElementById('spinner-reel');
+      const spinAgainBtn = document.getElementById('spin-again-btn');
+      const surpriseAddToCartWrapper = document.getElementById('surprise-add-to-cart-wrapper');
+
+      function openSurpriseModal() {
+          if (surpriseModal && surpriseModalContent) {
+              surpriseModal.classList.remove('hidden');
+              surpriseModal.classList.add('flex');
+              setTimeout(() => {
+                  surpriseModalContent.classList.remove('scale-95', 'opacity-0');
+                  surpriseModalContent.classList.add('scale-100', 'opacity-100');
+              }, 50);
+              triggerRoulette();
+          }
+      }
+
+      function closeSurprise() {
+          if (surpriseModal && surpriseModalContent) {
+              surpriseModalContent.classList.add('scale-95', 'opacity-0');
+              surpriseModalContent.classList.remove('scale-100', 'opacity-100');
+              setTimeout(() => {
+                  surpriseModal.classList.add('hidden');
+                  surpriseModal.classList.remove('flex');
+              }, 300);
+          }
+      }
+
+      if (surpriseFab) {
+          surpriseFab.addEventListener('click', openSurpriseModal);
+      }
+      if (closeSurpriseModal) {
+          closeSurpriseModal.addEventListener('click', closeSurprise);
+      }
+
+      function triggerRoulette() {
+          const availableCards = Array.from(document.querySelectorAll('.menu-card')).filter(c => {
+              const isVisible = c.style.display !== 'none';
+              const isAvailable = c.getAttribute('data-is-available') === 'true';
+              return isVisible && isAvailable;
+          });
+
+          if (availableCards.length === 0) {
+              if (spinnerReel) {
+                  spinnerReel.innerHTML = `
+                      <div class="text-center p-6 space-y-2">
+                          <i class="fa-solid fa-face-frown text-4xl text-slate-450"></i>
+                          <h4 class="font-bold text-slate-700">No dishes available right now</h4>
+                      </div>
+                  `;
+              }
+              if (surpriseAddToCartWrapper) {
+                  surpriseAddToCartWrapper.innerHTML = '';
+              }
+              return;
+          }
+
+          let duration = 1600;
+          let interval = 80;
+          let elapsed = 0;
+          if (spinAgainBtn) spinAgainBtn.disabled = true;
+          if (surpriseAddToCartWrapper) surpriseAddToCartWrapper.innerHTML = '';
+
+          const spinTimer = setInterval(() => {
+              const randomIdx = Math.floor(Math.random() * availableCards.length);
+              const selectedCard = availableCards[randomIdx];
+              const name = selectedCard.getAttribute('data-name');
+              const price = selectedCard.getAttribute('data-price');
+              const image = selectedCard.getAttribute('data-food-image');
+
+              if (spinnerReel) {
+                  spinnerReel.innerHTML = `
+                      <div class="text-center space-y-3 flex flex-col items-center animate-pulse">
+                          <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-amber-400 flex-shrink-0 bg-slate-100">
+                              <img src="${image || '/static/img/default.png'}" class="w-full h-full object-cover">
+                          </div>
+                          <div>
+                              <h4 class="font-bold text-sm text-slate-700 capitalize line-clamp-1">${name}</h4>
+                              <p class="text-xs text-amber-500 font-bold mt-1">₹${parseFloat(price).toFixed(2)}</p>
+                          </div>
+                      </div>
+                  `;
+              }
+
+              elapsed += interval;
+              if (elapsed >= duration) {
+                  clearInterval(spinTimer);
+                  const finalIdx = Math.floor(Math.random() * availableCards.length);
+                  const winnerCard = availableCards[finalIdx];
+                  displayWinner(winnerCard);
+              }
+          }, interval);
+      }
+
+      function displayWinner(card) {
+          const foodId = card.getAttribute('data-food-id');
+          const name = card.getAttribute('data-name');
+          const desc = card.getAttribute('data-description') || '';
+          const price = card.getAttribute('data-price');
+          const image = card.getAttribute('data-food-image');
+          const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+          const csrfToken = csrfInput ? csrfInput.value : '';
+
+          if (spinnerReel) {
+              spinnerReel.innerHTML = `
+                  <div class="text-center space-y-3 flex flex-col items-center">
+                      <div class="w-20 h-20 rounded-2xl overflow-hidden border-4 border-emerald-400 flex-shrink-0 shadow-lg shadow-emerald-450/10">
+                          <img src="${image || '/static/img/default.png'}" class="w-full h-full object-cover">
+                      </div>
+                      <div class="px-2">
+                          <h4 class="font-black text-slate-800 text-base capitalize line-clamp-1">${name}</h4>
+                          <p class="text-xs text-slate-450 mt-1 line-clamp-2">${desc}</p>
+                          <p class="text-sm text-brand font-black mt-2">₹${parseFloat(price).toFixed(2)}</p>
+                      </div>
+                  </div>
+              `;
+          }
+
+          if (surpriseAddToCartWrapper) {
+              surpriseAddToCartWrapper.innerHTML = `
+                  <form action="/add-to-cart/${foodId}/" method="post" class="w-full">
+                      <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
+                      <button type="submit" class="w-full py-3 bg-[#FF4D30] hover:bg-[#ea361b] text-white font-extrabold rounded-xl text-xs transition-colors flex items-center justify-center gap-1.5 shadow-md shadow-brand/10">
+                          <i class="fas fa-cart-plus"></i> Add
+                      </button>
+                  </form>
+              `;
+          }
+          if (spinAgainBtn) spinAgainBtn.disabled = false;
+      }
+
+      if (spinAgainBtn) {
+          spinAgainBtn.addEventListener('click', triggerRoulette);
+      }
+
+      sortVisibleCards();
+      applyFilters();
+    });
+  </script>
+</body>
+</html>

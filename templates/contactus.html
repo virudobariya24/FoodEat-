@@ -1,0 +1,512 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gj3 - Contact Us</title>
+    <script src="{% static 'js/3.4.js' %}"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <link rel="stylesheet" href="{% static 'css/css2.css' %}">
+    <link rel="stylesheet" href="{% static 'css/css3.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* --- Base and Color Variables --- */
+        :root {
+            --body-bg: #fffaf4;
+            --card-bg: #FFFFFF;
+            --main-text: #222222;
+            --secondary-text: #555555;
+            --border-color: #EAEAEA;
+            --shadow-color: rgba(0,0,0,0.08);
+            --accent-color: #F8B602; /* Yellow */
+            --orange-accent: #F05941; /* Orange/Red */
+        }
+
+        body[data-theme="dark"] {
+            --body-bg: #000000;
+            --card-bg: #1A1A1A;
+            --main-text: #FFFFFF;
+            --secondary-text: #bbbbbb;
+            --border-color: #333333;
+            --shadow-color: rgba(255,255,255,0.05);
+        }
+
+        /* --- Base Body Styles --- */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--body-bg);
+            color: var(--main-text);
+            transition: background-color 0.3s, color 0.3s;
+            padding-top: 100px;
+            scroll-behavior: smooth;
+        }
+        
+        /* --- Reusable Section Styling --- */
+        .section-padding { padding: 4rem 1.5rem; }
+        @media (min-width: 768px) { .section-padding { padding: 6rem 2rem; } }
+        
+        /* --- Animation --- */
+        .scroll-animate { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+        .scroll-animate.visible { opacity: 1; transform: translateY(0); }
+
+        /* --- Contact Section Styles --- */
+        .contact-header { text-align: center; margin-bottom: 3.5rem; }
+        .contact-title { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 6vw, 3.5rem); color: var(--main-text); font-weight: 700; }
+        .contact-header p { font-size: 1.125rem; color: var(--secondary-text); max-width: 600px; margin: 1rem auto 0; line-height: 1.8; }
+        .contact-section-title { color: var(--main-text); font-size: 1.5rem; font-weight: 600; padding-left: 1.25rem; border-left: 4px solid var(--orange-accent); }
+        /* Adjusted styles for Django form fields */
+        .contact-form .form-field-wrapper input, 
+        .contact-form .form-field-wrapper textarea { 
+            background-color: #fdfdfd; 
+            border: 1px solid #f0f0f0; 
+            color: #333; 
+            padding: 0.875rem 1rem; 
+            transition: all 0.3s; 
+            border-radius: 0.5rem;
+            display: block; /* Make sure they take full width */
+            width: 100%; /* Ensure full width */
+        }
+        .contact-form .form-field-wrapper input:focus, 
+        .contact-form .form-field-wrapper textarea:focus { 
+            outline: none; 
+            border-color: var(--accent-color); 
+            box-shadow: 0 0 0 3px #F8B60240; 
+        }
+        body[data-theme="dark"] .contact-form .form-field-wrapper input, 
+        body[data-theme="dark"] .contact-form .form-field-wrapper textarea { 
+            background-color: #1F1F1F; 
+            border-color: #333; 
+            color: #e0e0e0; 
+        }
+        body[data-theme="dark"] .contact-form .form-field-wrapper input::placeholder, 
+        body[data-theme="dark"] .contact-form .form-field-wrapper textarea::placeholder { 
+            color: #777; 
+        }
+        .contact-form .form-field-wrapper label {
+            display: block; /* Make label stack above input */
+            text-align: left; /* Align label text to left */
+            font-size: 0.875rem; /* text-sm */
+            font-weight: 500; /* font-medium */
+            margin-bottom: 0.5rem; /* mb-2 */
+            color: var(--secondary-text); /* Ensure consistent color */
+        }
+        .contact-form .form-field-wrapper {
+            margin-bottom: 1.25rem; /* space-y-5 for divs */
+        }
+        
+        /* --- Footer --- */
+        .footer { background-color: var(--card-bg); border-top: 1px solid var(--border-color); }
+
+        /* =================================================== */
+        /*                 CHATBOT STYLES                      */
+        /* =================================================== */
+        #chat-toggle {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            background-color: var(--orange-accent);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.75rem;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            z-index: 999;
+            transition: transform 0.2s;
+        }
+        #chat-toggle:hover { transform: scale(1.1); }
+
+        #chat-window {
+            position: fixed;
+            bottom: 6.5rem;
+            right: 2rem;
+            width: 370px;
+            max-width: 90vw;
+            height: 500px;
+            max-height: 70vh;
+            background-color: var(--body-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(20px);
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        #chat-window:not(.hidden) {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .chat-header {
+            padding: 1rem;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .chat-header h3 { font-weight: 600; font-size: 1.1rem; }
+        #chat-close-btn { font-size: 1.25rem; cursor: pointer; color: var(--secondary-text); }
+        
+        #chat-messages {
+            flex-grow: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        .chat-message {
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+            max-width: 80%;
+            line-height: 1.5;
+        }
+        .chat-message.bot {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            align-self: flex-start;
+            border-top-left-radius: 0.25rem;
+        }
+        .chat-message.user {
+            background-color: var(--orange-accent);
+            color: white;
+            align-self: flex-end;
+            border-top-right-radius: 0.25rem;
+        }
+        .typing-indicator { align-self: flex-start; }
+        .typing-indicator span { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background-color: var(--secondary-text); margin: 0 2px; animation: bounce 1.4s infinite ease-in-out both; }
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
+
+        #chat-quick-replies {
+            padding: 0.5rem 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        #chat-quick-replies button {
+            background-color: transparent;
+            border: 1px solid var(--orange-accent);
+            color: var(--orange-accent);
+            padding: 0.5rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        #chat-quick-replies button:hover { background-color: var(--orange-accent); color: white; }
+
+        .chat-input-form {
+            display: flex;
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            flex-shrink: 0;
+        }
+        .chat-input-form input {
+            flex-grow: 1;
+            border: 1px solid var(--border-color);
+            background-color: var(--body-bg);
+            border-radius: 20px;
+            padding: 0.75rem 1rem;
+            outline: none;
+            color: var(--main-text);
+        }
+        .chat-input-form button {
+            background: none; border: none; font-size: 1.5rem; margin-left: 0.75rem;
+            color: var(--orange-accent); cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Include -->
+    {% include 'header.html' %}
+
+    <!-- CONTACT SECTION -->
+    <section id="contact" class="section-padding">
+        <div class="container mx-auto px-4 max-w-6xl">
+            <div class="contact-header scroll-animate">
+                <h2 class="contact-title">Get In Touch</h2>
+                <p>Have a question about your order, feedback for our team, or a partnership inquiry? We'd love to hear from you. Reach out using the form below or start a live chat.</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-16 gap-y-16">
+                <div class="scroll-animate flex flex-col">
+                    <h3 class="contact-section-title">Contact Information</h3>
+                    <div class="mt-8 space-y-6 text-lg" style="color: var(--secondary-text);">
+                        <div class="flex items-start space-x-4"><i class="fas fa-map-marker-alt text-xl mt-1 flex-shrink-0" style="color: var(--orange-accent);"></i><span>123 Culinary Lane, Foodie City, 45678</span></div>
+                        <div class="flex items-center space-x-4"><i class="fas fa-phone text-xl flex-shrink-0" style="color: var(--orange-accent);"></i><span>+1 (555) 123-4567</span></div>
+                        <div class="flex items-center space-x-4"><i class="fas fa-envelope text-xl flex-shrink-0" style="color: var(--orange-accent);"></i><span>support@zestybite.com</span></div>
+                    </div>
+                    <div class="mt-auto pt-8">
+                        <div class="rounded-xl h-64 w-full flex items-center justify-center text-gray-400" style="background-color: var(--card-bg); border: 1px dashed var(--border-color);">Google Map Placeholder</div>
+                    </div>
+                </div>
+                <div class="contact-form scroll-animate">
+                    <h3 class="contact-section-title">Send us a Message</h3>
+                    
+                    {% if messages %}
+                        <div class="mt-4 mb-6">
+                            {% for message in messages %}
+                                <p class="text-green-600 font-semibold">{{ message }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                        
+                    <form method="POST" class="mt-8 space-y-5">
+                        {% csrf_token %}
+                        
+                        <!-- Iterate through your Django form fields -->
+                        <div class="form-field-wrapper">
+                            <label for="{{ form.full_name.id_for_label }}">Full Name</label>
+                            {{ form.full_name }}
+                            {% if form.full_name.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ form.full_name.errors }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-field-wrapper">
+                            <label for="{{ form.email.id_for_label }}">Email Address</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ form.email.errors }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-field-wrapper">
+                            <label for="{{ form.subject.id_for_label }}">Subject</label>
+                            {{ form.subject }}
+                            {% if form.subject.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ form.subject.errors }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-field-wrapper">
+                            <label for="{{ form.message.id_for_label }}">Message</label>
+                            {{ form.message }}
+                            {% if form.message.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ form.message.errors }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div>
+                            <button type="submit" class="w-full text-white font-bold py-4 px-6 rounded-lg text-lg transition hover:opacity-90 active:scale-95" style="background-color: var(--orange-accent);">Send Message</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CHATBOT WIDGET HTML -->
+    <div id="chat-toggle">
+        <i class="fas fa-comment-dots"></i>
+    </div>
+
+    <div id="chat-window" class="hidden">
+        <div class="chat-header">
+            <h3>Gj3 Assistant</h3>
+            <i id="chat-close-btn" class="fas fa-times"></i>
+        </div>
+        <div id="chat-messages">
+            <!-- Messages are injected here -->
+        </div>
+        <div id="chat-quick-replies">
+            <!-- Quick replies are injected here -->
+        </div>
+        <form class="chat-input-form" id="chat-form">
+            <input type="text" id="chat-input" placeholder="Type a message..." autocomplete="off">
+            <button type="submit" aria-label="Send Message"><i class="fas fa-paper-plane"></i></button>
+        </form>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- Existing scripts for Mobile Menu, Theme, and Scroll Animation ---
+        function setupMobileMenu() {
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (menuBtn && mobileMenu) {
+                menuBtn.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+        }
+
+        function setupThemeSwitcher() {
+            const themeSwitcher = document.querySelector('.theme-switcher');
+            if (!themeSwitcher) return;
+            const themeIcon = themeSwitcher.querySelector('i');
+            const setTheme = (theme) => {
+                document.body.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+                if (themeIcon) {
+                    themeIcon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+                }
+            };
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(savedTheme);
+            themeSwitcher.addEventListener('click', () => {
+                const currentTheme = document.body.getAttribute('data-theme') || 'light';
+                setTheme(currentTheme === 'light' ? 'dark' : 'light');
+            });
+        }
+
+        function setupScrollAnimation() {
+            const animatedElements = document.querySelectorAll('.scroll-animate');
+            if (animatedElements.length === 0) return;
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            animatedElements.forEach(el => { observer.observe(el); });
+        }
+
+        // --- CHATBOT LOGIC ---
+        function setupChatbot() {
+            const chatToggle = document.getElementById('chat-toggle');
+            const chatWindow = document.getElementById('chat-window');
+            const chatCloseBtn = document.getElementById('chat-close-btn');
+            const chatMessages = document.getElementById('chat-messages');
+            const chatForm = document.getElementById('chat-form');
+            const chatInput = document.getElementById('chat-input');
+            const quickRepliesContainer = document.getElementById('chat-quick-replies');
+
+            const questionsAndAnswers = [
+                {
+                    question: "What are your hours?",
+                    answer: "We are open from 11:00 AM to 10:00 PM, seven days a week!"
+                },
+                {
+                    question: "Do you offer delivery?",
+                    answer: "Yes, we do! You can order for delivery directly through our website on the 'Menu' page. We partner with local delivery services to get your food to you quickly."
+                },
+                {
+                    question: "Can I make a reservation?",
+                    answer: "Absolutely! For parties of 5 or more, we recommend making a reservation. Please call us at +1 (555) 123-4567 to book your table."
+                },
+                {
+                    question: "Do you have vegetarian options?",
+                    answer: "We have a wide variety of delicious vegetarian and vegan dishes! You can filter our menu by selecting the 'Vegetarian' tag to see all the options."
+                },
+                {
+                    question: "Where are you located?",
+                    answer: "You can find us at 123 Culinary Lane, Foodie City, 45678. We look forward to seeing you!"
+                }
+            ];
+
+            const toggleChatWindow = () => {
+                chatWindow.classList.toggle('hidden');
+                if (!chatWindow.classList.contains('hidden') && chatMessages.children.length === 0) {
+                    initiateChat();
+                }
+            };
+            
+            const scrollToBottom = () => {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            };
+
+            const addMessage = (text, sender) => {
+                const messageEl = document.createElement('div');
+                messageEl.className = `chat-message ${sender}`;
+                messageEl.textContent = text;
+                chatMessages.appendChild(messageEl);
+                scrollToBottom();
+            };
+
+            const showTypingIndicator = () => {
+                const typingEl = document.createElement('div');
+                typingEl.className = 'chat-message typing-indicator';
+                typingEl.innerHTML = '<span></span><span></span><span></span>';
+                chatMessages.appendChild(typingEl);
+                scrollToBottom();
+            };
+
+            const hideTypingIndicator = () => {
+                const indicator = chatMessages.querySelector('.typing-indicator');
+                if (indicator) indicator.remove();
+            };
+            
+            const getBotResponse = (userInput) => {
+                showTypingIndicator();
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    const lowerCaseInput = userInput.toLowerCase();
+                    const match = questionsAndAnswers.find(qa => qa.question.toLowerCase() === lowerCaseInput);
+                    const response = match ? match.answer : "I'm sorry, I don't understand that question. For more complex issues, please fill out the contact form, and a human will get back to you shortly!";
+                    addMessage(response, 'bot');
+                }, 1200); // Simulate bot thinking
+            };
+
+            const handleUserInput = (text) => {
+                if (!text.trim()) return;
+                addMessage(text, 'user');
+                getBotResponse(text);
+                if (chatInput) chatInput.value = '';
+            };
+
+            const createQuickReplies = () => {
+                quickRepliesContainer.innerHTML = '';
+                questionsAndAnswers.forEach(qa => {
+                    const button = document.createElement('button');
+                    button.textContent = qa.question;
+                    quickRepliesContainer.appendChild(button);
+                });
+            };
+            
+            const initiateChat = () => {
+                addMessage("Hello! I'm Gj3 Assistant, your virtual guide. How can I help you today?", 'bot');
+                createQuickReplies();
+            };
+
+            // --- Event Listeners ---
+            chatToggle.addEventListener('click', toggleChatWindow);
+            chatCloseBtn.addEventListener('click', toggleChatWindow);
+            chatForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                handleUserInput(chatInput.value);
+            });
+            quickRepliesContainer.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    handleUserInput(e.target.textContent);
+                }
+            });
+        }
+
+        // --- Initialize all scripts ---
+        setupMobileMenu();
+        setupThemeSwitcher();
+        setupScrollAnimation();
+        setupChatbot(); // Initialize the chatbot
+    });
+    </script>
+
+
+{% include 'footer.html' %}
+</body>
+</html>

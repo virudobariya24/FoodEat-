@@ -1,0 +1,772 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Dashboard - Foodeat</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="{% static 'js/3.4.js' %}"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800">
+    {% include 'super_admin/super_sidebar.html' %}
+
+    <div class="main-content min-h-screen">
+        <div class="p-4 md:p-8 lg:p-10 flex flex-col gap-8 max-w-[1400px] mx-auto">
+            
+            <!-- Welcome Header Card -->
+            <div class="w-full bg-gradient-to-r from-orange-500 to-amber-500 rounded-3xl p-6 md:p-8 text-white shadow-lg relative overflow-hidden">
+                <div class="relative z-10">
+                    <span class="bg-white/20 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Super Administrator</span>
+                    <h2 class="text-2xl md:text-3xl font-extrabold mt-3">Welcome Back, {{ super_user.full_name }}!</h2>
+                    <p class="text-sm text-white/90 mt-1.5 max-w-xl">Monitor your platform's statistics, order logs, restaurant listings, and food insights from a centralized premium workspace.</p>
+                </div>
+                <!-- Background Decorative Elements -->
+                <div class="absolute -right-10 -bottom-10 w-44 h-44 rounded-full bg-white/10 blur-xl"></div>
+                <div class="absolute right-20 -top-10 w-32 h-32 rounded-full bg-white/10 blur-lg"></div>
+            </div>
+
+            <!-- Platform Financial Performance Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                
+                <!-- Card 1: Platform Net Profit -->
+                <div class="bg-white rounded-2xl border border-slate-200/60 p-5 shadow-sm relative overflow-hidden group hover:border-emerald-500/40 transition duration-300">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Platform Profit (Today)</p>
+                            <p class="text-2xl font-black text-emerald-600 mt-1.5">₹{{ today_net_profit|floatformat:2 }}</p>
+                            <div class="mt-4 pt-3 border-t border-slate-100">
+                                <p class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Total Platform Profit</p>
+                                <p class="text-lg font-bold text-slate-700 mt-0.5">₹{{ platform_net_profit|floatformat:2 }}</p>
+                            </div>
+                        </div>
+                        <div class="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-center justify-center text-lg group-hover:scale-105 transition-transform duration-300">
+                            <i class="fa-solid fa-scale-balanced"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Received From Restaurants -->
+                <div class="bg-white rounded-2xl border border-slate-200/60 p-5 shadow-sm relative overflow-hidden group hover:border-orange-500/40 transition duration-300 cursor-pointer" onclick="openProfitModal()">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Received from Restaurants (Today)</p>
+                            <p class="text-2xl font-black text-orange-600 mt-1.5">₹{{ today_commission|floatformat:2 }}</p>
+                            <div class="mt-4 pt-3 border-t border-slate-100">
+                                <p class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Total Received</p>
+                                <p class="text-lg font-bold text-slate-700 mt-0.5">₹{{ total_commission|floatformat:2 }}</p>
+                            </div>
+                        </div>
+                        <div class="w-11 h-11 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-500 flex items-center justify-center text-lg group-hover:scale-105 transition-transform duration-300">
+                            <i class="fa-solid fa-percentage"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Received From Delivery -->
+                <div class="bg-white rounded-2xl border border-slate-200/60 p-5 shadow-sm relative overflow-hidden group hover:border-blue-500/40 transition duration-300">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Delivery Profit (Today)</p>
+                            <p class="text-2xl font-black text-blue-600 mt-1.5">₹{{ today_delivery_profit|floatformat:2 }}</p>
+                            <div class="mt-4 pt-3 border-t border-slate-100 space-y-1.5">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Total Delivery Profit</span>
+                                    <span class="text-sm font-bold text-slate-700">₹{{ total_delivery_profit|floatformat:2 }}</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">Admin Wallet Additions</span>
+                                    <span class="text-sm font-bold text-slate-700">₹{{ total_admin_wallet_adds|floatformat:2 }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w-11 h-11 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-600 flex items-center justify-center text-lg group-hover:scale-105 transition-transform duration-300">
+                            <i class="fa-solid fa-truck-ramp-box"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wallet additions and Rider Milestone Bonus Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                <!-- Card 1: Admin Wallet Additions -->
+                <div class="bg-white rounded-2xl border border-slate-200/60 p-5 shadow-sm relative overflow-hidden group hover:border-emerald-500/40 transition duration-300">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Admin Wallet Additions</p>
+                            <p class="text-2xl font-black text-emerald-600 mt-1.5">₹{{ total_admin_wallet_adds|floatformat:2 }}</p>
+                            <p class="text-[10px] text-slate-400 mt-1.5 font-semibold">Total funds added to users by Admin</p>
+                        </div>
+                        <div class="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 flex items-center justify-center text-lg group-hover:scale-105 transition-transform duration-300">
+                            <i class="fa-solid fa-wallet"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Total Rider Weekly Bonus Paid -->
+                <div class="bg-white rounded-2xl border border-slate-200/60 p-5 shadow-sm relative overflow-hidden group hover:border-rose-500/40 transition duration-300">
+                    <div class="flex items-start justify-between">
+                        <div>
+                            <p class="text-[10px] text-slate-500 font-extrabold uppercase tracking-wider">Weekly Rider Bonuses</p>
+                            <p class="text-2xl font-black text-rose-600 mt-1.5">₹{{ total_rider_bonuses|floatformat:2 }}</p>
+                            <p class="text-[10px] text-slate-400 mt-1.5 font-semibold">Milestone bonuses paid to delivery boys</p>
+                        </div>
+                        <div class="w-11 h-11 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center justify-center text-lg group-hover:scale-105 transition-transform duration-300">
+                            <i class="fa-solid fa-gift"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <!-- Orders & Profit Overview -->
+                <div class="bg-white rounded-3xl border border-slate-200/60 p-6 shadow-sm flex flex-col gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-chart-line text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-slate-800">Orders &amp; Profit</h3>
+                            <p class="text-xs text-slate-400 mt-0.5">Timeline performance metrics per day.</p>
+                        </div>
+                    </div>
+                    <div class="relative h-[320px] w-full mt-2">
+                        <canvas id="ordersChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Restaurant Performance -->
+                <div class="bg-white rounded-3xl border border-slate-200/60 p-6 shadow-sm flex flex-col gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-store text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-slate-800">Restaurant Performance</h3>
+                            <p class="text-xs text-slate-400 mt-0.5">Orders and profits generated by delivery outlets.</p>
+                        </div>
+                    </div>
+                    <div class="relative h-[320px] w-full mt-2">
+                        <canvas id="restaurantChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Food Insights -->
+                <div class="lg:col-span-2 bg-white rounded-3xl border border-slate-200/60 p-6 shadow-sm flex flex-col gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-bowl-food text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-slate-800">Food Insights</h3>
+                            <p class="text-xs text-slate-400 mt-0.5">Comparisons of price points, availabilities, and dietary preferences.</p>
+                        </div>
+                    </div>
+                    <div class="relative h-[360px] w-full mt-2">
+                        <canvas id="foodInsightsChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Settlement & Earnings Directory -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                 
+                <!-- Restaurant Commissions Directory -->
+                <div class="bg-white rounded-3xl border border-slate-200/60 p-6 shadow-sm flex flex-col gap-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center flex-shrink-0">
+                                <i class="fa-solid fa-shop text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-slate-800">Restaurant Commission Directory</h3>
+                                <p class="text-xs text-slate-400 mt-0.5">Commissions to collect from restaurant sales ({{ commission_rate }}%)</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto max-h-[300px] overflow-y-auto pr-1">
+                        <table class="w-full text-left text-xs font-semibold text-slate-650">
+                            <thead class="bg-slate-50 text-slate-400 font-extrabold uppercase text-[10px] tracking-wider sticky top-0">
+                                <tr>
+                                    <th class="py-3 px-4">Restaurant</th>
+                                    <th class="py-3 px-4 text-right">Orders</th>
+                                    <th class="py-3 px-4 text-right">Gross Sales</th>
+                                    <th class="py-3 px-4 text-right text-rose-500">Commission</th>
+                                    <th class="py-3 px-4 text-right text-emerald-600">Net Outflow</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                {% for r in restaurant_settlements %}
+                                    <tr class="hover:bg-slate-50/50 transition-colors">
+                                        <td class="py-3.5 px-4 font-bold text-slate-800">{{ r.food__restaurant_name }}</td>
+                                        <td class="py-3.5 px-4 text-right font-bold text-slate-500">{{ r.order_count }}</td>
+                                        <td class="py-3.5 px-4 text-right">₹{{ r.total_sales|floatformat:2 }}</td>
+                                        <td class="py-3.5 px-4 text-right text-rose-600 font-extrabold">₹{{ r.commission|floatformat:2 }}</td>
+                                        <td class="py-3.5 px-4 text-right text-emerald-600 font-black">₹{{ r.net_resto_payout|floatformat:2 }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="py-8 text-center text-slate-400 italic">No sales log yet.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Delivery Boy Payouts Directory -->
+                <div class="bg-white rounded-3xl border border-slate-200/60 p-6 shadow-sm flex flex-col gap-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center flex-shrink-0">
+                                <i class="fa-solid fa-motorcycle text-lg"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-slate-800">Rider Settlement Directory</h3>
+                                <p class="text-xs text-slate-400 mt-0.5">Earnings payouts due to delivery partners.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto max-h-[300px] overflow-y-auto pr-1">
+                        <table class="w-full text-left text-xs font-semibold text-slate-650">
+                            <thead class="bg-slate-50 text-slate-400 font-extrabold uppercase text-[10px] tracking-wider sticky top-0">
+                                <tr>
+                                    <th class="py-3 px-4">Rider</th>
+                                    <th class="py-3 px-4">Contact</th>
+                                    <th class="py-3 px-4 text-right">Delivered</th>
+                                    <th class="py-3 px-4 text-right">Fee Collected</th>
+                                    <th class="py-3 px-4 text-right text-emerald-600">Payout (Owed)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                {% for rider in rider_settlements %}
+                                    <tr class="hover:bg-slate-50/50 transition-colors">
+                                        <td class="py-3.5 px-4 font-bold text-slate-800">{{ rider.delivery_boy__name }}</td>
+                                        <td class="py-3.5 px-4 font-semibold text-slate-550">{{ rider.delivery_boy__phone_number }}</td>
+                                        <td class="py-3.5 px-4 text-right font-bold text-slate-500">{{ rider.total_deliveries }}</td>
+                                        <td class="py-3.5 px-4 text-right">₹{{ rider.total_charges|floatformat:2 }}</td>
+                                        <td class="py-3.5 px-4 text-right text-emerald-600 font-black">₹{{ rider.total_payout|floatformat:2 }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="py-8 text-center text-slate-400 italic">No payouts logged yet.</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Setup Chart Defaults
+        Chart.defaults.font.family = '"Plus Jakarta Sans", sans-serif';
+        Chart.defaults.color = '#64748b';
+
+        // --- Orders Chart ---
+        const ordersCtx = document.getElementById('ordersChart').getContext('2d');
+        const profitGradient = ordersCtx.createLinearGradient(0, 0, 0, 320);
+        profitGradient.addColorStop(0, 'rgba(249, 115, 22, 0.85)');
+        profitGradient.addColorStop(1, 'rgba(249, 115, 22, 0.05)');
+
+        const countGradient = ordersCtx.createLinearGradient(0, 0, 0, 320);
+        countGradient.addColorStop(0, 'rgba(99, 102, 241, 0.85)');
+        countGradient.addColorStop(1, 'rgba(99, 102, 241, 0.05)');
+
+        new Chart(ordersCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ chart_labels|safe }},
+                datasets: [
+                    {
+                        label: 'Profit (₹)',
+                        data: {{ chart_profit|safe }},
+                        backgroundColor: profitGradient,
+                        borderColor: '#ea580c',
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Orders Count',
+                        data: {{ chart_orders|safe }},
+                        backgroundColor: countGradient,
+                        borderColor: '#4f46e5',
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        yAxisID: 'yOrders'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { boxWidth: 10, font: { weight: 600 } } }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { 
+                        type: 'linear',
+                        position: 'left',
+                        title: { display: true, text: 'Profit (₹)', font: { weight: 700 } },
+                        beginAtZero: true,
+                        grid: { color: 'rgba(226, 232, 240, 0.6)' }
+                    },
+                    yOrders: {
+                        type: 'linear',
+                        position: 'right',
+                        title: { display: true, text: 'Orders Count', font: { weight: 700 } },
+                        beginAtZero: true,
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        // --- Restaurant Chart ---
+        const restoCtx = document.getElementById('restaurantChart').getContext('2d');
+        const restoProfitGrad = restoCtx.createLinearGradient(0, 0, 0, 320);
+        restoProfitGrad.addColorStop(0, 'rgba(234, 179, 8, 0.85)');
+        restoProfitGrad.addColorStop(1, 'rgba(234, 179, 8, 0.05)');
+
+        const restoCountGrad = restoCtx.createLinearGradient(0, 0, 0, 320);
+        restoCountGrad.addColorStop(0, 'rgba(20, 184, 166, 0.85)');
+        restoCountGrad.addColorStop(1, 'rgba(20, 184, 166, 0.05)');
+
+        new Chart(restoCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ chart_restaurant_labels|safe }},
+                datasets: [
+                    {
+                        label: 'Total Profit (₹)',
+                        data: {{ chart_restaurant_profit|safe }},
+                        backgroundColor: restoProfitGrad,
+                        borderColor: '#ca8a04',
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Orders Count',
+                        data: {{ chart_restaurant_orders|safe }},
+                        backgroundColor: restoCountGrad,
+                        borderColor: '#0d9488',
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        yAxisID: 'yOrders'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'top', labels: { boxWidth: 10, font: { weight: 600 } } }
+                },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { 
+                        type: 'linear',
+                        position: 'left',
+                        title: { display: true, text: 'Profit (₹)', font: { weight: 700 } },
+                        beginAtZero: true,
+                        grid: { color: 'rgba(226, 232, 240, 0.6)' }
+                    },
+                    yOrders: {
+                        type: 'linear',
+                        position: 'right',
+                        title: { display: true, text: 'Orders Count', font: { weight: 700 } },
+                        beginAtZero: true,
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        // --- Food Insights Chart ---
+        const foodCtx = document.getElementById('foodInsightsChart').getContext('2d');
+        const foodPriceGrad = foodCtx.createLinearGradient(0, 0, 0, 360);
+        foodPriceGrad.addColorStop(0, 'rgba(244, 63, 94, 0.85)');
+        foodPriceGrad.addColorStop(1, 'rgba(244, 63, 94, 0.05)');
+
+        new Chart(foodCtx, {
+            data: {
+                labels: {{ chart_food_labels|safe }},
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: 'Price (₹)',
+                        data: {{ chart_food_prices|safe }},
+                        backgroundColor: foodPriceGrad,
+                        borderColor: '#e11d48',
+                        borderWidth: 2,
+                        borderRadius: 8,
+                        yAxisID: 'y1'
+                    },
+                    {
+                        type: 'line',
+                        label: 'Available',
+                        data: {{ chart_food_is_available|safe }},
+                        borderColor: '#06b6d4',
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#06b6d4',
+                        pointBorderColor: '#ffffff',
+                        pointHoverRadius: 6,
+                        tension: 0.4,
+                        yAxisID: 'y2'
+                    },
+                    {
+                        type: 'line',
+                        label: 'Veg Preference',
+                        data: {{ chart_food_is_veg|safe }},
+                        borderColor: '#22c55e',
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#22c55e',
+                        pointBorderColor: '#ffffff',
+                        pointHoverRadius: 6,
+                        tension: 0.4,
+                        yAxisID: 'y2'
+                    },
+                    {
+                        type: 'line',
+                        label: 'Spicy Level',
+                        data: {{ chart_food_is_spicy|safe }},
+                        borderColor: '#eab308',
+                        backgroundColor: 'transparent',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#eab308',
+                        pointBorderColor: '#ffffff',
+                        pointHoverRadius: 6,
+                        tension: 0.4,
+                        yAxisID: 'y2'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { position: 'top', labels: { boxWidth: 10, font: { weight: 600 } } }
+                },
+                scales: {
+                    y1: {
+                        type: 'linear',
+                        position: 'left',
+                        title: { display: true, text: 'Price (₹)', font: { weight: 700 } },
+                        beginAtZero: true,
+                        grid: { color: 'rgba(226, 232, 240, 0.6)' }
+                    },
+                    y2: {
+                        type: 'linear',
+                        position: 'right',
+                        title: { display: true, text: 'Indicators (1=Yes, 0=No)', font: { weight: 700 } },
+                        beginAtZero: true,
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        function openProfitModal() {
+            const modal = document.getElementById('restaurantProfitModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.remove('opacity-0');
+                    modal.firstElementChild.classList.remove('scale-95');
+                }, 50);
+            }
+        }
+
+        function closeProfitModal() {
+            const modal = document.getElementById('restaurantProfitModal');
+            if (modal) {
+                modal.classList.add('opacity-0');
+                modal.firstElementChild.classList.add('scale-95');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        // Auto-open modal if filtering is active
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('profit_date') || urlParams.has('profit_restaurant') || urlParams.get('open_modal') === 'true') {
+                openProfitModal();
+            }
+        });
+    </script>
+
+    <!-- Restaurant Profit Details Modal -->
+    <div id="restaurantProfitModal" class="fixed inset-0 bg-slate-950/60 z-[100] flex items-center justify-center hidden opacity-0 transition-opacity duration-300 backdrop-blur-sm p-4">
+        <div class="bg-white w-full max-w-4xl rounded-3xl shadow-2xl overflow-hidden transform scale-95 transition-all duration-300 flex flex-col max-h-[92vh] border border-slate-100">
+            <!-- Header -->
+            <div class="flex items-center justify-between border-b border-slate-100 p-6 bg-gradient-to-r from-slate-50 to-white">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-orange-500/20">
+                        <i class="fa-solid fa-chart-line text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-900 tracking-tight">Restaurant Profit Insights</h3>
+                        <p class="text-xs text-slate-500 mt-1">Track commissions, filter earnings by date ranges, and analyze performance.</p>
+                    </div>
+                </div>
+                <button type="button" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-655 hover:text-slate-800 transition-all hover:rotate-90 duration-300" onclick="closeProfitModal()">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Content Area (Scrollable) -->
+            <div class="p-6 overflow-y-auto flex-1 space-y-6">
+                
+                <!-- Quick Summary Stats Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 {% if profit_date_str or profit_restaurant %}lg:grid-cols-3{% else %}sm:grid-cols-2{% endif %} gap-4">
+                    <!-- Card 1: Today's Total Profit -->
+                    <div class="bg-gradient-to-br from-orange-50/60 to-amber-50/30 rounded-2xl border border-orange-100/80 p-4 flex items-center justify-between hover:shadow-md hover:shadow-orange-500/5 transition-all duration-300">
+                        <div>
+                            <p class="text-[10px] text-orange-500 font-extrabold uppercase tracking-wider">Today's Profit</p>
+                            <p class="text-2xl font-black text-orange-600 mt-1">₹{{ modal_today_profit|floatformat:2 }}</p>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Across all outlets today</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-600 flex items-center justify-center text-md">
+                            <i class="fa-solid fa-calendar-day"></i>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Filtered Profit (Conditional) -->
+                    {% if profit_date_str or profit_restaurant %}
+                    <div class="bg-gradient-to-br from-blue-50/60 to-indigo-50/30 rounded-2xl border border-blue-100/80 p-4 flex items-center justify-between hover:shadow-md hover:shadow-blue-500/5 transition-all duration-300">
+                        <div>
+                            <p class="text-[10px] text-blue-500 font-extrabold uppercase tracking-wider">Filtered Profit</p>
+                            <p class="text-2xl font-black text-blue-600 mt-1">₹{{ total_filtered_commission|floatformat:2 }}</p>
+                            <p class="text-[10px] text-slate-450 mt-0.5">For selected filters</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-650 flex items-center justify-center text-md">
+                            <i class="fa-solid fa-filter"></i>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Card 3: Cumulative Profit -->
+                    <div class="bg-gradient-to-br from-emerald-50/60 to-teal-50/30 rounded-2xl border border-emerald-100/80 p-4 flex items-center justify-between hover:shadow-md hover:shadow-emerald-500/5 transition-all duration-300 {% if not profit_date_str and not profit_restaurant %}sm:col-span-2 lg:col-span-1{% endif %}">
+                        <div>
+                            <p class="text-[10px] text-emerald-500 font-extrabold uppercase tracking-wider">Cumulative Profit</p>
+                            <p class="text-2xl font-black text-emerald-600 mt-1">₹{{ modal_cumulative_profit|floatformat:2 }}</p>
+                            <p class="text-[10px] text-slate-400 mt-0.5">All-time earnings</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center text-md">
+                            <i class="fa-solid fa-coins"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filter Actions Card -->
+                <div class="bg-slate-50/60 p-5 rounded-2xl border border-slate-200/50">
+                    <div class="flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-end">
+                        <!-- Date & Restaurant Filter Form -->
+                        <form method="GET" action="" class="w-full lg:flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 items-end">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-shop text-[10px]"></i> Restaurant
+                                </label>
+                                <select name="profit_restaurant" class="w-full border border-slate-200 bg-white rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all">
+                                    <option value="">All Restaurants</option>
+                                    {% for r in all_resto_names %}
+                                    <option value="{{ r.name }}" {% if r.name == profit_restaurant %}selected{% endif %}>{{ r.name }} ({{ r.owner_name }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5 flex items-center gap-1.5">
+                                    <i class="fa-regular fa-calendar text-[10px]"></i> Select Date
+                                </label>
+                                <input type="date" name="profit_date" value="{{ profit_date_str|default:'' }}"
+                                       class="w-full border border-slate-200 bg-white rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all">
+                            </div>
+                            <div class="flex gap-2 w-full">
+                                <button type="submit" class="flex-1 px-5 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold rounded-xl text-xs shadow-md shadow-orange-500/10 transition-all flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-filter"></i> Filter
+                                </button>
+                                {% if profit_date_str or profit_restaurant %}
+                                <a href="/super_dashboard/?open_modal=true" class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl text-xs text-center transition-all flex items-center justify-center">
+                                    Clear
+                                </a>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Detailed Profits Desktop Table View -->
+                <div class="hidden md:block overflow-x-auto border border-slate-200/60 rounded-2xl shadow-sm bg-white">
+                    <table class="w-full text-left text-xs font-semibold text-slate-650">
+                        <thead class="bg-slate-50/80 text-slate-400 font-extrabold uppercase text-[10px] tracking-wider border-b border-slate-100">
+                            <tr>
+                                <th class="py-4 px-6 text-slate-700 font-bold">Restaurant Name</th>
+                                <th class="py-4 px-6 text-right text-orange-500 font-bold">Today's Profit</th>
+                                {% if profit_date_str or profit_restaurant %}
+                                <th class="py-4 px-6 text-right text-blue-500 font-bold">Filtered Profit</th>
+                                {% endif %}
+                                <th class="py-4 px-6 text-right text-emerald-600 font-bold">All Over Profit</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {% for r in restaurant_profits_list %}
+                            <tr class="hover:bg-slate-50/50 transition-colors duration-200 desktop-row" data-name="{{ r.name|lower }}">
+                                <td class="py-4 px-6">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 font-bold text-xs">
+                                            {{ r.name|slice:":1"|upper }}
+                                        </div>
+                                        <span class="font-bold text-slate-800 text-sm">{{ r.name }}</span>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6 text-right text-orange-600 font-bold text-sm">₹{{ r.today_profit|floatformat:2 }}</td>
+                                {% if profit_date_str or profit_restaurant %}
+                                <td class="py-4 px-6 text-right text-blue-600 font-bold text-sm">₹{{ r.filtered_profit|floatformat:2 }}</td>
+                                {% endif %}
+                                <td class="py-4 px-6 text-right text-emerald-600 font-black text-sm">₹{{ r.all_time_profit|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="{% if profit_date_str or profit_restaurant %}4{% else %}3{% endif %}" class="py-10 text-center text-slate-400 italic">
+                                    <div class="flex flex-col items-center justify-center gap-2">
+                                        <i class="fa-solid fa-inbox text-2xl text-slate-300"></i>
+                                        <span>No profits logged yet.</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            <!-- No matches row -->
+                            <tr id="desktopNoMatchRow" style="display: none;">
+                                <td colspan="{% if profit_date_str or profit_restaurant %}4{% else %}3{% endif %}" class="py-10 text-center text-slate-400 italic">
+                                    <div class="flex flex-col items-center justify-center gap-2">
+                                        <i class="fa-solid fa-magnifying-glass text-2xl text-slate-300"></i>
+                                        <span>No restaurants match your search.</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Detailed Profits Mobile Cards View -->
+                <div class="block md:hidden space-y-4">
+                    {% for r in restaurant_profits_list %}
+                    <div class="bg-white border border-slate-200/80 rounded-2xl p-4 shadow-sm space-y-3 hover:border-orange-500/20 transition-all duration-200 mobile-card" data-name="{{ r.name|lower }}">
+                        <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
+                            <div class="w-8 h-8 rounded-lg bg-orange-50 text-orange-500 flex items-center justify-center font-bold text-sm">
+                                {{ r.name|slice:":1"|upper }}
+                            </div>
+                            <span class="font-bold text-slate-800 text-base">{{ r.name }}</span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-3 text-xs">
+                            <div class="bg-orange-50/50 border border-orange-100/50 p-2.5 rounded-xl">
+                                <span class="block text-[9px] text-orange-400 font-extrabold uppercase tracking-wide">Today's Profit</span>
+                                <span class="text-orange-600 font-bold text-sm">₹{{ r.today_profit|floatformat:2 }}</span>
+                            </div>
+                            
+                            {% if profit_date_str or profit_restaurant %}
+                            <div class="bg-blue-50/50 border border-blue-100/50 p-2.5 rounded-xl">
+                                <span class="block text-[9px] text-blue-450 font-extrabold uppercase tracking-wide">Filtered Profit</span>
+                                <span class="text-blue-600 font-bold text-sm">₹{{ r.filtered_profit|floatformat:2 }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="bg-emerald-50/50 border border-emerald-100/50 p-2.5 rounded-xl {% if not profit_date_str and not profit_restaurant %}col-span-2{% endif %}">
+                                <span class="block text-[9px] text-emerald-450 font-extrabold uppercase tracking-wide">All Over Profit</span>
+                                <span class="text-emerald-600 font-black text-sm">₹{{ r.all_time_profit|floatformat:2 }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="bg-white border border-slate-200/80 rounded-2xl p-8 text-center text-slate-400 italic">
+                        <div class="flex flex-col items-center justify-center gap-2">
+                            <i class="fa-solid fa-inbox text-xl text-slate-300"></i>
+                            <span>No profits logged yet.</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <!-- No matches card -->
+                    <div id="mobileNoMatchCard" class="bg-white border border-slate-200/80 rounded-2xl p-8 text-center text-slate-450 italic" style="display: none;">
+                        <div class="flex flex-col items-center justify-center gap-2">
+                            <i class="fa-solid fa-magnifying-glass text-xl text-slate-300"></i>
+                            <span>No restaurants match your search.</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Client-side Restaurant Name Filter Script -->
+    <script>
+        function filterRestaurants() {
+            const query = document.getElementById('restoSearchInput').value.toLowerCase().trim();
+            let desktopVisibleCount = 0;
+            let mobileVisibleCount = 0;
+            
+            // Filter desktop table rows
+            const desktopRows = document.querySelectorAll('.desktop-row');
+            desktopRows.forEach(row => {
+                const name = row.getAttribute('data-name') || '';
+                if (name.includes(query)) {
+                    row.style.display = '';
+                    desktopVisibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            // Filter mobile cards
+            const mobileCards = document.querySelectorAll('.mobile-card');
+            mobileCards.forEach(card => {
+                const name = card.getAttribute('data-name') || '';
+                if (name.includes(query)) {
+                    card.style.display = '';
+                    mobileVisibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            
+            // Toggle no match message
+            const desktopNoMatch = document.getElementById('desktopNoMatchRow');
+            if (desktopNoMatch) {
+                desktopNoMatch.style.display = (desktopVisibleCount === 0 && desktopRows.length > 0) ? '' : 'none';
+            }
+            
+            const mobileNoMatch = document.getElementById('mobileNoMatchCard');
+            if (mobileNoMatch) {
+                mobileNoMatch.style.display = (mobileVisibleCount === 0 && mobileCards.length > 0) ? '' : 'none';
+            }
+        }
+    </script>
+</body>
+</html>

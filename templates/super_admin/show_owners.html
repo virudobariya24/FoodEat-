@@ -1,0 +1,422 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registered Admin Owners - Super Admin</title>
+
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="{% static 'js/3.4.js' %}"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        brand: { 50:'#fff7ed', 100:'#ffedd5', 500:'#ff6f00', 600:'#ea580c', 700:'#c2410c' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen">
+
+    <!-- Sidebar & Header -->
+    {% include 'super_admin/super_sidebar.html' %}
+
+    <!-- Main Content Wrapper -->
+    <div class="main-content min-h-screen flex flex-col transition-colors duration-200">
+        <main class="p-4 md:p-8 lg:p-10 max-w-[1400px] w-full mx-auto space-y-6">
+            
+            <!-- Page Header -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-black text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-store text-brand-500"></i> Registered Admin Owners
+                    </h2>
+                    <p class="text-xs text-slate-400 font-semibold mt-1">Manage and monitor food outlet listings and restaurant administrators.</p>
+                </div>
+            </div>
+
+            <!-- Responsive Table / Card List -->
+            <div class="bg-white border border-slate-200/60 shadow-sm rounded-2xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-full block md:table">
+                        <thead class="hidden md:table-header-group">
+                            <tr class="bg-slate-900 text-slate-100 text-xs font-black uppercase tracking-wider border-b border-slate-900">
+                                <th class="py-3 px-3 w-[35%]">
+                                    <span class="flex items-center gap-2 text-white">
+                                        <i class="fa-solid fa-user text-brand-500 text-sm"></i>
+                                        Owner Details
+                                    </span>
+                                </th>
+                                <th class="py-3 px-3 w-[35%]">
+                                    <span class="flex items-center gap-2 text-white">
+                                        <i class="fa-solid fa-store text-brand-500 text-sm"></i>
+                                        Restaurant Details
+                                    </span>
+                                </th>
+                                <th class="py-3 px-3 w-[30%]">
+                                    <span class="flex items-center gap-2 text-white">
+                                        <i class="fa-solid fa-gears text-brand-500 text-sm"></i>
+                                        Admin Actions
+                                    </span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="ownersTbody" class="divide-y divide-slate-100 text-sm block md:table-row-group">
+                            {% for owner in owners %}
+                            <tr class="hover:bg-slate-50/40 transition-colors block md:table-row p-3 md:p-0 space-y-2.5 md:space-y-0 relative border-b md:border-b-0 border-slate-100">
+                                <!-- Column 1: Owner Details Box -->
+                                <td class="py-1.5 md:py-2 px-0 md:px-2 block md:table-cell" data-label="Owner">
+                                    <div class="p-2.5 bg-slate-50/80 hover:bg-slate-100/50 rounded-xl border border-slate-200/50 space-y-2 h-full flex items-start gap-3">
+                                        <!-- Profile Image -->
+                                        <div class="flex-shrink-0">
+                                            {% if owner.profile_image %}
+                                                <div class="w-10 h-10 rounded-full overflow-hidden border border-slate-200 bg-slate-100">
+                                                    <img src="{{ owner.profile_image.url }}" class="w-full h-full object-cover" alt="Profile">
+                                                </div>
+                                            {% else %}
+                                                <div class="w-10 h-10 rounded-full border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-slate-400">
+                                                    <i class="fa-solid fa-user text-xs"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <!-- Info -->
+                                        <div class="flex-1 min-w-0 space-y-0.5">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-[10px] font-extrabold text-brand-500 bg-brand-50 border border-brand-100 px-1.5 py-0.5 rounded">Owner #{{ owner.id }}</span>
+                                                <span id="blockedBadge-{{ owner.id }}" class="{% if not owner.is_blocked %}hidden{% endif %} text-[9px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded uppercase tracking-wider animate-pulse">Blocked</span>
+                                            </div>
+                                            <div class="font-extrabold text-slate-800 text-xs truncate mt-1">{{ owner.full_name }}</div>
+                                            <div class="text-[10px] text-slate-600 font-bold flex items-center gap-1">
+                                                <i class="fa-solid fa-envelope text-slate-400 text-[9px]"></i>
+                                                {{ owner.email }}
+                                            </div>
+                                            <div class="text-[9px] text-slate-400 font-semibold pt-1 border-t border-slate-200/50">
+                                                Registered: {{ owner.created_at|date:"d M Y H:i" }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Column 2: Restaurant Details Box -->
+                                <td class="py-1.5 md:py-2 px-0 md:px-2 block md:table-cell" data-label="Restaurant">
+                                    <div class="p-2.5 bg-slate-50/80 hover:bg-slate-100/50 rounded-xl border border-slate-200/50 space-y-2 h-full flex flex-col justify-between">
+                                        <div>
+                                            <div class="font-extrabold text-slate-800 text-xs flex items-center gap-1.5">
+                                                <i class="fa-solid fa-utensils text-slate-400 text-[10px]"></i>
+                                                {{ owner.restaurant_name }}
+                                            </div>
+                                            
+                                            <div class="flex items-center gap-2 mt-1.5">
+                                                <span class="text-[9px] text-slate-400 font-bold">Outlet Status:</span>
+                                                {% if owner.restaurant_is_online == True %}
+                                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
+                                                        <span class="w-1 h-1 rounded-full bg-emerald-500"></span> Open
+                                                    </span>
+                                                {% elif owner.restaurant_is_online == False %}
+                                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-50 text-rose-700 border border-rose-200 uppercase">
+                                                        <span class="w-1 h-1 rounded-full bg-rose-500"></span> Closed
+                                                    </span>
+                                                {% else %}
+                                                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-50 text-slate-700 border border-slate-200 uppercase">
+                                                        <span class="w-1 h-1 rounded-full bg-slate-400"></span> Offline
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        <div class="pt-1.5 border-t border-slate-200/50 flex items-center justify-between text-[10px]">
+                                            <span class="text-[9px] text-slate-400 font-bold uppercase">KYC Document:</span>
+                                            {% if owner.aadhar_card_img %}
+                                                <a href="{{ owner.aadhar_card_img.url }}" target="_blank" class="inline-flex items-center gap-1 text-[10px] font-black text-brand-500 hover:underline">
+                                                    <i class="fa-solid fa-address-card text-xs"></i> View Aadhar
+                                                </a>
+                                            {% else %}
+                                                <span class="text-[9px] font-semibold text-slate-400">No Image</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Column 3: Administration & Actions Box -->
+                                <td class="py-1.5 md:py-2 px-0 md:px-2 block md:table-cell" data-label="Actions">
+                                    <div class="p-2.5 bg-slate-50/80 hover:bg-slate-100/50 rounded-xl border border-slate-200/50 space-y-2 h-full flex flex-col justify-between">
+                                        <div class="flex items-center justify-between gap-1.5">
+                                            <span class="text-[9px] text-slate-400 font-extrabold uppercase">Approval:</span>
+                                            {% if owner.is_approved %}
+                                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
+                                                    <span class="w-1 h-1 rounded-full bg-emerald-500"></span> Approved
+                                                </span>
+                                            {% else %}
+                                                <button type="button" onclick="toggleOwnerApproval('{{ owner.id }}', this)" 
+                                                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 transition-all uppercase"
+                                                        title="Click to approve">
+                                                    <span class="w-1 h-1 rounded-full bg-amber-500 animate-pulse"></span> Pending
+                                                </button>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="pt-1.5 border-t border-slate-200/50 flex items-center justify-between">
+                                            <span class="text-[9px] text-slate-400 font-bold uppercase">Actions:</span>
+                                            <div class="flex items-center gap-1.5">
+                                                <button type="button" onclick="openEmailModal('{{ owner.id }}', '{{ owner.email }}', '{{ owner.full_name }}')" class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-orange-100 text-orange-600 hover:bg-orange-200 transition-colors" title="Send Email">
+                                                    <i class="fa-solid fa-paper-plane text-[10px]"></i>
+                                                </button>
+                                                <button type="button" onclick="toggleOwnerBlock('{{ owner.id }}', this)" class="inline-flex h-7 w-7 items-center justify-center rounded-lg border {% if owner.is_blocked %}bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100{% else %}bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100{% endif %} transition-colors" title="{% if owner.is_blocked %}Blocked - Click to Unblock{% else %}Active - Click to Block{% endif %}">
+                                                    {% if owner.is_blocked %}
+                                                        <i class="fa-solid fa-user-lock text-[10px]"></i>
+                                                    {% else %}
+                                                        <i class="fa-solid fa-user-check text-[10px]"></i>
+                                                    {% endif %}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr class="block md:table-row">
+                                <td colspan="10" class="py-10 text-center text-slate-400 font-medium block md:table-cell">
+                                    <i class="fa-solid fa-circle-info text-lg mr-1 text-slate-300"></i> No registered admin owners found.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination footer block -->
+                <div class="bg-slate-50/50 border-t border-slate-100 px-6 py-4 flex items-center justify-between flex-wrap gap-4">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider" id="slideIndicator">Showing 1 to 5 of 5 entries</span>
+                    <div class="flex items-center gap-2">
+                        <button id="prevBtn" class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 bg-white hover:border-brand-400 hover:text-brand-600 transition-colors shadow-sm disabled:opacity-50 disabled:pointer-events-none">
+                            <i class="fa-solid fa-chevron-left mr-1"></i> Prev
+                        </button>
+                        <button id="nextBtn" class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 bg-white hover:border-brand-400 hover:text-brand-600 transition-colors shadow-sm disabled:opacity-50 disabled:pointer-events-none">
+                            Next <i class="fa-solid fa-chevron-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Script logic for Pagination -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const rowsPerPage = 5;
+            let currentPage = 0;
+
+            const tbody = document.getElementById("ownersTbody");
+            const allRows = Array.from(tbody.querySelectorAll("tr:not(.no-data)"));
+            if (allRows.length === 0) return;
+
+            const totalPages = Math.ceil(allRows.length / rowsPerPage);
+            const prevBtn = document.getElementById("prevBtn");
+            const nextBtn = document.getElementById("nextBtn");
+            const indicator = document.getElementById("slideIndicator");
+
+            function showPage(page) {
+                tbody.innerHTML = '';
+                const start = page * rowsPerPage;
+                const end = Math.min(start + rowsPerPage, allRows.length);
+                
+                allRows.slice(start, end).forEach(row => tbody.appendChild(row));
+                
+                indicator.textContent = `Showing ${start + 1} to ${end} of ${allRows.length} entries`;
+                
+                prevBtn.disabled = (page === 0);
+                nextBtn.disabled = (page === totalPages - 1);
+            }
+
+            prevBtn.addEventListener("click", () => {
+                if (currentPage > 0) {
+                    currentPage--;
+                    showPage(currentPage);
+                }
+            });
+
+            nextBtn.addEventListener("click", () => {
+                if (currentPage < totalPages - 1) {
+                    currentPage++;
+                    showPage(currentPage);
+                }
+            });
+
+            showPage(currentPage);
+        });
+    </script>
+
+    <!-- Email Modal -->
+    <div id="emailModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white rounded-2xl w-full max-w-lg shadow-xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="emailModalContent">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-600">
+                        <i class="fa-solid fa-envelope text-xs"></i>
+                    </span>
+                    <h3 class="text-sm font-bold text-slate-800" id="emailModalTitle">Send Message</h3>
+                </div>
+                <button type="button" onclick="closeEmailModal()" class="text-slate-400 hover:text-slate-600 transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Body / Form -->
+            <form id="emailForm" method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Recipient</label>
+                    <input type="text" id="recipientDisplay" readonly class="w-full px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold bg-slate-50 text-slate-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Subject</label>
+                    <input type="text" name="subject" required placeholder="Enter message subject..." class="w-full px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Message</label>
+                    <textarea name="message" required rows="5" placeholder="Write your message here..." class="w-full px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Attachment (Optional)</label>
+                    <input type="file" name="attachment" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100">
+                </div>
+                
+                <!-- Modal Footer Actions -->
+                <div class="flex items-center justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeEmailModal()" class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50 transition shadow-sm">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:scale-102 active:scale-98 transition shadow-lg shadow-orange-500/20">Send Email</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function openEmailModal(ownerId, email, name) {
+            const modal = document.getElementById('emailModal');
+            const content = document.getElementById('emailModalContent');
+            const form = document.getElementById('emailForm');
+            const display = document.getElementById('recipientDisplay');
+            
+            form.action = `/super_admin/owners/send_email/${ownerId}/`;
+            display.value = `${name} (${email})`;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Trigger reflow for animation
+            void modal.offsetWidth;
+            
+            modal.classList.add('opacity-100');
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }
+
+        function closeEmailModal() {
+            const modal = document.getElementById('emailModal');
+            const content = document.getElementById('emailModalContent');
+            
+            modal.classList.remove('opacity-100');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        async function toggleOwnerBlock(ownerId, btn) {
+            try {
+                const response = await fetch(`/super_admin/owners/toggle_block/${ownerId}/?ajax=true`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        const blockedBadge = document.getElementById(`blockedBadge-${ownerId}`);
+                        if (blockedBadge) {
+                            if (data.is_blocked) {
+                                blockedBadge.classList.remove('hidden');
+                            } else {
+                                blockedBadge.classList.add('hidden');
+                            }
+                        }
+                        if (data.is_blocked) {
+                            btn.className = 'inline-flex h-7 w-7 items-center justify-center rounded-lg border bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100 transition-colors';
+                            btn.title = 'Blocked - Click to Unblock';
+                            btn.innerHTML = '<i class="fa-solid fa-user-lock text-[10px]"></i>';
+                        } else {
+                            btn.className = 'inline-flex h-7 w-7 items-center justify-center rounded-lg border bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 transition-colors';
+                            btn.title = 'Active - Click to Block';
+                            btn.innerHTML = '<i class="fa-solid fa-user-check text-[10px]"></i>';
+                        }
+                        
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            icon: 'success',
+                            title: data.message
+                        });
+                    }
+                } else if (response.status === 403) {
+                    window.location.href = '/super_login/';
+                }
+            } catch (error) {
+                console.error('Error toggling owner block:', error);
+            }
+        }
+
+        async function toggleOwnerApproval(ownerId, btn) {
+            try {
+                const response = await fetch(`/super_admin/owners/toggle_approval/${ownerId}/`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        if (data.is_approved) {
+                            const span = document.createElement('span');
+                            span.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold border bg-emerald-50 text-emerald-700 border-emerald-200';
+                            span.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Approved';
+                            btn.parentNode.replaceChild(span, btn);
+                        }
+                        
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            icon: 'success',
+                            title: data.message
+                        });
+                    }
+                } else if (response.status === 403) {
+                    window.location.href = '/super_login/';
+                }
+            } catch (error) {
+                console.error('Error toggling owner approval:', error);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,509 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ahmedabad Eats - Restaurant Booking</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="{% static 'js/3.4.js' %}"></script>
+
+    <style>
+        /* --- CSS STYLES & ANIMATIONS --- */
+        :root {
+            --body-bg: #ffebef;
+            --card-bg: #FFFFFF;
+            --sidebar-bg: #fff5f7;
+            --main-text: #222222;
+            --secondary-text: #555555;
+            --border-color: #EAEAEA;
+            --shadow-color: rgba(0,0,0,0.08);
+            --accent-color: #F8B602;
+            --orange-accent: #F05941;
+            --veg-color: #28a745;
+            --non-veg-color: #dc3545;
+            --spicy-color: #e25822;
+            --header-text: #333;
+            --heading-font: 'Playfair Display', serif;
+            --primary-font: 'Poppins', sans-serif;
+            --border-radius: 12px;
+            --transition-speed: 0.4s;
+        }
+
+        /* --- Animations --- */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(10px); }
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Global Styles --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--primary-font);
+            background-image: linear-gradient(120deg, var(--body-bg), #fff1f4);
+            color: var(--main-text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .hidden { display: none !important; }
+
+        /* --- Header & Footer --- */
+        .site-header, .site-footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            background-color: var(--card-bg);
+            box-shadow: 0 2px 10px var(--shadow-color);
+        }
+
+        .site-header h1 { font-size: 3rem; color: var(--orange-accent); }
+        .site-footer { margin-top: 3rem; background-color: #fff5f7; color: var(--secondary-text); }
+
+        /* --- Page Transition Classes --- */
+        .page {
+            animation-duration: var(--transition-speed);
+            animation-fill-mode: forwards;
+        }
+        .page.fade-in { animation-name: fadeIn; }
+        .page.fade-out { animation-name: fadeOut; }
+        
+        /* --- Search Bar --- */
+        .search-container { margin-bottom: 2rem; }
+
+        #search-bar {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 15px var(--shadow-color);
+            transition: all 0.3s ease;
+        }
+        #search-bar:focus { outline: none; border-color: var(--orange-accent); box-shadow: 0 4px 20px rgba(240, 89, 65, 0.2); }
+
+        /* --- Restaurant Grid --- */
+        .restaurant-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+        .restaurant-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 4px 15px var(--shadow-color);
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            opacity: 0; /* Initially hidden for animation */
+            animation: slideUp 0.5s ease-out forwards;
+        }
+        .restaurant-card:hover { transform: translateY(-8px); box-shadow: 0 10px 30px rgba(0,0,0,0.12); }
+        .restaurant-card:active { transform: translateY(-2px) scale(0.98); }
+        .restaurant-card img { width: 100%; height: 200px; object-fit: cover; }
+        .card-content { padding: 1rem; }
+        .card-content h3 { margin-bottom: 0.5rem; font-size: 1.4rem; }
+        .card-content p { color: var(--secondary-text); margin-bottom: 0.5rem; }
+        .card-rating { display: inline-block; background-color: var(--accent-color); color: #fff; padding: 0.2rem 0.6rem; border-radius: 5px; font-weight: 600; }
+        .card-rating::before { content: '★ '; }
+
+        /* --- No Results Message --- */
+        #no-results {
+            text-align: center;
+            padding: 3rem;
+            background-color: var(--sidebar-bg);
+            border-radius: var(--border-radius);
+        }
+        #no-results h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        #no-results p { color: var(--secondary-text); }
+
+        /* --- Detail Page --- */
+        #back-to-list-btn {
+            background: none; border: 1px solid var(--orange-accent); color: var(--orange-accent);
+            padding: 0.5rem 1rem; border-radius: 20px; cursor: pointer; margin-bottom: 2rem;
+            font-size: 0.9rem; transition: all 0.3s ease;
+        }
+        #back-to-list-btn:hover { background-color: var(--orange-accent); color: var(--card-bg); }
+        #back-to-list-btn:active { transform: scale(0.95); }
+
+        .detail-container { background-color: var(--card-bg); padding: 2rem; border-radius: var(--border-radius); box-shadow: 0 4px 15px var(--shadow-color); }
+        .detail-header { display: flex; gap: 2rem; margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 2rem; }
+        #detail-img { width: 250px; height: 250px; object-fit: cover; border-radius: var(--border-radius); }
+        .header-info #detail-name { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .header-info #detail-cuisine { font-size: 1.2rem; color: var(--secondary-text); margin-bottom: 1rem; }
+        .rating-and-time { display: flex; gap: 1.5rem; align-items: center; margin-bottom: 1rem; font-size: 1.1rem; }
+        .rating { font-weight: 600; color: var(--accent-color); }
+        .rating::before { content: '⭐ '; } .timings::before { content: '🕒 '; }
+        
+        .detail-content { display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; }
+        .menu-section h3, .booking-section h3 { font-size: 1.8rem; margin-bottom: 1rem; }
+        #menu-table { width: 100%; border-collapse: collapse; }
+        #menu-table th, #menu-table td { padding: 0.8rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+        #menu-table th { background-color: var(--sidebar-bg); }
+        .menu-item-name span { margin-left: 8px; font-size: 0.8em; font-weight: bold; display: inline-block; padding: 2px 6px; border-radius: 4px; }
+        .veg { color: var(--veg-color); border: 1px solid var(--veg-color); }
+        .non-veg { color: var(--non-veg-color); border: 1px solid var(--non-veg-color); }
+        .spicy { color: var(--spicy-color); }
+
+        /* --- Booking Form --- */
+        .booking-section { background-color: var(--sidebar-bg); padding: 1.5rem; border-radius: var(--border-radius); }
+        #booking-form { display: flex; flex-direction: column; gap: 1rem; }
+        #booking-form label { font-weight: 600; }
+        #booking-form input { width: 100%; padding: 0.8rem; border: 1px solid var(--border-color); border-radius: 8px; font-family: var(--primary-font); }
+        .cta-button {
+            background-color: var(--orange-accent); color: white; padding: 1rem; border: none;
+            border-radius: 8px; font-size: 1.1rem; font-weight: 600; cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .cta-button:hover { background-color: #d84a32; }
+        .cta-button:active { transform: scale(0.97); }
+
+        /* --- Loader Spinner --- */
+        .loader {
+            border: 5px solid #f3f3f3; border-top: 5px solid var(--orange-accent);
+            border-radius: 50%; width: 50px; height: 50px;
+            animation: spin 1s linear infinite; margin: 5rem auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- Booking Confirmation Modal --- */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000; opacity: 0;
+            animation: fadeIn 0.3s ease forwards;
+        }
+        .modal-content {
+            background: var(--card-bg); padding: 2.5rem; text-align: center;
+            border-radius: var(--border-radius); box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            width: 90%; max-width: 450px;
+            transform: scale(0.9);
+            animation: slideUp 0.4s ease-out forwards;
+        }
+        .modal-content h2 { color: var(--orange-accent); margin-bottom: 1rem; }
+        .modal-content p { color: var(--secondary-text); margin-bottom: 0.5rem; }
+        .modal-content strong { color: var(--main-text); }
+        .modal-close-btn {
+            margin-top: 1.5rem; background-color: var(--orange-accent); color: white;
+            padding: 0.7rem 1.5rem; border: none; border-radius: 8px;
+            font-size: 1rem; font-weight: 600; cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .modal-close-btn:hover { background-color: #d84a32; }
+
+
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            .detail-header { flex-direction: column; }
+            #detail-img { width: 100%; height: 250px; }
+            .detail-content { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="site-header">
+        <h1>Ahmedabad Eats</h1>
+        <p>Your guide to the best dining in the city</p>
+    </header>
+
+    <main>
+        <!-- Loader element -->
+        <div id="loader" class="loader hidden"></div>
+
+        <!-- ============================================= -->
+        <!--      RESTAURANT LISTING PAGE (HOMEPAGE)       -->
+        <!-- ============================================= -->
+        <section id="restaurant-list-page" class="page">
+            <div class="search-container">
+                <input type="text" id="search-bar" placeholder="Search for restaurants or cuisine...">
+            </div>
+            <div id="restaurant-grid" class="restaurant-grid">
+                <!-- Restaurant cards will be injected here by JavaScript -->
+            </div>
+            <div id="no-results" class="hidden">
+                <h3>No Restaurants Found</h3>
+                <p>Try searching for a different cuisine or restaurant name.</p>
+            </div>
+        </section>
+
+        <!-- ============================================= -->
+        <!--    INDIVIDUAL RESTAURANT DETAIL PAGE (HIDDEN) -->
+        <!-- ============================================= -->
+        <section id="restaurant-detail-page" class="page hidden">
+            <!-- Content will be populated by JS -->
+        </section>
+    </main>
+
+    <!-- Booking Confirmation Modal -->
+    <div id="booking-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 id="modal-title">Booking Confirmed!</h2>
+            <p>Your table at <strong id="modal-resto-name"></strong> has been requested.</p>
+            <p>Date: <strong id="modal-date"></strong></p>
+            <p>Time: <strong id="modal-time"></strong></p>
+            <p>Guests: <strong id="modal-guests"></strong></p>
+            <button id="modal-close-btn" class="modal-close-btn">Done</button>
+        </div>
+    </div>
+    
+    <footer class="site-footer">
+        <p>&copy; 2024 Ahmedabad Eats. All rights reserved.</p>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const restaurants = [
+            {
+                id: 1, name: "Agashiye", cuisine: "Gujarati Thali", rating: 4.8, address: "The House of MG, Lal Darwaja",
+                timings: "12:00 PM - 10:30 PM", image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600",
+                menu: [
+                    { name: "Gujarati Thali", price: 950, type: 'veg', isSpicy: false },
+                    { name: "Jalebi with Rabdi", price: 250, type: 'veg', isSpicy: false },
+                    { name: "Masala Chaas", price: 100, type: 'veg', isSpicy: true },
+                ]
+            },
+            {
+                id: 2, name: "Gordhan Thal", cuisine: "Gujarati, Rajasthani", rating: 4.5, address: "Thaltej, Ahmedabad",
+                timings: "11:00 AM - 11:00 PM", image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600",
+                menu: [
+                    { name: "Special Thali", price: 600, type: 'veg', isSpicy: false },
+                    { name: "Dal Baati Churma", price: 450, type: 'veg', isSpicy: true },
+                    { name: "Kadhi Khichdi", price: 300, type: 'veg', isSpicy: false },
+                ]
+            },
+            {
+                id: 3, name: "Earthen Oven", cuisine: "North Indian, Mughlai", rating: 4.7, address: "Fortune Landmark, Ashram Road",
+                timings: "7:00 PM - 11:00 PM", image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600",
+                menu: [
+                    { name: "Dal Makhani", price: 550, type: 'veg', isSpicy: true },
+                    { name: "Murgh Tikka", price: 750, type: 'non-veg', isSpicy: true },
+                    { name: "Garlic Naan", price: 150, type: 'veg', isSpicy: false },
+                ]
+            },
+            {
+                id: 4, name: "Patang Revolving Restaurant", cuisine: "Multi-cuisine", rating: 4.2, address: "Near Nehru Bridge, Ashram Road",
+                timings: "12:00 PM - 11:00 PM", image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600",
+                menu: [
+                    { name: "Buffet Lunch", price: 1200, type: 'multi', isSpicy: false },
+                    { name: "Paneer Lababdar", price: 600, type: 'veg', isSpicy: true },
+                    { name: "Chicken Biryani", price: 800, type: 'non-veg', isSpicy: true },
+                ]
+            },
+            {
+                id: 5, name: "The Project Cafe", cuisine: "Cafe, Continental", rating: 4.4, address: "Ambavadi, Ahmedabad",
+                timings: "11:00 AM - 11:00 PM", image: "https://images.unsplash.com/photo-1552566626-52f8b828add9?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600",
+                menu: [
+                    { name: "Mushroom Risotto", price: 550, type: 'veg', isSpicy: false },
+                    { name: "Classic Cold Coffee", price: 250, type: 'veg', isSpicy: false },
+                    { name: "Spicy Aglio Olio Pasta", price: 480, type: 'veg', isSpicy: true },
+                ]
+            },
+            {
+                id: 6, name: "Swati Snacks", cuisine: "Street Food, South Indian", rating: 4.6, address: "Law Garden, Ahmedabad",
+                timings: "12:00 PM - 10:45 PM", image: "https://images.unsplash.com/photo-1578474846511-04ba529f0b88?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600",
+                menu: [
+                    { name: "Panki Chatni", price: 220, type: 'veg', isSpicy: false },
+                    { name: "Sev Puri", price: 180, type: 'veg', isSpicy: true },
+                    { name: "Sugarcane Juice", price: 150, type: 'veg', isSpicy: false },
+                ]
+            },
+            {
+                id: 7, name: "Mocha Cafe & Bar", cuisine: "Cafe, Italian, Mexican", rating: 4.3, address: "Bodakdev, Ahmedabad",
+                timings: "11:00 AM - 1:00 AM", image: "https://images.unsplash.com/photo-1498654896293-37a11aa40015?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600",
+                menu: [
+                    { name: "Kit Kat Shake", price: 300, type: 'veg', isSpicy: false },
+                    { name: "Veg Nachos Grande", price: 450, type: 'veg', isSpicy: true },
+                    { name: "Margherita Pizza", price: 500, type: 'veg', isSpicy: false },
+                ]
+            },
+            {
+                id: 8, name: "Barbeque Nation", cuisine: "Barbecue, North Indian", rating: 4.9, address: "Prahlad Nagar, Ahmedabad",
+                timings: "12:00 PM - 10:30 PM", image: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600",
+                menu: [
+                    { name: "Veg Buffet", price: 799, type: 'veg', isSpicy: true },
+                    { name: "Non-Veg Buffet", price: 899, type: 'non-veg', isSpicy: true },
+                    { name: "Kulfi Platter", price: 250, type: 'veg', isSpicy: false },
+                ]
+            },
+            {
+                id: 9, name: "Tinello", cuisine: "Italian", rating: 4.5, address: "Hyatt Regency, Ashram Road",
+                timings: "7:00 AM - 11:00 PM", image: "https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600",
+                menu: [
+                    { name: "Tiramisu", price: 450, type: 'veg', isSpicy: false },
+                    { name: "Quattro Formaggi Pizza", price: 900, type: 'veg', isSpicy: false },
+                    { name: "Spaghetti Carbonara", price: 850, type: 'non-veg', isSpicy: false },
+                ]
+            },
+            {
+                id: 10, name: "Manek Chowk Night Market", cuisine: "Street Food", rating: 4.1, address: "Manek Chowk, Old City",
+                timings: "8:00 PM - 2:00 AM", image: "https://images.unsplash.com/photo-1533777857889-4be7c70b33f7?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600",
+                menu: [
+                    { name: "Gwalior Dosa", price: 200, type: 'veg', isSpicy: true },
+                    { name: "Chocolate Sandwich", price: 180, type: 'veg', isSpicy: false },
+                    { name: "Kulfi", price: 100, type: 'veg', isSpicy: false },
+                ]
+            }
+        ];
+
+        const listPage = document.getElementById('restaurant-list-page');
+        const detailPage = document.getElementById('restaurant-detail-page');
+        const restaurantGrid = document.getElementById('restaurant-grid');
+        const noResults = document.getElementById('no-results');
+        const searchBar = document.getElementById('search-bar');
+        const loader = document.getElementById('loader');
+        const modal = document.getElementById('booking-modal');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+
+        function displayRestaurants(restaurantArray) {
+            restaurantGrid.innerHTML = '';
+            if (restaurantArray.length === 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+                restaurantArray.forEach((resto, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'restaurant-card';
+                    card.dataset.id = resto.id;
+                    card.style.animationDelay = `${index * 50}ms`;
+                    card.innerHTML = `
+                        <img src="${resto.image}" alt="${resto.name}">
+                        <div class="card-content">
+                            <h3>${resto.name}</h3>
+                            <p>${resto.cuisine}</p>
+                            <span class="card-rating">${resto.rating}</span>
+                        </div>
+                    `;
+                    restaurantGrid.appendChild(card);
+                });
+            }
+        }
+
+        function showRestaurantDetails(id) {
+            const restaurant = restaurants.find(r => r.id === id);
+            if (!restaurant) return;
+            
+            let menuHtml = '';
+            restaurant.menu.forEach(item => {
+                let itemDetails = '';
+                if (item.type === 'veg') itemDetails += '<span class="veg">Veg</span>';
+                if (item.type === 'non-veg') itemDetails += '<span class="non-veg">Non-Veg</span>';
+                if (item.isSpicy) itemDetails += '<span class="spicy">🌶️</span>';
+                menuHtml += `<tr><td class="menu-item-name">${item.name} ${itemDetails}</td><td>₹${item.price}</td></tr>`;
+            });
+
+            detailPage.innerHTML = `
+                <button id="back-to-list-btn">&larr; Back to all restaurants</button>
+                <div class="detail-container">
+                    <div class="detail-header">
+                        <img id="detail-img" src="${restaurant.image}" alt="Restaurant Image">
+                        <div class="header-info">
+                            <h2 id="detail-name">${restaurant.name}</h2>
+                            <p id="detail-cuisine">${restaurant.cuisine}</p>
+                            <div class="rating-and-time">
+                                <span id="detail-rating" class="rating">${restaurant.rating} Rating</span>
+                                <span id="detail-timings" class="timings">Open: ${restaurant.timings}</span>
+                            </div>
+                            <p id="detail-address">${restaurant.address}</p>
+                        </div>
+                    </div>
+                    <div class="detail-content">
+                        <div class="menu-section">
+                            <h3>Our Menu</h3>
+                            <table id="menu-table">
+                                <thead><tr><th>Item</th><th>Price</th></tr></thead>
+                                <tbody>${menuHtml}</tbody>
+                            </table>
+                        </div>
+                        <div class="booking-section">
+                            <h3>Book a Table</h3>
+                            <form id="booking-form" data-restaurant-name="${restaurant.name}">
+                                <label for="booking-date">Date:</label>
+                                <input type="date" id="booking-date" required>
+                                <label for="booking-time">Time:</label>
+                                <input type="time" id="booking-time" required>
+                                <label for="booking-guests">Number of Guests:</label>
+                                <input type="number" id="booking-guests" min="1" max="10" value="2" required>
+                                <button type="submit" class="cta-button">Confirm Booking</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>`;
+            
+            // Add event listeners for the newly created elements
+            detailPage.querySelector('#back-to-list-btn').addEventListener('click', () => transitionPages(detailPage, listPage));
+            detailPage.querySelector('#booking-form').addEventListener('submit', handleBookingSubmit);
+        }
+        
+        function handleBookingSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            document.getElementById('modal-resto-name').textContent = form.dataset.restaurantName;
+            document.getElementById('modal-date').textContent = form.querySelector('#booking-date').value;
+            document.getElementById('modal-time').textContent = form.querySelector('#booking-time').value;
+            document.getElementById('modal-guests').textContent = form.querySelector('#booking-guests').value;
+            modal.classList.remove('hidden');
+            form.reset();
+        }
+        
+        function transitionPages(fromPage, toPage) {
+            fromPage.classList.add('fade-out');
+            loader.classList.remove('hidden');
+
+            setTimeout(() => {
+                fromPage.classList.add('hidden');
+                fromPage.classList.remove('fade-out');
+                
+                loader.classList.add('hidden');
+                toPage.classList.remove('hidden');
+                toPage.classList.add('fade-in');
+                window.scrollTo(0, 0);
+
+                setTimeout(() => toPage.classList.remove('fade-in'), 400);
+            }, 400);
+        }
+
+        // --- Event Listeners ---
+        searchBar.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredRestaurants = restaurants.filter(resto =>
+                resto.name.toLowerCase().includes(searchTerm) ||
+                resto.cuisine.toLowerCase().includes(searchTerm)
+            );
+            displayRestaurants(filteredRestaurants);
+        });
+
+        restaurantGrid.addEventListener('click', (e) => {
+            const card = e.target.closest('.restaurant-card');
+            if (card) {
+                showRestaurantDetails(parseInt(card.dataset.id));
+                transitionPages(listPage, detailPage);
+            }
+        });
+
+        modalCloseBtn.addEventListener('click', () => modal.classList.add('hidden'));
+        modal.addEventListener('click', (e) => {
+             if (e.target === modal) modal.classList.add('hidden');
+        });
+
+        // --- Initial Load ---
+        displayRestaurants(restaurants);
+    });
+    </script>
+</body>
+</html>

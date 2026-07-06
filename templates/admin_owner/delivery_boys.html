@@ -1,0 +1,244 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Delivery Staff - GJ3 Admin</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#ff6f00', // Orange matching theme
+                            600: '#ea580c',
+                            700: '#c2410c',
+                        },
+                        navy: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        input:not([type="radio"]):not([type="checkbox"]) {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            color: #334155;
+            background-color: #f8fafc;
+            transition: all 0.2s ease-in-out;
+        }
+        input:not([type="radio"]):not([type="checkbox"]):focus {
+            border-color: #ff6f00;
+            background-color: #ffffff;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(255, 111, 0, 0.15);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex">
+    {% include 'admin_owner/sidebar.html' %}
+
+    <div class="w-full md:w-[calc(100%-70px)] lg:w-[calc(100%-260px)] md:ml-[70px] lg:ml-[260px] min-h-screen flex flex-col transition-all duration-300">
+        <!-- Top Header -->
+        <header class="bg-white border-b border-slate-200 h-20 px-6 md:px-8 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+            <!-- Left Side: Page Title -->
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">Delivery Staff</h1>
+                <p class="text-xs md:text-sm text-slate-500 hidden sm:block">Manage your restaurant's logistics and delivery boys.</p>
+            </div>
+
+            <!-- Right Side: User Profile Dropdown -->
+            <div class="relative" id="adminProfileDropdownContainer">
+                <button id="adminProfileBtn" class="flex items-center gap-3 p-1.5 pr-3 hover:bg-slate-100 rounded-full transition-all duration-200 focus:outline-none">
+                    <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-brand-500 shadow-sm flex-shrink-0">
+                        {% if admin_user.profile_image %}
+                            <img src="{{ admin_user.profile_image.url }}" alt="Admin Profile" class="w-full h-full object-cover">
+                        {% else %}
+                            <img src="{% static 'images/default-profile.png' %}" alt="Default Profile" class="w-full h-full object-cover">
+                        {% endif %}
+                    </div>
+                    <div class="text-left hidden sm:block">
+                        <p class="text-sm font-semibold text-slate-800 leading-tight">{{ admin_user.full_name }}</p>
+                        <p class="text-xs text-slate-400 font-medium leading-none mt-0.5">{{ admin_user.restaurant_name|default:"No Restaurant" }}</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 hidden sm:block transition-transform duration-200" id="dropdownArrow"></i>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div id="adminDropdownMenu" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-100 py-2 z-50 transform origin-top-right transition-all duration-200">
+                    <div class="px-4 py-2 border-b border-slate-50 md:hidden">
+                        <p class="text-sm font-semibold text-slate-800">{{ admin_user.full_name }}</p>
+                        <p class="text-xs text-slate-400 font-medium">{{ admin_user.restaurant_name|default:"No Restaurant" }}</p>
+                    </div>
+                    <a href="{% url 'admin_profile' %}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-brand-600 transition-colors">
+                        <i class="fa-solid fa-user text-slate-400 w-5"></i>
+                        <span>My Profile</span>
+                    </a>
+                    <hr class="my-1 border-slate-100">
+                    <a href="/admin_logout/" class="flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors">
+                        <i class="fa-solid fa-right-from-bracket w-5"></i>
+                        <span>Log Out</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow p-6 md:p-8 max-w-6xl w-full mx-auto">
+            
+            <!-- Message Center -->
+            {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for msg in messages %}
+                        <div class="p-4 rounded-xl border flex items-center justify-between {% if msg.tags == 'error' %}bg-rose-50 border-rose-200 text-rose-700{% else %}bg-emerald-50 border-emerald-200 text-emerald-700{% endif %}">
+                            <span class="text-sm font-semibold">{{ msg }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left column: Add new Delivery Boy Form -->
+                <div class="lg:col-span-1 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm h-fit">
+                    <h3 class="text-lg font-bold text-slate-800 border-b border-slate-100 pb-3 mb-5 flex items-center gap-2">
+                        <i class="fa-solid fa-user-plus text-brand-500"></i> Register Staff
+                    </h3>
+                    
+                    <form method="POST" class="space-y-4">
+                        {% csrf_token %}
+                        <div>
+                            <label class="block text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">Delivery Boy Name</label>
+                            <input type="text" name="name" required placeholder="e.g. Ramesh Kumar">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">Phone Number</label>
+                            <input type="text" name="phone" required placeholder="e.g. 9876543210" pattern="[0-9]{10}" title="Ten digit phone number">
+                        </div>
+                        
+                        <button type="submit" class="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold text-sm shadow-md shadow-brand-500/10 transition-all">
+                            Add Delivery Boy
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Right Column: Delivery Boys List Table -->
+                <div class="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                    <h3 class="text-lg font-bold text-slate-800 border-b border-slate-100 pb-3 mb-5 flex items-center gap-2">
+                        <i class="fa-solid fa-list text-brand-500"></i> Delivery Staff List
+                    </h3>
+
+                    <div class="overflow-x-auto rounded-xl border border-slate-100">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-100 text-xs font-extrabold text-slate-400 uppercase tracking-wider">
+                                    <th class="py-3 px-4">Name</th>
+                                    <th class="py-3 px-4">Phone</th>
+                                    <th class="py-3 px-4 text-center">Status</th>
+                                    <th class="py-3 px-4 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-sm">
+                                {% for boy in delivery_boys %}
+                                    <tr class="hover:bg-slate-50/40">
+                                        <td class="py-4 px-4 font-bold text-slate-800">{{ boy.name }}</td>
+                                        <td class="py-4 px-4 font-semibold text-slate-500">{{ boy.phone }}</td>
+                                        <td class="py-4 px-4 text-center">
+                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold
+                                                {% if boy.status == 'Available' %}
+                                                    bg-emerald-50 text-emerald-700
+                                                {% elif boy.status == 'Delivering' %}
+                                                    bg-blue-50 text-blue-700
+                                                {% else %}
+                                                    bg-slate-100 text-slate-700
+                                                {% endif %}">
+                                                <span class="w-1.5 h-1.5 rounded-full
+                                                    {% if boy.status == 'Available' %}
+                                                        bg-emerald-500
+                                                    {% elif boy.status == 'Delivering' %}
+                                                        bg-blue-500
+                                                    {% else %}
+                                                        bg-slate-500
+                                                    {% endif %}"></span>
+                                                {{ boy.status }}
+                                            </span>
+                                        </td>
+                                        <td class="py-4 px-4 text-center">
+                                            <a href="{% url 'delete_delivery_boy' boy.id %}" 
+                                               onclick="return confirm('Are you sure you want to remove this delivery boy?');"
+                                               class="text-rose-500 hover:text-rose-700 p-1.5 hover:bg-rose-50 rounded-lg inline-block transition-colors">
+                                                <i class="fa-solid fa-trash-can text-base"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="4" class="py-8 text-center text-slate-400">
+                                            No delivery staff registered. Add one using the form on the left.
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Dropdown Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileBtn = document.getElementById('adminProfileBtn');
+            const dropdownMenu = document.getElementById('adminDropdownMenu');
+            const dropdownArrow = document.getElementById('dropdownArrow');
+
+            if (profileBtn && dropdownMenu) {
+                profileBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdownMenu.classList.toggle('hidden');
+                    if (dropdownArrow) {
+                        dropdownArrow.classList.toggle('rotate-180');
+                    }
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                        dropdownMenu.classList.add('hidden');
+                        if (dropdownArrow) {
+                            dropdownArrow.classList.remove('rotate-180');
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

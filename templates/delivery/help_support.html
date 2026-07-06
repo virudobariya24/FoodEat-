@@ -1,0 +1,78 @@
+{% extends 'delivery/base.html' %}
+{% load static %}
+
+{% block title %}Help & Support - Delivery Partner - Foodeat{% endblock %}
+
+{% block header_title %}Help & Support{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white border border-neutral-200 rounded-3xl shadow-sm overflow-hidden text-neutral-900">
+    
+    <!-- Header -->
+    <div class="px-6 py-5 border-b border-neutral-200 flex items-center justify-between">
+        <div>
+            <h2 class="text-lg font-extrabold text-neutral-800">Help & Support</h2>
+            <p class="text-[11px] text-neutral-500 mt-0.5">Need help? Browse FAQs or reach out to partner support</p>
+        </div>
+        <i class="fa-solid fa-circle-question text-2xl text-black"></i>
+    </div>
+
+    <!-- Body -->
+    <div class="p-6 md:p-8 space-y-6">
+        
+        <!-- Quick Support Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="p-4 bg-neutral-50 border border-neutral-200 rounded-2xl flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-white border border-neutral-200 text-black flex items-center justify-center text-lg flex-shrink-0">
+                    <i class="fa-solid fa-phone"></i>
+                </div>
+                <div>
+                    <span class="block text-[9px] font-bold text-neutral-450 uppercase tracking-wider">Partner Support Hotline</span>
+                    <a href="tel:18005553663" class="text-sm font-extrabold text-neutral-800 hover:underline">1800-555-FOOD</a>
+                </div>
+            </div>
+
+            <div class="p-4 bg-neutral-50 border border-neutral-200 rounded-2xl flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-white border border-neutral-200 text-black flex items-center justify-center text-lg flex-shrink-0">
+                    <i class="fa-solid fa-envelope"></i>
+                </div>
+                <div>
+                    <span class="block text-[9px] font-bold text-neutral-450 uppercase tracking-wider">Partner Email Support</span>
+                    <a href="mailto:partners@foodeat.com" class="text-sm font-extrabold text-neutral-800 hover:underline">partners@foodeat.com</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQs Section -->
+        <div>
+            <h3 class="text-sm font-black text-neutral-800 uppercase tracking-wider mb-4 border-b border-neutral-200 pb-2">Frequently Asked Questions</h3>
+            
+            <div class="space-y-4 divide-y divide-neutral-100">
+                <div class="pt-3 first:pt-0">
+                    <h4 class="text-xs font-bold text-neutral-800 flex items-center gap-1.5"><i class="fa-solid fa-circle-play text-[8px]"></i> How do weekly payouts work?</h4>
+                    <p class="text-xs text-neutral-500 mt-1 pl-4 leading-relaxed">Weekly rider earnings and tips are automatically calculated and processed every Sunday night. Payouts are directly transferred to the bank account registered in your Bank Details tab on Monday morning.</p>
+                </div>
+
+                <div class="pt-3">
+                    <h4 class="text-xs font-bold text-neutral-800 flex items-center gap-1.5"><i class="fa-solid fa-circle-play text-[8px]"></i> How do I accept delivery tasks?</h4>
+                    <p class="text-xs text-neutral-500 mt-1 pl-4 leading-relaxed">Make sure you toggle your **Duty Status** inside the sidebar driver card to **ONLINE**. Once online, active orders prepared by restaurants in your local area will appear in your **Available Requests** panel, where you can click **Accept Task**.</p>
+                </div>
+
+                <div class="pt-3">
+                    <h4 class="text-xs font-bold text-neutral-800 flex items-center gap-1.5"><i class="fa-solid fa-circle-play text-[8px]"></i> What is the customer OTP verification?</h4>
+                    <p class="text-xs text-neutral-500 mt-1 pl-4 leading-relaxed">For security reasons, every delivery must be verified. When you arrive at the customer's address, request the customer's delivery OTP code, input it in the active task panel, and verify to mark the order as delivered.</p>
+                </div>
+
+                <div class="pt-3">
+                    <h4 class="text-xs font-bold text-neutral-800 flex items-center gap-1.5"><i class="fa-solid fa-circle-play text-[8px]"></i> What if the customer is unreachable?</h4>
+                    <p class="text-xs text-neutral-500 mt-1 pl-4 leading-relaxed">If the customer is not answering calls or is unreachable at the address, try calling their phone via the green **Call Customer** shortcut in your dashboard. If there is no response after 10 minutes, contact the support hotline immediately.</p>
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+
+</div>
+{% endblock %}

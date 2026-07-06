@@ -1,0 +1,720 @@
+{% extends 'delivery/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Delivery Partner - Foodeat{% endblock %}
+
+{% block header_title %}Dashboard Overview{% endblock %}
+
+{% block content %}
+<div class="bg-white border border-slate-100 rounded-3xl p-4 sm:p-6 md:p-8 shadow-md space-y-6 text-slate-900 transition-all duration-300">
+    
+    <!-- Blocked Status Alert Banner -->
+    {% if boy.is_blocked %}
+        <div class="p-5 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-2xl flex items-start gap-4 shadow-lg animate-pulse">
+            <div class="w-12 h-12 rounded-xl bg-white/20 text-white flex items-center justify-center flex-shrink-0 text-xl backdrop-blur-md">
+                <i class="fa-solid fa-ban"></i>
+            </div>
+            <div>
+                <h4 class="font-extrabold text-sm text-white">Partner Profile Blocked</h4>
+                <p class="text-xs text-rose-100 mt-1 leading-relaxed">Your delivery partner account has been blocked by the Administrator. You are permitted to view your earnings history and profile details, but you cannot go online or accept new delivery tasks until unblocked.</p>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- 3-Column Stats Grid (Light Colors) -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        <!-- Earnings Card -->
+        <div class="bg-gradient-to-br from-indigo-50/70 to-violet-100/70 border border-indigo-100 rounded-3xl p-5 shadow-sm relative overflow-hidden group hover:scale-[1.02] hover:shadow-md transition-all duration-300">
+            <div class="absolute -right-5 -top-5 w-32 h-32 bg-indigo-500/5 rounded-full blur-xl group-hover:scale-110 transition duration-300"></div>
+            <div class="flex items-start justify-between relative z-10">
+                <div class="text-indigo-950">
+                    <p class="text-[10px] text-indigo-500 font-extrabold uppercase tracking-wider">Earnings (Today)</p>
+                    <p class="text-3xl font-black mt-1.5 text-indigo-900">₹{{ today_earnings|floatformat:2 }}</p>
+                    <div class="mt-4 pt-3 border-t border-indigo-200/50">
+                        <p class="text-[10px] text-indigo-400 font-extrabold uppercase tracking-wider">Total Earnings</p>
+                        <p class="text-lg font-bold mt-0.5 text-indigo-850">₹{{ total_earnings|floatformat:2 }}</p>
+                    </div>
+                </div>
+                <div class="w-11 h-11 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-lg shadow-sm">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Deliveries Card -->
+        <div class="bg-gradient-to-br from-emerald-50/70 to-teal-100/70 border border-emerald-100 rounded-3xl p-5 shadow-sm relative overflow-hidden group hover:scale-[1.02] hover:shadow-md transition-all duration-300">
+            <div class="absolute -right-5 -top-5 w-32 h-32 bg-emerald-500/5 rounded-full blur-xl group-hover:scale-110 transition duration-300"></div>
+            <div class="flex items-start justify-between relative z-10">
+                <div class="text-emerald-950">
+                    <p class="text-[10px] text-emerald-600 font-extrabold uppercase tracking-wider">Deliveries (Today)</p>
+                    <p class="text-3xl font-black mt-1.5 text-emerald-900">{{ today_completed_count }}</p>
+                    <div class="mt-4 pt-3 border-t border-emerald-200/50">
+                        <p class="text-[10px] text-emerald-500 font-extrabold uppercase tracking-wider">Total Deliveries</p>
+                        <p class="text-lg font-bold mt-0.5 text-emerald-850">{{ completed_deliveries|length }} Deliveries</p>
+                    </div>
+                </div>
+                <div class="w-11 h-11 rounded-xl bg-emerald-650 text-white flex items-center justify-center text-lg shadow-sm">
+                    <i class="fa-solid fa-motorcycle"></i>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Partner Rating Card -->
+        <div class="bg-gradient-to-br from-amber-50/70 to-orange-100/70 border border-amber-100 rounded-3xl p-5 shadow-sm relative overflow-hidden group hover:scale-[1.02] hover:shadow-md transition-all duration-300">
+            <div class="absolute -right-5 -top-5 w-32 h-32 bg-amber-500/5 rounded-full blur-xl group-hover:scale-110 transition duration-300"></div>
+            <div class="flex items-start justify-between relative z-10">
+                <div class="text-amber-955">
+                    <p class="text-[10px] text-amber-600 font-extrabold uppercase tracking-wider">Partner Rating</p>
+                    <p class="text-3xl font-black mt-1.5 text-amber-900">
+                        {% if avg_rating %}
+                            {{ avg_rating }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                        <span class="text-xs font-normal text-slate-500">/ 5 ★</span>
+                    </p>
+                    <div class="mt-4 pt-3 border-t border-amber-200/50">
+                        <p class="text-[10px] text-amber-550 font-extrabold uppercase tracking-wider">Performance Status</p>
+                        <p class="text-sm font-bold mt-0.5">
+                            <span class="bg-amber-600 text-white px-2.5 py-0.5 rounded-full font-bold text-xs">
+                                {{ performance_status }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                <div class="w-11 h-11 rounded-xl bg-amber-600 text-white flex items-center justify-center text-lg shadow-sm">
+                    <i class="fa-solid fa-star"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Split Layout -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- Left 2 Cols: Deliveries, Route Map & Requests -->
+        <div class="lg:col-span-2 space-y-6">
+            
+            {% if rider_tasks %}
+            <!-- Milestone Tasks Widget -->
+            <div class="space-y-4">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Milestone Tasks</h3>
+                
+                {% for r_task in rider_tasks %}
+                <div class="bg-gradient-to-br from-slate-50 to-white border border-slate-150 rounded-3xl p-5 shadow-sm relative overflow-hidden group">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center text-lg">
+                                <i class="fa-solid fa-trophy"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-black text-slate-800">{{ r_task.task.title }}</h4>
+                                <p class="text-xs text-slate-500 mt-0.5">{{ r_task.task.description|default:"Complete deliveries to earn extra bonus payouts!" }}</p>
+                            </div>
+                        </div>
+                        <div class="text-left sm:text-right">
+                            <span class="text-[9px] text-slate-400 font-extrabold uppercase tracking-wider block">Target Progress</span>
+                            <p class="text-base font-black text-slate-800 mt-0.5">{{ r_task.orders_completed }} / {{ r_task.task.required_orders }}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="mt-4">
+                        <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                            <div class="bg-gradient-to-r from-amber-50 to-orange-500 h-2.5 rounded-full transition-all duration-500" 
+                                 style="width: calc({{ r_task.orders_completed }} / {{ r_task.task.required_orders }} * 100%)"></div>
+                        </div>
+                        <div class="flex justify-between items-center mt-2 text-[10px] text-slate-400 font-extrabold uppercase tracking-wider">
+                            <span>Ends on: {{ r_task.task.end_date|date:"d M Y" }}</span>
+                            {% if r_task.is_completed %}
+                            <span class="text-emerald-600 flex items-center gap-1 font-black">
+                                <i class="fa-solid fa-circle-check"></i> ₹{{ r_task.task.bonus_amount|floatformat:2 }} Bonus Credited
+                            </span>
+                            {% else %}
+                            <span class="text-slate-700">₹{{ r_task.task.bonus_amount|floatformat:2 }} extra payout</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- 1. Active Task Panel -->
+            <div class="bg-gradient-to-b from-slate-50 to-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm relative">
+                <h3 class="text-base font-extrabold text-slate-800 border-b border-slate-150 pb-3 mb-5 flex items-center gap-2">
+                    <i class="fa-solid fa-route text-indigo-600"></i> Active Delivery Task
+                </h3>
+
+                {% if active_order %}
+                    <div class="space-y-6 text-slate-800">
+                        
+                        <!-- Header Info -->
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-white rounded-2xl border border-slate-150 shadow-sm">
+                            <div>
+                                <p class="text-[10px] text-slate-405 font-extrabold uppercase tracking-wider">Order Reference</p>
+                                <p class="text-base font-black text-slate-900 mt-0.5">Order #{{ active_order.id }}</p>
+                            </div>
+                            <div class="sm:text-center">
+                                <p class="text-[10px] text-slate-405 font-extrabold uppercase tracking-wider">Your Earning</p>
+                                <p class="text-base font-black text-indigo-600 mt-0.5">₹{{ active_order.rider_earning|floatformat:2 }}</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] text-slate-405 font-extrabold uppercase tracking-wider sm:text-right">Order Date</p>
+                                <p class="text-xs font-bold text-slate-600 mt-0.5 sm:text-right">{{ active_order.order_date|date:"d M Y, h:i A" }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Pickup & Delivery Info Card -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            
+                            <!-- Pickup Info Card -->
+                            <div class="bg-gradient-to-br from-indigo-50/50 to-white rounded-2xl border border-indigo-100 p-5 shadow-sm hover:border-indigo-200 transition-colors">
+                                <p class="text-[9px] font-black text-indigo-600 uppercase tracking-widest mb-3 flex items-center gap-1.5"><i class="fa-solid fa-store"></i> Restaurant Pickup</p>
+                                <p class="text-sm font-extrabold text-slate-850">{% if active_order_items %}{{ active_order_items.0.food.restaurant_name }}{% else %}Restaurant Partner{% endif %}</p>
+                                <p class="text-[11px] font-semibold text-slate-500 mt-1 flex items-center gap-1"><i class="fa-solid fa-utensils text-[10px] text-slate-400"></i> Food items prepared and packed</p>
+                            </div>
+
+                            <!-- Delivery Info Card -->
+                            <div class="bg-gradient-to-br from-emerald-50/50 to-white rounded-2xl border border-emerald-100 p-5 shadow-sm hover:border-emerald-200 transition-colors">
+                                <p class="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-3 flex items-center gap-1.5"><i class="fa-solid fa-user"></i> Customer Delivery</p>
+                                <p class="text-sm font-extrabold text-slate-850">{{ active_order.delivery_name }}</p>
+                                <p class="text-xs font-semibold text-slate-500 mt-1.5 flex items-center gap-1"><i class="fa-solid fa-location-dot text-[10px] text-slate-400"></i> {{ active_order.delivery_address }}</p>
+                                <a href="tel:{{ active_order.delivery_phone }}" class="inline-flex items-center gap-1.5 mt-3 text-[10px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg border border-emerald-150 transition-colors">
+                                    <i class="fa-solid fa-phone text-[10px]"></i> Call Customer: {{ active_order.delivery_phone }}
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Food Items -->
+                        <div class="bg-white rounded-2xl border border-slate-150 p-5 shadow-sm">
+                            <p class="text-[9px] font-black text-slate-450 uppercase tracking-widest mb-3 flex items-center gap-1.5"><i class="fa-solid fa-utensils"></i> Items to Collect</p>
+                            <div class="divide-y divide-slate-100">
+                                {% for item in active_order_items %}
+                                    <div class="flex items-center justify-between py-2.5">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-9 h-9 rounded-lg overflow-hidden bg-slate-50 border border-slate-200 flex-shrink-0">
+                                                {% if item.food.food_image %}
+                                                    <img src="{{ item.food.food_image.url }}" alt="{{ item.food.food_name }}" class="w-full h-full object-cover">
+                                                {% else %}
+                                                    <div class="w-full h-full flex items-center justify-center bg-slate-100 text-xs">🍔</div>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <p class="text-xs font-bold text-slate-800">{{ item.food.food_name }}</p>
+                                                <p class="text-[10px] text-slate-500">{{ item.food.restaurant_name }}</p>
+                                            </div>
+                                        </div>
+                                        <span class="text-xs font-extrabold text-slate-700 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-full">Qty: {{ item.quantity }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Action Updates -->
+                        <div class="flex flex-col sm:flex-row gap-4 items-center justify-between border-t border-slate-200 pt-6">
+                            <div class="text-slate-500 text-xs">
+                                Current Status: 
+                                <span class="font-extrabold text-indigo-700 uppercase ml-1 tracking-wider text-[10px] bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-full">
+                                    {{ active_order.status }}
+                                </span>
+                            </div>
+                            <div class="flex gap-3 w-full sm:w-auto justify-end">
+                                {% if active_order.status == 'Pending' or active_order.status == 'paid' %}
+                                    <div class="px-4 py-2.5 bg-amber-50 border border-amber-200 text-amber-800 font-bold rounded-xl text-[10px] flex items-center gap-2">
+                                        <i class="fa-solid fa-hourglass-start animate-spin"></i>
+                                        Preparing Order... Waiting for Restaurant to Pack
+                                    </div>
+                                {% elif active_order.status == 'Packed' %}
+                                    <form method="POST" action="{% url 'delivery_update_status' active_order.id %}" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="status" value="Shipped">
+                                        <div class="relative flex-grow min-w-[200px]">
+                                            <i class="fa-solid fa-clock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                            <input type="number" name="estimated_time" required min="1" max="180" placeholder="Est. minutes to user (e.g. 25)" 
+                                                   class="w-full h-10 pl-9 pr-4 text-xs bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:outline-none">
+                                        </div>
+                                        <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white rounded-xl font-bold text-xs transition-all shadow hover:shadow-indigo-100 whitespace-nowrap active:scale-[0.98]">
+                                            Collect & Start Ride
+                                        </button>
+                                    </form>
+                                {% elif active_order.status == 'Shipped' %}
+                                    {% if not active_order.delivery_otp %}
+                                        <div class="flex flex-col sm:flex-row items-center gap-3">
+                                            <div id="countdown-timer" class="text-xs font-bold text-slate-600 bg-slate-100 border border-slate-200 px-3 py-2 rounded-xl">
+                                                Calculating remaining time...
+                                            </div>
+                                            <a href="{% url 'delivery_request_otp' active_order.id %}" id="send-otp-btn" class="px-5 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white rounded-xl font-bold text-xs transition-all shadow hover:shadow-indigo-100 flex items-center gap-2 active:scale-[0.98]">
+                                                <i class="fa-solid fa-bell animate-bounce"></i> Send OTP to Customer
+                                            </a>
+                                        </div>
+                                    {% else %}
+                                        <form method="POST" action="{% url 'delivery_verify_order' active_order.id %}" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full">
+                                            {% csrf_token %}
+                                            <div class="relative flex-grow">
+                                                <i class="fa-solid fa-key absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                                <input type="text" name="otp" required placeholder="Enter customer OTP" 
+                                                       class="w-full h-10 pl-9 pr-4 text-xs bg-white border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:outline-none">
+                                            </div>
+                                            <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl font-bold text-xs transition-all shadow hover:shadow-emerald-100 whitespace-nowrap active:scale-[0.98]">
+                                                Verify & Deliver
+                                            </button>
+                                            <a href="{% url 'delivery_request_otp' active_order.id %}" class="px-4 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-500 hover:text-slate-800 rounded-xl text-[10px] font-semibold flex items-center justify-center transition-colors">
+                                                Resend
+                                            </a>
+                                        </form>
+                                    {% endif %}
+                                {% endif %}
+                              </div>
+                          </div>
+
+                    </div>
+                {% else %}
+                    <div class="py-12 text-center text-slate-400">
+                        <div class="text-4xl mb-3 animate-bounce" style="animation-duration: 2.5s;">🚴</div>
+                        <p class="font-bold text-slate-700 text-sm">No active delivery task</p>
+                        <p class="text-xs text-slate-505 mt-1.5 max-w-sm mx-auto">Select a package from the available delivery requests below to start earning.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Route Radar Panel -->
+            <div class="bg-gradient-to-b from-slate-50 to-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm relative overflow-hidden">
+                <h3 class="text-base font-extrabold text-slate-800 pb-3 border-b border-slate-150 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-map-location-dot text-indigo-600"></i> Route Radar
+                </h3>
+                <div class="relative w-full h-[220px] rounded-2xl bg-slate-950 border border-slate-900 overflow-hidden shadow-inner">
+                    <!-- SVG Map Background -->
+                    <svg class="absolute inset-0 w-full h-full opacity-35" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <pattern id="radar-grid" width="30" height="30" patternUnits="userSpaceOnUse">
+                                <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+                            </pattern>
+                            <linearGradient id="routeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#8b5cf6" />
+                                <stop offset="100%" stop-color="#06b6d4" />
+                            </linearGradient>
+                        </defs>
+                        <rect width="100%" height="100%" fill="url(#radar-grid)" />
+                        <!-- Mapped roads -->
+                        <path d="M-20,40 L300,40 L300,170 L500,170" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="6" stroke-linecap="round"/>
+                        <path d="M100,0 L100,250" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M0,130 L420,130 L420,300" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="5" stroke-linecap="round"/>
+                        
+                        {% if active_order %}
+                            <!-- Animated Active Route path -->
+                            <path d="M100,40 L300,40 L300,130 L420,130" fill="none" stroke="url(#routeGrad)" stroke-width="3.5" stroke-dasharray="10 7" stroke-linecap="round" class="route-line-anim"/>
+                        {% endif %}
+                    </svg>
+                    
+                    <style>
+                        .route-line-anim {
+                            animation: routeDash 8s linear infinite;
+                        }
+                        @keyframes routeDash {
+                            to {
+                                stroke-dashoffset: -300;
+                            }
+                        }
+                        .radar-ping-anim {
+                            animation: radarPing 2.5s ease-out infinite;
+                        }
+                        @keyframes radarPing {
+                            0% { transform: scale(0.5); opacity: 1; }
+                            100% { transform: scale(2.2); opacity: 0; }
+                        }
+                    </style>
+
+                    <!-- Mock Map Points -->
+                    {% if active_order %}
+                        <!-- Restaurant location pin -->
+                        <div class="absolute left-[80px] top-[24px] flex flex-col items-center">
+                            <span class="relative flex h-4 w-4">
+                                <span class="radar-ping-anim absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-4 w-4 bg-violet-500 border-2 border-white shadow"></span>
+                            </span>
+                            <span class="mt-1 px-1.5 py-0.5 bg-slate-900 border border-slate-800 text-[8px] font-extrabold rounded text-white shadow">Restaurant</span>
+                        </div>
+
+                        <!-- Customer location pin -->
+                        <div class="absolute left-[380px] top-[114px] flex flex-col items-center">
+                            <span class="relative flex h-4 w-4">
+                                <span class="radar-ping-anim absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-4 w-4 bg-cyan-500 border-2 border-white shadow"></span>
+                            </span>
+                            <span class="mt-1 px-1.5 py-0.5 bg-slate-900 border border-slate-800 text-[8px] font-extrabold rounded text-white shadow">Delivery Address</span>
+                        </div>
+
+                        <!-- Dynamic Rider motorcycle icon positioning -->
+                        {% if active_order.status == 'Pending' or active_order.status == 'Packed' %}
+                            <!-- Rider heading to Restaurant -->
+                            <div class="absolute left-[115px] top-[18px] flex flex-col items-center animate-bounce">
+                                <div class="w-8 h-8 rounded-full bg-indigo-600 border border-white shadow text-white flex items-center justify-center text-xs">
+                                    <i class="fa-solid fa-motorcycle"></i>
+                                </div>
+                                <span class="mt-1 px-1 py-0.5 bg-indigo-700 text-white text-[7px] font-black uppercase rounded tracking-wider shadow">To Shop</span>
+                            </div>
+                        {% elif active_order.status == 'Shipped' %}
+                            <!-- Rider heading to Customer -->
+                            <div class="absolute left-[290px] top-[80px] flex flex-col items-center animate-bounce">
+                                <div class="w-8 h-8 rounded-full bg-cyan-500 border border-white shadow text-white flex items-center justify-center text-xs">
+                                    <i class="fa-solid fa-motorcycle"></i>
+                                </div>
+                                <span class="mt-1 px-1 py-0.5 bg-cyan-600 text-white text-[7px] font-black uppercase rounded tracking-wider shadow animate-pulse">To User</span>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <!-- Radar scan animation when idle -->
+                        <div class="absolute inset-0 flex items-center justify-center flex-col">
+                            <div class="relative flex items-center justify-center w-24 h-24">
+                                <div class="absolute w-full h-full rounded-full border border-indigo-500/20 animate-ping"></div>
+                                <div class="absolute w-2/3 h-2/3 rounded-full border border-indigo-500/30 animate-pulse"></div>
+                                <div class="w-10 h-10 bg-indigo-950/80 border border-indigo-500 rounded-full flex items-center justify-center text-indigo-400 text-sm shadow shadow-indigo-500/50">
+                                    <i class="fa-solid fa-circle-notch animate-spin"></i>
+                                </div>
+                            </div>
+                            <span class="mt-4 text-[10px] text-indigo-300 font-extrabold uppercase tracking-widest">Scanning radar for requests...</span>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                {% if active_order %}
+                    <div class="mt-3.5 p-3 rounded-2xl border border-slate-100 bg-white flex items-center gap-3 shadow-sm">
+                        {% if active_order.status == 'Pending' or active_order.status == 'Packed' %}
+                            <div class="w-8 h-8 rounded-xl bg-violet-50 border border-violet-100 text-violet-600 flex items-center justify-center text-base flex-shrink-0 animate-pulse">
+                                <i class="fa-solid fa-store"></i>
+                            </div>
+                            <div>
+                                <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">Current Task Route</span>
+                                <span class="text-xs font-black text-slate-800 block">Riding to Restaurant to Pick Up Order</span>
+                            </div>
+                        {% elif active_order.status == 'Shipped' %}
+                            <div class="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center text-base flex-shrink-0 animate-pulse">
+                                <i class="fa-solid fa-house-user"></i>
+                            </div>
+                            <div>
+                                <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">Current Task Route</span>
+                                <span class="text-xs font-black text-slate-800 block">Riding to Customer Address to Deliver</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- 2. Available Orders Panel -->
+            {% if not active_order %}
+                <div class="bg-gradient-to-b from-slate-50 to-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
+                    <div class="flex items-center justify-between border-b border-slate-150 pb-3 mb-5">
+                        <h3 class="text-base font-extrabold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-bell text-indigo-600"></i> Available Requests
+                        </h3>
+                        <span class="bg-indigo-600 text-white text-xs font-extrabold px-3 py-1 rounded-full shadow-md shadow-indigo-100 animate-pulse">{{ available_orders|length }} Available</span>
+                    </div>
+
+                    <div class="space-y-4">
+                        {% if boy.status == 'Off-duty' %}
+                            <div class="py-12 text-center text-slate-400">
+                                <div class="text-4xl mb-3">😴</div>
+                                <p class="font-bold text-slate-700 text-sm">You are Offline</p>
+                                <p class="text-xs text-slate-505 mt-2 max-w-sm mx-auto">Toggle your Duty status to ONLINE in the sidebar toggle switch to start receiving new orders.</p>
+                            </div>
+                        {% else %}
+                            {% for order in available_orders %}
+                                <div class="p-5 bg-white hover:bg-slate-50 border border-slate-150 hover:border-indigo-200 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-300 shadow-sm group">
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-sm font-extrabold text-slate-800">Order #{{ order.id }}</span>
+                                            <span class="text-[9px] bg-indigo-50 border border-indigo-200 text-indigo-700 px-2 py-0.5 rounded-full font-extrabold uppercase">Ready</span>
+                                        </div>
+                                        
+                                        <div class="mt-2.5 space-y-1">
+                                            <div class="text-xs text-slate-600 flex items-center gap-1.5">
+                                                <i class="fa-solid fa-location-dot text-slate-400 text-[10px]"></i>
+                                                <span class="truncate max-w-[280px] md:max-w-[380px] font-medium text-slate-700" title="{{ order.delivery_address }}">{{ order.delivery_address }}</span>
+                                            </div>
+                                            <div class="text-xs text-slate-600 flex items-center gap-1.5">
+                                                <i class="fa-solid fa-user text-slate-400 text-[10px]"></i>
+                                                <span class="font-medium text-slate-700">Customer: {{ order.delivery_name }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center justify-between md:justify-end gap-5 mt-2 md:mt-0 border-t border-slate-100 md:border-0 pt-3 md:pt-0">
+                                        <div class="text-left md:text-right">
+                                            <p class="text-[9px] text-slate-400 uppercase tracking-widest font-extrabold">Your Payout</p>
+                                            <p class="text-sm font-black text-indigo-600">₹{{ order.rider_earning|floatformat:2 }}</p>
+                                        </div>
+                                        <a href="{% url 'delivery_accept' order.id %}" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition-all shadow hover:shadow-indigo-100 group-hover:scale-[1.02] active:scale-[0.98]">
+                                            Accept Task
+                                        </a>
+                                    </div>
+                                </div>
+                            {% empty %}
+                                <div class="py-8 text-center text-slate-400">
+                                    <p class="text-xs font-semibold">No available delivery requests nearby.</p>
+                                    <p class="text-[11px] text-slate-505 mt-1">Please wait or refresh later. Orders will show up once restaurants prepare them.</p>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+        </div>
+
+        <!-- Right Column: Safety checklist, Daily target, Recent Rides -->
+        <div class="lg:col-span-1 space-y-6">
+            
+            <!-- NEW: Rider Safety & Shift Checklist Hub (Light color style) -->
+            <div class="bg-gradient-to-br from-sky-50/70 via-blue-50/50 to-indigo-50/50 border border-sky-100 rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+                <div class="flex items-center gap-2 border-b border-sky-200/50 pb-2">
+                    <span class="text-xl">🛡️</span>
+                    <div>
+                        <h3 class="text-sm font-black text-slate-800 leading-tight">Pre-Ride Safety Hub</h3>
+                        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Daily Rider Checklist</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="flex items-center gap-3 p-2 bg-white rounded-xl border border-sky-100 cursor-pointer hover:bg-slate-50 transition-colors">
+                        <input type="checkbox" checked class="w-4 h-4 text-sky-600 border-sky-300 rounded focus:ring-sky-500">
+                        <span class="text-xs font-bold text-slate-700">Helmet & Gear secure ⛑️</span>
+                    </label>
+                    <label class="flex items-center gap-3 p-2 bg-white rounded-xl border border-sky-100 cursor-pointer hover:bg-slate-50 transition-colors">
+                        <input type="checkbox" class="w-4 h-4 text-sky-600 border-sky-300 rounded focus:ring-sky-500">
+                        <span class="text-xs font-bold text-slate-700">Phone battery > 80% 📱</span>
+                    </label>
+                    <label class="flex items-center gap-3 p-2 bg-white rounded-xl border border-sky-100 cursor-pointer hover:bg-slate-50 transition-colors">
+                        <input type="checkbox" checked class="w-4 h-4 text-sky-600 border-sky-300 rounded focus:ring-sky-500">
+                        <span class="text-xs font-bold text-slate-700">Raincoat packed 🧥</span>
+                    </label>
+                    <label class="flex items-center gap-3 p-2 bg-white rounded-xl border border-sky-100 cursor-pointer hover:bg-slate-50 transition-colors">
+                        <input type="checkbox" class="w-4 h-4 text-sky-600 border-sky-300 rounded focus:ring-sky-500">
+                        <span class="text-xs font-bold text-slate-700">Vehicle fuel checked ⛽</span>
+                    </label>
+                </div>
+                
+                <div class="p-3 bg-white/70 rounded-xl border border-sky-150/50 text-[10px] text-sky-850 flex items-start gap-2">
+                    <span class="text-base leading-none">📢</span>
+                    <div>
+                        <p class="font-extrabold">Safety Tip of the Day</p>
+                        <p class="text-[9px] text-slate-500 leading-normal mt-0.5">Wet roads reduce traction. Drive 10km/h slower in rainfall and avoid hard braking.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions & Broadcast Hub (Light Color Scheme) -->
+            <div class="bg-gradient-to-br from-teal-50/80 via-emerald-50/60 to-green-50/50 border border-emerald-100 rounded-3xl p-5 sm:p-6 shadow-sm space-y-4">
+                <div class="flex items-center gap-2 border-b border-emerald-200/50 pb-2">
+                    <span class="text-xl">⚡</span>
+                    <div>
+                        <h3 class="text-sm font-black text-slate-800 leading-tight">Quick Actions & Broadcasts</h3>
+                        <p class="text-[9px] text-emerald-600 font-bold uppercase tracking-wider">Rider shortcuts & updates</p>
+                    </div>
+                </div>
+
+                <!-- Announcement banner -->
+                <div class="p-3 bg-white border border-emerald-100/80 rounded-2xl space-y-1.5 shadow-xs">
+                    <div class="flex items-center gap-1.5 text-xs font-extrabold text-rose-600">
+                        <span class="h-2 w-2 rounded-full bg-rose-500 animate-ping"></span>
+                        High Demand Hotspot!
+                    </div>
+                    <p class="text-[10px] text-slate-500 leading-relaxed">High order volume detected in <b>Downtown Sector 12</b>. Drivers in this area are receiving consecutive delivery assignments.</p>
+                </div>
+
+                <!-- Interactive Shortcut Buttons -->
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <a href="tel:108" class="flex flex-col items-center justify-center p-3 bg-rose-50 hover:bg-rose-100/80 border border-rose-200 text-rose-700 rounded-2xl text-center transition-all duration-200 active:scale-95 group">
+                        <i class="fa-solid fa-triangle-exclamation text-lg mb-1 group-hover:scale-110 transition-transform"></i>
+                        <span class="text-[10px] font-black uppercase tracking-wider">SOS Emergency</span>
+                    </a>
+                    <a href="{% url 'delivery_help_support' %}" class="flex flex-col items-center justify-center p-3 bg-indigo-50 hover:bg-indigo-100/80 border border-indigo-200 text-indigo-700 rounded-2xl text-center transition-all duration-200 active:scale-95 group">
+                        <i class="fa-solid fa-headset text-lg mb-1 group-hover:scale-110 transition-transform"></i>
+                        <span class="text-[10px] font-black uppercase tracking-wider">Rider Support</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Delivery History List -->
+            <div class="bg-gradient-to-b from-slate-50 to-white border border-slate-200 rounded-3xl p-5 sm:p-6 shadow-sm">
+                <h3 class="text-base font-extrabold text-slate-800 border-b border-slate-150 pb-3 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-slate-400"></i> Recent Rides
+                </h3>
+
+                <div class="space-y-3.5 max-h-[450px] overflow-y-auto pr-1">
+                    {% for ride in completed_deliveries %}
+                        <div class="p-3 bg-white rounded-xl border border-slate-150 flex flex-col gap-1.5 text-xs animate-fade-in shadow-sm hover:border-slate-300 transition-colors">
+                            <div class="flex items-center justify-between w-full">
+                                <div>
+                                    <p class="font-bold text-slate-800">Order #{{ ride.id }}</p>
+                                    <p class="text-slate-400 mt-0.5">{{ ride.order_date|date:"d M Y" }}</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider text-[9px] block">Delivered</span>
+                                    <span class="text-[10px] text-indigo-650 font-black block mt-1">+₹{{ ride.rider_earning|floatformat:2 }}</span>
+                                </div>
+                            </div>
+
+                            {% if ride.delivery_rating or ride.food_rating %}
+                            <div class="pt-2 border-t border-slate-100 flex items-center gap-2 text-[10px] font-bold text-slate-500">
+                                {% if ride.delivery_rating %}
+                                    <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded flex items-center gap-1">
+                                        <i class="fa-solid fa-star text-[8px]"></i> Delivery: {{ ride.delivery_rating }}/5
+                                    </span>
+                                {% endif %}
+                                {% if ride.food_rating %}
+                                    <span class="bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded flex items-center gap-1">
+                                        <i class="fa-solid fa-star text-[8px]"></i> Food: {{ ride.food_rating }}/5
+                                    </span>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    {% empty %}
+                        <p class="text-xs text-slate-505 text-center py-4">No completed rides yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Countdown timer for rider arrival
+        const countdownEl = document.getElementById('countdown-timer');
+        if (countdownEl) {
+            const rideStartedAtStr = "{% if active_order and active_order.ride_started_at %}{{ active_order.ride_started_at|date:'c' }}{% endif %}";
+            const estMinutes = parseInt("{{ active_order.estimated_delivery_time|default:0 }}");
+            if (rideStartedAtStr && estMinutes > 0) {
+                const rideStartedAt = new Date(rideStartedAtStr);
+                const targetTime = new Date(rideStartedAt.getTime() + estMinutes * 60 * 1000);
+                
+                function updateCountdown() {
+                    const now = new Date();
+                    const diffMs = targetTime - now;
+                    if (diffMs <= 0) {
+                        countdownEl.innerText = "Arrived at Customer Location!";
+                        countdownEl.className = "text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-2 rounded-xl";
+                    } else {
+                        const diffMins = Math.floor(diffMs / (60 * 1000));
+                        const diffSecs = Math.floor((diffMs % (60 * 1000)) / 1000);
+                        countdownEl.innerText = `Expected Arrival in: ${diffMins}m ${diffSecs}s`;
+                        setTimeout(updateCountdown, 1000);
+                    }
+                }
+                updateCountdown();
+            } else {
+                countdownEl.innerText = "Order Picked Up!";
+            }
+        }
+
+        const soundFile = "{% static 'audio/notification.mp3' %}";
+        let globalAudio = null;
+        let audioUnlocked = false;
+
+        const unlockAudio = () => {
+            if (audioUnlocked) return;
+            try {
+                globalAudio = new Audio(soundFile);
+                globalAudio.volume = 0; // mute
+                globalAudio.play().then(() => {
+                    audioUnlocked = true;
+                    globalAudio.pause();
+                    console.log("Delivery Partner Audio context unlocked!");
+                    document.removeEventListener('click', unlockAudio);
+                    document.removeEventListener('touchstart', unlockAudio);
+                }).catch(err => {
+                    console.log("Audio unlock failed, retrying on next click:", err);
+                });
+            } catch (e) {
+                console.error("Audio init error:", e);
+            }
+        };
+        document.addEventListener('click', unlockAudio);
+        document.addEventListener('touchstart', unlockAudio);
+
+        function playAlarmSound() {
+            try {
+                const playSoundWithLoop = (audioObj) => {
+                    audioObj.currentTime = 0;
+                    audioObj.volume = 1;
+                    let playCount = 0;
+                    audioObj.onended = function() {
+                        playCount++;
+                        if (playCount < 3) {
+                            audioObj.currentTime = 0;
+                            audioObj.play().catch(e => console.log("Loop play failed:", e));
+                        }
+                    };
+                    audioObj.play().catch(err => {
+                        console.log("Audio play failed, retrying on gesture:", err);
+                        const playOnNextClick = () => {
+                            audioObj.play().then(() => {
+                                document.removeEventListener('click', playOnNextClick);
+                            }).catch(e => console.log("Fallback play failed:", e));
+                        };
+                        document.addEventListener('click', playOnNextClick);
+                    });
+                };
+
+                if (globalAudio) {
+                    playSoundWithLoop(globalAudio);
+                } else {
+                    const audioFallback = new Audio(soundFile);
+                    playSoundWithLoop(audioFallback);
+                }
+            } catch (e) {
+                console.error("Audio playback error:", e);
+            }
+        }
+
+        // Active Order Polling for Delivery Partner
+        let lastActiveOrderId = sessionStorage.getItem('last_active_order_id');
+        if (lastActiveOrderId === null) {
+            {% if active_order %}
+                lastActiveOrderId = "{{ active_order.id }}";
+                sessionStorage.setItem('last_active_order_id', lastActiveOrderId);
+            {% else %}
+                lastActiveOrderId = "0";
+                sessionStorage.setItem('last_active_order_id', "0");
+            {% endif %}
+        }
+
+        function checkNewAssignedOrders() {
+            fetch('/delivery/check_orders/')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const currentId = String(data.active_order_id);
+                        if (currentId !== "0" && currentId !== lastActiveOrderId) {
+                            playAlarmSound();
+                            sessionStorage.setItem('last_active_order_id', currentId);
+                            lastActiveOrderId = currentId;
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 3000);
+                        } else if (currentId === "0" && lastActiveOrderId !== "0") {
+                            sessionStorage.setItem('last_active_order_id', "0");
+                            lastActiveOrderId = "0";
+                        }
+                    }
+                })
+                .catch(err => console.error("Error polling assigned orders:", err));
+        }
+
+        setInterval(checkNewAssignedOrders, 5000);
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                checkNewAssignedOrders();
+            }
+        });
+    });
+</script>
+{% endblock %}

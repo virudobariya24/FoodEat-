@@ -1,0 +1,588 @@
+{% load static %}{% load tz %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GJ3 Admin Panel - Dashboard</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#ff6f00', // Orange matching theme
+                            600: '#ea580c',
+                            700: '#c2410c',
+                        },
+                        navy: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex">
+    {% include 'admin_owner/sidebar.html' %}
+
+    <div class="w-full md:w-[calc(100%-70px)] lg:w-[calc(100%-260px)] md:ml-[70px] lg:ml-[260px] min-h-screen flex flex-col transition-all duration-300">
+        <!-- Top Header -->
+        <header class="bg-white border-b border-slate-200 h-20 px-6 md:px-8 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+            <!-- Left Side: Page Title -->
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">Dashboard Overview</h1>
+                <p class="text-xs md:text-sm text-slate-500 hidden sm:block">Welcome back to your restaurant control center.</p>
+            </div>
+
+            <!-- Right Side: Notifications & User Profile Dropdown -->
+            <div class="flex items-center gap-4">
+                <!-- Notifications Dropdown -->
+                <div class="relative" id="adminNotificationDropdownContainer">
+                    <button id="adminNotificationBtn" class="relative w-10 h-10 rounded-full hover:bg-slate-100 flex items-center justify-center transition-all duration-200 focus:outline-none text-slate-500 hover:text-brand-500">
+                        <i class="fa-solid fa-bell text-lg"></i>
+                        <span id="notificationBadge" class="{% if not has_unread %}hidden{% endif %} absolute top-2 right-2.5 w-2.5 h-2.5 rounded-full bg-brand-500 border-2 border-white animate-pulse"></span>
+                    </button>
+
+                    <!-- Notifications Dropdown Menu -->
+                    <div id="adminNotificationMenu" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-slate-100 py-3 z-50 transform origin-top-right transition-all duration-200">
+                        <div class="px-4 pb-2.5 border-b border-slate-100 flex items-center justify-between">
+                            <h4 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+                                <i class="fa-solid fa-bell text-brand-500"></i>
+                                Notifications
+                            </h4>
+                            <span class="bg-orange-50 text-brand-600 text-[10px] font-bold px-2 py-0.5 rounded-full border border-brand-100">Live</span>
+                        </div>
+                        <div id="notificationList" class="max-h-[300px] overflow-y-auto divide-y divide-slate-50">
+                            {% for notif in notifications %}
+                                <div class="px-4 py-3 hover:bg-slate-50/50 transition-colors flex items-start justify-between gap-2">
+                                    <div>
+                                        <p class="text-xs font-semibold text-slate-800 leading-snug">{{ notif.message }}</p>
+                                        <p class="text-[9px] text-slate-400 mt-1 font-medium">{{ notif.created_at|localtime|date:"d M, h:i A" }}</p>
+                                    </div>
+                                    {% if not notif.is_read %}
+                                        <span class="unread-dot w-2 h-2 rounded-full bg-brand-500 flex-shrink-0 mt-1.5 animate-pulse"></span>
+                                    {% endif %}
+                                </div>
+                            {% empty %}
+                                <div id="emptyNotificationMessage" class="py-8 text-center text-slate-400">
+                                    <i class="fa-solid fa-bell-slash text-xl text-slate-200"></i>
+                                    <p class="text-xs mt-2 font-medium">No notifications yet.</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Profile Dropdown -->
+                <div class="relative" id="adminProfileDropdownContainer">
+                    <button id="adminProfileBtn" class="flex items-center gap-3 p-1.5 pr-3 hover:bg-slate-100 rounded-full transition-all duration-200 focus:outline-none">
+                        <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-brand-500 shadow-sm flex-shrink-0">
+                            {% if admin_user.profile_image %}
+                                <img src="{{ admin_user.profile_image.url }}" alt="Admin Profile" class="w-full h-full object-cover">
+                            {% else %}
+                                <img src="{% static 'images/default-profile.png' %}" alt="Default Profile" class="w-full h-full object-cover">
+                            {% endif %}
+                        </div>
+                        <div class="text-left hidden sm:block">
+                            <p class="text-sm font-semibold text-slate-800 leading-tight">{{ admin_user.full_name }}</p>
+                            <p class="text-xs text-slate-400 font-medium leading-none mt-0.5">{{ admin_user.restaurant_name|default:"No Restaurant" }}</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-down text-xs text-slate-400 hidden sm:block transition-transform duration-200" id="dropdownArrow"></i>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <div id="adminDropdownMenu" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-100 py-2 z-50 transform origin-top-right transition-all duration-200">
+                        <div class="px-4 py-2 border-b border-slate-50 md:hidden">
+                            <p class="text-sm font-semibold text-slate-800">{{ admin_user.full_name }}</p>
+                            <p class="text-xs text-slate-400 font-medium">{{ admin_user.restaurant_name|default:"No Restaurant" }}</p>
+                        </div>
+                        <a href="{% url 'admin_profile' %}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-brand-600 transition-colors">
+                            <i class="fa-solid fa-user text-slate-400 w-5"></i>
+                            <span>My Profile</span>
+                        </a>
+                        <hr class="my-1 border-slate-100">
+                        <a href="/admin_logout/" class="flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors">
+                            <i class="fa-solid fa-right-from-bracket w-5"></i>
+                            <span>Log Out</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow p-6 md:p-8 max-w-7xl w-full mx-auto">
+            <!-- Greeting Banner -->
+            <div class="bg-gradient-to-r from-slate-900 to-navy-800 rounded-2xl p-6 md:p-8 text-white mb-8 shadow-md relative overflow-hidden">
+                <div class="absolute right-0 top-0 w-64 h-64 bg-brand-500 opacity-10 rounded-full blur-3xl -mr-16 -mt-16"></div>
+                <div class="relative z-10">
+                    <span class="bg-brand-500/20 text-brand-100 text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">Overview</span>
+                    <h2 class="text-2xl md:text-3xl font-extrabold mt-3 tracking-tight">Welcome, {{ admin_user.full_name }}!</h2>
+                    <p class="text-slate-300 text-sm md:text-base mt-2 max-w-xl">Manage your food items, track customer reservations, and configure special discounts for <span class="text-brand-500 font-semibold">{{ admin_user.restaurant_name|default:"your restaurant" }}</span>.</p>
+                </div>
+            </div>
+
+            <!-- Dashboard Date Filter Toolbar -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 bg-white border border-slate-200/60 p-4 md:p-5 rounded-2xl shadow-sm">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-day text-brand-500"></i>
+                        Filter Date: <span class="text-brand-500 font-extrabold">{{ selected_date|date:"d M Y" }}</span>
+                        {% if selected_date|date:"Y-m-d" == today|date:"Y-m-d" %}
+                            <span class="bg-brand-50 text-brand-600 text-[10px] font-bold px-2 py-0.5 rounded-full border border-brand-100">Today</span>
+                        {% endif %}
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Displaying transactions and orders for the selected date.</p>
+                </div>
+                <div>
+                    <form method="GET" id="dateFilterForm" class="flex items-center gap-3">
+                        <label for="dashboardDate" class="text-xs font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Choose Date:</label>
+                        <div class="relative">
+                            <input type="date" id="dashboardDate" name="date" value="{{ selected_date|date:'Y-m-d' }}" 
+                                   class="bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl px-4 py-2 text-sm font-semibold text-slate-700 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 cursor-pointer transition-all duration-200 w-[160px] min-w-[160px]"
+                                   onchange="document.getElementById('dateFilterForm').submit();">
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ══ Stats Grid · 4 Cards in 1 Row ══ -->
+            <style>
+                .stat-card { transition: transform .22s ease, box-shadow .22s ease; }
+                .stat-card:hover { transform: translateY(-5px); box-shadow: 0 20px 45px -10px rgba(0,0,0,.15); }
+                @keyframes pulse-icon { 0%,100%{opacity:.12} 50%{opacity:.28} }
+                .pulse-icon { animation: pulse-icon 3.5s ease-in-out infinite; }
+            </style>
+
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+
+                <!-- Card 1 · Net Payout — Emerald Green -->
+                <div class="stat-card bg-white rounded-2xl shadow-sm overflow-hidden flex border border-slate-100" style="min-height:120px">
+                    <div class="relative flex flex-col items-center justify-center flex-shrink-0" style="width:72px;background:linear-gradient(150deg,#10b981 0%,#059669 100%)">
+                        <i class="fa-solid fa-indian-rupee-sign pulse-icon text-white absolute" style="font-size:60px;bottom:-8px;right:-12px;pointer-events:none"></i>
+                        <div class="relative z-10 w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,.22)">
+                            <i class="fa-solid fa-indian-rupee-sign text-white" style="font-size:16px"></i>
+                        </div>
+                        <span class="relative z-10 text-white font-black uppercase mt-2" style="font-size:7px;writing-mode:vertical-rl;transform:rotate(180deg);letter-spacing:.15em;opacity:.85">{% if selected_date == today %}TODAY{% else %}FILTERED{% endif %}</span>
+                    </div>
+                    <div class="flex flex-col justify-between flex-1 px-4 py-3">
+                        <div>
+                            <p class="text-[9px] font-extrabold text-emerald-600 uppercase tracking-widest">{% if selected_date == today %}Today's{% else %}Selected Day's{% endif %} Net Payout</p>
+                            <p class="text-slate-800 font-black leading-none mt-1.5 truncate" style="font-size:clamp(1rem,2.2vw,1.4rem)">&#8377;{{ selected_net_payout|floatformat:2 }}</p>
+                        </div>
+                        <div class="flex items-end justify-between pt-2 mt-2 border-t border-slate-100">
+                            <div>
+                                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Orders</p>
+                                <p class="text-emerald-600 font-black leading-none" style="font-size:1.2rem">{{ selected_orders }}</p>
+                            </div>
+                            <span class="text-[8px] font-extrabold text-emerald-600 bg-emerald-50 border border-emerald-100 px-1.5 py-0.5 rounded-full uppercase tracking-wider">{% if selected_date == today %}Live{% else %}Selected{% endif %}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 · Overall Net Earning — Violet Purple -->
+                <div class="stat-card bg-white rounded-2xl shadow-sm overflow-hidden flex border border-slate-100" style="min-height:120px">
+                    <div class="relative flex flex-col items-center justify-center flex-shrink-0" style="width:72px;background:linear-gradient(150deg,#8b5cf6 0%,#6d28d9 100%)">
+                        <i class="fa-solid fa-chart-line pulse-icon text-white absolute" style="font-size:60px;bottom:-8px;right:-12px;pointer-events:none"></i>
+                        <div class="relative z-10 w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,.22)">
+                            <i class="fa-solid fa-chart-line text-white" style="font-size:16px"></i>
+                        </div>
+                        <span class="relative z-10 text-white font-black uppercase mt-2" style="font-size:7px;writing-mode:vertical-rl;transform:rotate(180deg);letter-spacing:.15em;opacity:.85">OVERALL</span>
+                    </div>
+                    <div class="flex flex-col justify-between flex-1 px-4 py-3">
+                        <div>
+                            <p class="text-[9px] font-extrabold text-violet-600 uppercase tracking-widest">Overall Net Earning</p>
+                            <p class="text-slate-800 font-black leading-none mt-1.5 truncate" style="font-size:clamp(1rem,2.2vw,1.4rem)">&#8377;{{ lifetime_net_payout|floatformat:2 }}</p>
+                        </div>
+                        <div class="flex items-end justify-between pt-2 mt-2 border-t border-slate-100">
+                            <div>
+                                <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Total Orders</p>
+                                <p class="text-violet-600 font-black leading-none" style="font-size:1.2rem">{{ lifetime_orders }}</p>
+                            </div>
+                            <span class="text-[8px] font-extrabold text-violet-600 bg-violet-50 border border-violet-100 px-1.5 py-0.5 rounded-full uppercase tracking-wider">All&#8209;Time</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3 · Menu Items — Orange Brand -->
+                <a href="{% url 'food_list' %}" class="stat-card group bg-white rounded-2xl shadow-sm overflow-hidden flex border border-slate-100 hover:border-orange-200" style="min-height:120px">
+                    <div class="relative flex flex-col items-center justify-center flex-shrink-0" style="width:72px;background:linear-gradient(150deg,#ff6f00 0%,#ea580c 100%)">
+                        <i class="fas fa-hamburger pulse-icon text-white absolute" style="font-size:60px;bottom:-8px;right:-12px;pointer-events:none"></i>
+                        <div class="relative z-10 w-10 h-10 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110" style="background:rgba(255,255,255,.22)">
+                            <i class="fas fa-hamburger text-white" style="font-size:16px"></i>
+                        </div>
+                        <span class="relative z-10 text-white font-black uppercase mt-2" style="font-size:7px;writing-mode:vertical-rl;transform:rotate(180deg);letter-spacing:.15em;opacity:.85">MENU</span>
+                    </div>
+                    <div class="flex flex-col justify-between flex-1 px-4 py-3">
+                        <div>
+                            <p class="text-[9px] font-extrabold text-orange-600 uppercase tracking-widest">Menu Items</p>
+                            <p class="text-slate-800 font-black leading-none mt-1.5 group-hover:text-orange-500 transition-colors" style="font-size:clamp(1.4rem,3vw,2rem)">{{ total_items }}</p>
+                        </div>
+                        <div class="flex items-end justify-between pt-2 mt-2 border-t border-slate-100">
+                            <p class="text-[9px] text-slate-400 font-semibold">Total food items</p>
+                            <div class="flex items-center gap-1 text-[10px] font-bold text-orange-500">
+                                <span>View</span><i class="fas fa-arrow-right text-[9px] group-hover:translate-x-1 transition-transform duration-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+
+                <!-- Card 4 · Today Bookings — Teal Cyan -->
+                <a href="{% url 'owner_bookings' %}" class="stat-card group bg-white rounded-2xl shadow-sm overflow-hidden flex border border-slate-100 hover:border-teal-200" style="min-height:120px">
+                    <div class="relative flex flex-col items-center justify-center flex-shrink-0" style="width:72px;background:linear-gradient(150deg,#14b8a6 0%,#0d9488 100%)">
+                        <i class="fas fa-calendar-check pulse-icon text-white absolute" style="font-size:60px;bottom:-8px;right:-12px;pointer-events:none"></i>
+                        <div class="relative z-10 w-10 h-10 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110" style="background:rgba(255,255,255,.22)">
+                            <i class="fas fa-calendar-check text-white" style="font-size:16px"></i>
+                        </div>
+                        <span class="relative z-10 text-white font-black uppercase mt-2" style="font-size:7px;writing-mode:vertical-rl;transform:rotate(180deg);letter-spacing:.15em;opacity:.85">BOOKING</span>
+                    </div>
+                    <div class="flex flex-col justify-between flex-1 px-4 py-3">
+                        <div>
+                            <p class="text-[9px] font-extrabold text-teal-600 uppercase tracking-widest">Today's Bookings</p>
+                            <p class="text-slate-800 font-black leading-none mt-1.5 group-hover:text-teal-500 transition-colors" style="font-size:clamp(1.4rem,3vw,2rem)">{{ total_bookings }}</p>
+                        </div>
+                        <div class="flex items-end justify-between pt-2 mt-2 border-t border-slate-100">
+                            <p class="text-[9px] text-slate-400 font-semibold">{{ today|date:"d M Y" }}</p>
+                            <div class="flex items-center gap-1 text-[10px] font-bold text-teal-500">
+                                <span>View</span><i class="fas fa-arrow-right text-[9px] group-hover:translate-x-1 transition-transform duration-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+
+            </section>
+
+            <!-- New Order & Day-Wise Payment Sections -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Left Panel: Selected Date Restaurant Orders -->
+                <div class="lg:col-span-2 bg-white border border-slate-100 rounded-2xl p-6 shadow-sm flex flex-col">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fas fa-clipboard-list text-brand-500"></i>
+                                Orders on {{ selected_date|date:"d M Y" }}
+                            </h3>
+                            <p class="text-xs text-slate-400 mt-0.5">Customers who ordered from your restaurant on this day.</p>
+                        </div>
+                        <span class="bg-brand-50 text-brand-600 text-xs font-semibold px-3 py-1 rounded-full">{{ order_items|length }} Order{{ order_items|length|pluralize }}</span>
+                    </div>
+
+                    <!-- Responsive Table Wrapper -->
+                    <div class="overflow-x-auto rounded-xl border border-slate-100">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-100">
+                                    <th class="py-3.5 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Order Info</th>
+                                    <th class="py-3.5 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Customer Details</th>
+                                    <th class="py-3.5 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Food Items</th>
+                                    <th class="py-3.5 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Subtotal</th>
+                                    <th class="py-3.5 px-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-center">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-sm">
+                                {% for item in order_items %}
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <!-- Order ID & Date -->
+                                    <td class="py-4 px-4 whitespace-nowrap">
+                                        <div class="font-bold text-slate-800 flex items-center gap-1">
+                                            <span>#{{ item.order.id }}</span>
+                                        </div>
+                                        <div class="text-xs text-slate-400 mt-0.5">
+                                            {{ item.order.order_date|localtime|date:"d M Y" }}
+                                            <span class="text-slate-300 mx-0.5">·</span>
+                                            <span class="font-semibold text-slate-500">{{ item.order.order_date|localtime|date:"h:i A" }}</span>
+                                            <span class="text-[10px] text-slate-300 ml-0.5">IST</span>
+                                        </div>
+                                    </td>
+                                    <!-- Customer Details -->
+                                    <td class="py-4 px-4">
+                                        <div class="font-semibold text-slate-800 leading-snug">{{ item.order.delivery_name }}</div>
+                                        <div class="text-xs text-slate-500 mt-0.5 flex items-center gap-1">
+                                            <i class="fa-solid fa-phone text-[10px] text-slate-400"></i>
+                                            {{ item.order.delivery_phone }}
+                                        </div>
+                                        <div class="text-xs text-slate-400 mt-1 max-w-[180px] truncate" title="{{ item.order.delivery_address }}">
+                                            <i class="fa-solid fa-location-dot text-[10px] text-brand-500"></i>
+                                            {{ item.order.delivery_address }}
+                                        </div>
+                                        {% if item.order.delivery_boy %}
+                                        <div class="text-[10px] text-cyan-600 bg-cyan-50 border border-cyan-100 rounded px-1.5 py-0.5 mt-1.5 w-fit font-bold flex items-center gap-1">
+                                            <i class="fa-solid fa-truck"></i> {{ item.order.delivery_boy.name }} ({{ item.order.delivery_boy.phone_number }})
+                                        </div>
+                                        {% endif %}
+                                    </td>
+                                    <!-- Food Item ordered -->
+                                    <td class="py-4 px-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-lg overflow-hidden border border-slate-100 bg-slate-50 flex-shrink-0">
+                                                {% if item.food.food_image %}
+                                                    <img src="{{ item.food.food_image.url }}" alt="{{ item.food.food_name }}" class="w-full h-full object-cover">
+                                                {% else %}
+                                                    <div class="w-full h-full flex items-center justify-center text-xs text-slate-300">🍽️</div>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <div class="font-semibold text-slate-800">{{ item.food.food_name }}</div>
+                                                <div class="text-xs text-slate-400 mt-0.5">
+                                                    {% if item.discount > 0 %}
+                                                        <span class="line-through text-slate-400 mr-1.5">₹{{ item.price|floatformat:2 }}</span>
+                                                        <span class="text-rose-500 font-extrabold mr-1">₹{{ item.discounted_unit_price|floatformat:2 }}</span>
+                                                    {% else %}
+                                                        <span class="mr-1">₹{{ item.price|floatformat:2 }}</span>
+                                                    {% endif %}
+                                                    × {{ item.quantity }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <!-- Price / Subtotal & Net Earning -->
+                                    <td class="py-4 px-4 text-right whitespace-nowrap">
+                                        <div class="font-bold text-slate-800">₹{{ item.subtotal|floatformat:2 }}</div>
+                                        <div class="text-[10px] text-rose-500 font-semibold mt-1" title="Platform Commission ({{ commission_rate }}%)">
+                                            Comm: -₹{{ item.commission_amount|floatformat:2 }}
+                                        </div>
+                                        <div class="text-xs text-emerald-650 font-bold mt-0.5" title="Net Earning">
+                                            Net: ₹{{ item.net_earning|floatformat:2 }}
+                                        </div>
+                                    </td>
+                                    <!-- Status -->
+                                    <td class="py-4 px-4 text-center whitespace-nowrap">
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold
+                                            {% if item.order.status == 'Delivered' %}
+                                                bg-emerald-50 text-emerald-700
+                                            {% elif item.order.status == 'Shipped' %}
+                                                bg-blue-50 text-blue-700
+                                            {% elif item.order.status == 'Cancelled' %}
+                                                bg-rose-50 text-rose-700
+                                            {% else %}
+                                                bg-slate-100 text-slate-700
+                                            {% endif %}">
+                                            <span class="w-1.5 h-1.5 rounded-full
+                                                {% if item.order.status == 'Delivered' %}
+                                                    bg-emerald-500
+                                                {% elif item.order.status == 'Shipped' %}
+                                                    bg-blue-500
+                                                {% elif item.order.status == 'Cancelled' %}
+                                                    bg-rose-500
+                                                {% else %}
+                                                    bg-slate-500
+                                                {% endif %}"></span>
+                                            {{ item.order.status }}
+                                        </span>
+                                        {% if item.order.status == 'paid' or item.order.status == 'Pending' %}
+                                            <div class="mt-2">
+                                                {% if item.status == 'Pending' %}
+                                                    <a href="{% url 'owner_pack_order' item.order.id %}" class="inline-block px-3 py-1.5 bg-brand-500 hover:bg-brand-600 text-white text-[10px] font-extrabold uppercase rounded-lg transition-all shadow-md shadow-brand-500/10">
+                                                        <i class="fa-solid fa-box-open mr-1"></i> Mark Packed
+                                                    </a>
+                                                {% else %}
+                                                    <span class="inline-block px-2.5 py-1 bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-extrabold uppercase rounded-lg">
+                                                        <i class="fa-solid fa-square-check mr-1"></i> Items Packed
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="py-12 text-center text-slate-400">
+                                        <div class="text-3xl">📥</div>
+                                        <div class="mt-2 font-medium">No orders for this date</div>
+                                        <div class="text-xs text-slate-300 mt-1">Orders containing your restaurant's food items placed on this day will display here.</div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                             </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Right Panel: Selected Date Payment Summary & Notifications -->
+                <div class="space-y-6 flex flex-col">
+                    <!-- Daily Payment Summary Card -->
+                    <div class="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm flex flex-col">
+                        <div class="border-b border-slate-100 pb-4 mb-6">
+                            <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-scale-balanced text-brand-500"></i>
+                                Admin Commission Owed ({{ commission_rate }}%)
+                            </h3>
+                            <p class="text-xs text-slate-400 mt-0.5">Platform commission details for the selected day.</p>
+                        </div>
+
+                        <!-- Selected Day Summary Card -->
+                        <div class="p-5 border border-brand-500 bg-orange-50/40 ring-1 ring-brand-500/20 rounded-2xl shadow-sm flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-xl bg-brand-500 text-white flex items-center justify-center flex-shrink-0 shadow-md shadow-brand-500/20">
+                                    <i class="fa-solid fa-calendar-day text-lg"></i>
+                                </div>
+                                <div>
+                                    <div class="font-extrabold text-slate-800 text-base">{{ selected_date|date:"d M Y" }}</div>
+                                    <div class="text-xs text-slate-500 mt-1 flex items-center gap-1.5 font-medium">
+                                        <i class="fa-solid fa-utensils text-[10px] text-brand-500"></i>
+                                        {{ selected_orders }} Order{{ selected_orders|pluralize }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-right flex flex-col items-end">
+                                <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-widest">Paid to Admin</span>
+                                <div class="text-rose-600 font-black text-xl mt-0.5">₹{{ selected_commission|floatformat:2 }}</div>
+                                <div class="text-[8px] text-slate-500 mt-1 font-semibold">
+                                    Gross: ₹{{ selected_sales|floatformat:2 }} | Net: ₹{{ selected_net_payout|floatformat:2 }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Notifications are now in the top header. -->
+                </div>
+            </div>
+
+            <!-- Day-Wise Earnings History Directory -->
+            <div class="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm mt-8 flex flex-col gap-4">
+                <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+                    <div class="w-10 h-10 rounded-xl bg-orange-50 text-brand-500 flex items-center justify-center flex-shrink-0">
+                        <i class="fa-solid fa-chart-line text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-800">Day-Wise Settlement History</h3>
+                        <p class="text-xs text-slate-400 mt-0.5">Daily breakdown of sales, platform commissions ({{ commission_rate }}%), and net payouts.</p>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs font-semibold text-slate-650">
+                        <thead class="bg-slate-50 text-slate-400 font-extrabold uppercase text-[10px] tracking-wider">
+                            <tr>
+                                <th class="py-3 px-4">Date</th>
+                                <th class="py-3 px-4 text-center">Orders</th>
+                                <th class="py-3 px-4 text-right">Gross Sales</th>
+                                <th class="py-3 px-4 text-right text-rose-500">Platform Commission</th>
+                                <th class="py-3 px-4 text-right text-emerald-600">Your Net Earning</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            {% for day in day_wise_payments %}
+                                <tr class="hover:bg-slate-50/50 transition-colors">
+                                    <td class="py-3.5 px-4 font-bold text-slate-800">{{ day.date|date:"d M Y" }}</td>
+                                    <td class="py-3.5 px-4 text-center font-bold text-slate-500">{{ day.order_count }}</td>
+                                    <td class="py-3.5 px-4 text-right text-slate-700">₹{{ day.total_amount|floatformat:2 }}</td>
+                                    <td class="py-3.5 px-4 text-right text-rose-600 font-bold">₹{{ day.commission|floatformat:2 }}</td>
+                                    <td class="py-3.5 px-4 text-right text-emerald-600 font-black">₹{{ day.net_payout|floatformat:2 }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="py-8 text-center text-slate-400 italic">No sales recorded yet.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Dropdown Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Profile Dropdown
+            const profileBtn = document.getElementById('adminProfileBtn');
+            const dropdownMenu = document.getElementById('adminDropdownMenu');
+            const dropdownArrow = document.getElementById('dropdownArrow');
+
+            // Notification Dropdown
+            const notifBtn = document.getElementById('adminNotificationBtn');
+            const notifMenu = document.getElementById('adminNotificationMenu');
+            const notifBadge = document.getElementById('notificationBadge');
+            const notifList = document.getElementById('notificationList');
+            const emptyNotifMsg = document.getElementById('emptyNotificationMessage');
+
+            if (profileBtn && dropdownMenu) {
+                profileBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdownMenu.classList.toggle('hidden');
+                    if (notifMenu) {
+                        notifMenu.classList.add('hidden');
+                    }
+                    if (dropdownArrow) {
+                        dropdownArrow.classList.toggle('rotate-180');
+                    }
+                });
+            }
+
+            function clearNotifListUI() {
+                if (window.currentlyDisplayedOwnerIds && window.currentlyDisplayedOwnerIds.length > 0) {
+                    window.clearOwnerIds(window.currentlyDisplayedOwnerIds);
+                    if (window.pollGlobalNotifications) {
+                        window.pollGlobalNotifications();
+                    }
+                }
+            }
+
+            if (notifBtn && notifMenu) {
+                notifBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const isOpening = notifMenu.classList.contains('hidden');
+                    notifMenu.classList.toggle('hidden');
+                    if (dropdownMenu) {
+                        dropdownMenu.classList.add('hidden');
+                        if (dropdownArrow) {
+                            dropdownArrow.classList.remove('rotate-180');
+                        }
+                    }
+                    if (isOpening) {
+                        // Hide the notification badge when dropdown is opened
+                        if (notifBadge) {
+                            notifBadge.classList.add('hidden');
+                        }
+                        // Hide all unread dots inside the dropdown list
+                        const unreadDots = document.querySelectorAll('.unread-dot');
+                        unreadDots.forEach(dot => {
+                            dot.classList.add('hidden');
+                        });
+                    } else {
+                        // It is closing. Clear the notifications!
+                        clearNotifListUI();
+                    }
+                });
+            }
+
+            document.addEventListener('click', function(e) {
+                if (profileBtn && dropdownMenu && !profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                    dropdownMenu.classList.add('hidden');
+                    if (dropdownArrow) {
+                        dropdownArrow.classList.remove('rotate-180');
+                    }
+                }
+                if (notifBtn && notifMenu && !notifBtn.contains(e.target) && !notifMenu.contains(e.target)) {
+                    const wasOpen = !notifMenu.classList.contains('hidden');
+                    notifMenu.classList.add('hidden');
+                    if (wasOpen) {
+                        clearNotifListUI();
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

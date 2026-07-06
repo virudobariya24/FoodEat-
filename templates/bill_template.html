@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice #{{ order.id }} - Zomato by Aryan & Viraj</title>
+    <style>
+        @page {
+            size: a4 portrait;
+            margin: 1cm;
+        }
+
+        :root {
+            --brand-color: #F05941;
+            --dark-color: #2C3E50;
+            --secondary-color: #34495E;
+            --light-gray: #ECF0F1;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+            color: var(--text-color);
+            font-size: 10pt;
+            line-height: 1.5;
+        }
+
+        .invoice-wrapper {
+            position: relative;
+            background: #fff;
+            max-width: 800px;
+            margin: auto;
+            padding: 40px;
+            border: 1px solid #eee;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* The big "PAID" stamp in the background */
+        .paid-stamp {
+            position: absolute;
+            top: 150px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-30deg);
+            font-size: 100px;
+            font-weight: 700;
+            color: #2ecc71;
+            border: 10px solid #2ecc71;
+            padding: 10px 30px;
+            border-radius: 10px;
+            opacity: 0.1;
+            z-index: 1;
+            text-transform: uppercase;
+        }
+
+        .invoice-header {
+            display: -pdf-flexbox;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+        }
+
+        .logo img {
+            max-width: 180px;
+            height: auto;
+        }
+
+        .invoice-details {
+            text-align: right;
+        }
+
+        .invoice-details h1 {
+            margin: 0;
+            color: var(--dark-color);
+            font-size: 24pt;
+            font-weight: 700;
+        }
+        .invoice-details p {
+            margin: 2px 0;
+            font-size: 10pt;
+        }
+        
+        .billing-details {
+            display: -pdf-flexbox;
+            flex-direction: row;
+            justify-content: space-between;
+            margin-bottom: 50px;
+            border-top: 2px solid var(--light-gray);
+            border-bottom: 2px solid var(--light-gray);
+            padding: 20px 0;
+        }
+        
+        .billing-details .section h4 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            color: var(--dark-color);
+        }
+        
+        .billing-details .section p {
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            margin-bottom: 30px;
+        }
+
+        .items-table thead th {
+            background-color: var(--secondary-color);
+            color: #fff;
+            padding: 12px 15px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 9pt;
+            border: 1px solid var(--secondary-color);
+        }
+
+        .items-table tbody tr {
+            border-bottom: 1px solid #ddd;
+        }
+
+        .items-table tbody tr:nth-of-type(even) {
+            background-color: #f9f9f9;
+        }
+
+        .items-table td {
+            padding: 12px 15px;
+            vertical-align: top;
+        }
+        .items-table .item-name {
+            font-weight: bold;
+            color: var(--dark-color);
+        }
+        .items-table .align-right { text-align: right; }
+        .items-table .align-center { text-align: center; }
+
+        .summary {
+            display: -pdf-flexbox;
+            flex-direction: row;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .summary-table {
+            width: 45%;
+        }
+
+        .summary-table td {
+            padding: 8px 10px;
+        }
+
+        .summary-table .label {
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .summary-table .grand-total {
+            border-top: 3px solid var(--dark-color);
+            font-weight: bold;
+            font-size: 14pt;
+        }
+        .summary-table .grand-total .label, .summary-table .grand-total .value {
+            color: var(--brand-color);
+        }
+        
+        .notes-section {
+            margin-top: 40px;
+            font-size: 9pt;
+            color: #777;
+        }
+        
+        .notes-section h5 {
+            margin-top: 0;
+            margin-bottom: 5px;
+            color: var(--dark-color);
+        }
+
+        .invoice-footer {
+            text-align: center;
+            color: #888;
+            font-size: 9pt;
+            margin-top: 40px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="invoice-wrapper">
+        
+        {% if order.status == 'Delivered' or order.status == 'Paid' %}
+            <div class="paid-stamp">PAID</div>
+        {% endif %}
+
+        <div class="invoice-header">
+            <div class="logo">
+                <!-- Use the absolute path from your view context -->
+                <img src="{{ logo_path }}" alt="Zomato Logo" />
+            </div>
+            <div class="invoice-details">
+                <h1>INVOICE</h1>
+                <p><strong>Invoice #:</strong> {{ order.id }}</p>
+                <p><strong>Date Issued:</strong> {{ order.created_at|date:"F d, Y" }}</p>
+            </div>
+        </div>
+
+        <div class="billing-details">
+            <div class="section">
+                <h4>Billed To</h4>
+                <p>{{ order.user.first_name }} {{ order.user.last_name }}</p>
+                <p>{{ order.user.email }}</p>
+                {# You can add an address here if available #}
+                <p>City, State, Pin Code</p>
+            </div>
+            <div class="section" style="text-align: right;">
+                <h4>From</h4>
+                <p><strong>Zomato by Aryan & Viraj</strong></p>
+                <p>123 Food Street, Culinary City</p>
+                <p>contact@zomatoav.com</p>
+            </div>
+        </div>
+
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th style="width:5%;">#</th>
+                    <th style="width:50%;">Item Description</th>
+                    <th class="align-center">Qty</th>
+                    <th class="align-right">Rate</th>
+                    <th class="align-right">Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td class="item-name">{{ item.food.food_name }}</td>
+                    <td class="align-center">{{ item.quantity }}</td>
+                    <td class="align-right">₹{{ item.price|floatformat:2 }}</td>
+                    <td class="align-right">₹{{ item.subtotal|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="summary">
+            <table class="summary-table">
+                <tbody>
+                    <tr>
+                        <td class="label">Subtotal</td>
+                        <td class="align-right value">₹{{ subtotal|floatformat:2 }}</td>
+                    </tr>
+                    <tr>
+                        <td class="label">GST (5%)</td>
+                        <td class="align-right value">₹{{ tax_amount|floatformat:2 }}</td>
+                    </tr>
+                    <tr class="grand-total">
+                        <td class="label">Grand Total</td>
+                        <td class="align-right value">₹{{ grand_total|floatformat:2 }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="notes-section">
+            <h5>Notes</h5>
+            <p><strong>Payment Method:</strong> Online Payment / Card</p>
+            <p>This is a computer-generated invoice and does not require a signature. All items are inclusive of applicable taxes.</p>
+        </div>
+
+        <div class="invoice-footer">
+            <p>Thank you for ordering with Zomato by Aryan & Viraj!</p>
+            <p>For any queries, please reach out to us at contact@zomatoav.com.</p>
+        </div>
+    </div>
+
+</body>
+</html>

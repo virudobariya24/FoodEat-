@@ -1,0 +1,498 @@
+{% load static %}{% load tz %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurant Bookings - Admin</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- jsPDF & AutoTable -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        brand: { 50:'#fff7ed', 100:'#ffedd5', 500:'#ff6f00', 600:'#ea580c', 700:'#c2410c' },
+                        navy:  { 800:'#1e293b', 900:'#0f172a' }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+
+        /* ── Status badge ── */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+        .status-pending   { background:#fff7ed; color:#ea580c; border:1px solid #fed7aa; }
+        .status-confirmed { background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0; }
+        .status-cancelled { background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
+        .status-completed { background:#eff6ff; color:#2563eb; border:1px solid #bfdbfe; }
+        /* ── Compact Calendar Popup ── */
+        #calPopup {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            z-index: 999;
+            width: 260px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.13);
+            padding: 14px;
+            display: none;
+        }
+        #calPopup.open { display: block; animation: fadeSlideIn .22s ease both; }
+
+        /* ── Calendar cell ── */
+        .cal-day {
+            width: 1.85rem; height: 1.85rem;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: .4rem;
+            font-size: .72rem; font-weight: 600;
+            cursor: pointer;
+            transition: all .15s ease;
+            user-select: none;
+        }
+        .cal-day:hover                { background:#ffedd5; color:#ea580c; }
+        .cal-day.today                { border: 2px solid #ff6f00; color:#ff6f00; }
+        .cal-day.selected             { background: linear-gradient(135deg,#ff6f00,#ea580c); color:#fff; box-shadow:0 3px 8px rgba(255,111,0,.3); }
+        .cal-day.empty                { cursor:default; }
+        .cal-day.empty:hover          { background:transparent; color:inherit; }
+        .cal-day.has-booking          { position:relative; }
+        .cal-day.has-booking::after   { content:''; position:absolute; bottom:2px; left:50%; transform:translateX(-50%); width:3px; height:3px; border-radius:50%; background:#ff6f00; }
+        .cal-day.selected::after      { background:#fff; }
+
+        .cal-nav-btn {
+            width:1.7rem; height:1.7rem;
+            display:flex; align-items:center; justify-content:center;
+            border-radius:.4rem; cursor:pointer;
+            transition:all .15s ease;
+        }
+        .cal-nav-btn:hover { background:#f1f5f9; color:#ff6f00; }
+
+        @keyframes fadeSlideIn {
+            from { opacity:0; transform:translateY(10px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+        .anim-fade   { animation: fadeSlideIn .3s ease both; }
+        .empty-state { animation: fadeSlideIn .35s ease both; }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex">
+    {% include 'admin_owner/sidebar.html' %}
+
+    <!-- ── Main Panel ── -->
+    <div class="w-full md:w-[calc(100%-70px)] lg:w-[calc(100%-260px)] md:ml-[70px] lg:ml-[260px] min-h-screen flex flex-col transition-all duration-300">
+
+        <!-- Top Header -->
+        <header class="bg-white border-b border-slate-200 h-20 px-6 md:px-8 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">Restaurant Bookings</h1>
+                <p class="text-xs md:text-sm text-slate-500 hidden sm:block">Select a date from the calendar to view bookings.</p>
+            </div>
+
+            <!-- Profile Dropdown -->
+            <div class="relative" id="adminProfileDropdownContainer">
+                <button id="adminProfileBtn" class="flex items-center gap-3 p-1.5 pr-3 hover:bg-slate-100 rounded-full transition-all duration-200 focus:outline-none">
+                    <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-brand-500 shadow-sm flex-shrink-0">
+                        {% if admin_user.profile_image %}
+                            <img src="{{ admin_user.profile_image.url }}" alt="Admin Profile" class="w-full h-full object-cover">
+                        {% else %}
+                            <img src="{% static 'images/default-profile.png' %}" alt="Default Profile" class="w-full h-full object-cover">
+                        {% endif %}
+                    </div>
+                    <div class="text-left hidden sm:block">
+                        <p class="text-sm font-semibold text-slate-800 leading-tight">{{ admin_user.full_name }}</p>
+                        <p class="text-xs text-slate-400 font-medium leading-none mt-0.5">{{ admin_user.restaurant_name|default:"No Restaurant" }}</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 hidden sm:block transition-transform duration-200" id="dropdownArrow"></i>
+                </button>
+                <div id="adminDropdownMenu" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-100 py-2 z-50 transform origin-top-right transition-all duration-200">
+                    <div class="px-4 py-2 border-b border-slate-50 md:hidden">
+                        <p class="text-sm font-semibold text-slate-800">{{ admin_user.full_name }}</p>
+                        <p class="text-xs text-slate-400 font-medium">{{ admin_user.restaurant_name|default:"No Restaurant" }}</p>
+                    </div>
+                    <a href="{% url 'admin_profile' %}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-brand-600 transition-colors">
+                        <i class="fa-solid fa-user text-slate-400 w-5"></i><span>My Profile</span>
+                    </a>
+                    <hr class="my-1 border-slate-100">
+                    <a href="/admin_logout/" class="flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors">
+                        <i class="fa-solid fa-right-from-bracket w-5"></i><span>Log Out</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- ── Content Area ── -->
+        <main class="flex-grow p-4 md:p-6 lg:p-8">
+            <div class="flex flex-col gap-5 max-w-[1400px] mx-auto">
+
+                <!-- ════════ BOOKINGS PANEL ════════ -->
+                <div class="flex-1 min-w-0 flex flex-col gap-5">
+
+                    <!-- Action Bar -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+                        <div class="flex items-center gap-3 w-full sm:flex-1">
+                            <!-- 📅 Compact Calendar Toggle -->
+                            <div class="relative" id="calContainer">
+                                <button id="calToggleBtn" title="Pick a date" class="inline-flex items-center gap-2 px-3 py-2.5 border border-slate-200 rounded-xl text-sm font-semibold text-slate-600 hover:border-brand-400 hover:text-brand-600 transition-all bg-white shadow-sm">
+                                    <i class="fas fa-calendar-days text-brand-500"></i>
+                                    <span id="calBtnLabel">Pick date</span>
+                                    <i class="fas fa-chevron-down text-[10px] text-slate-400" id="calArrow"></i>
+                                </button>
+
+                                <!-- Floating Mini Calendar -->
+                                <div id="calPopup">
+                                    <!-- Month Nav -->
+                                    <div class="flex items-center justify-between mb-3">
+                                        <button id="calPrev" class="cal-nav-btn text-slate-500"><i class="fas fa-chevron-left text-[10px]"></i></button>
+                                        <span id="calMonthYear" class="text-xs font-bold text-slate-800 tracking-wide"></span>
+                                        <button id="calNext" class="cal-nav-btn text-slate-500"><i class="fas fa-chevron-right text-[10px]"></i></button>
+                                    </div>
+                                    <!-- Day labels -->
+                                    <div class="grid grid-cols-7 mb-0.5">
+                                        {% for lbl in "SMTWTFS" %}
+                                        <div class="text-center text-[0.58rem] font-bold text-slate-400 uppercase py-0.5">{{ lbl }}</div>
+                                        {% endfor %}
+                                    </div>
+                                    <!-- Day grid -->
+                                    <div id="calGrid" class="grid grid-cols-7 gap-y-0.5"></div>
+                                    <!-- Legend -->
+                                    <div class="mt-2.5 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+                                        <span class="flex items-center gap-1.5 text-[0.6rem] text-slate-400">
+                                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-brand-500"></span> Has bookings
+                                        </span>
+                                        <button id="clearDateBtn" class="text-[0.6rem] text-rose-400 hover:text-rose-600 font-semibold transition-colors hidden" id="clearDateBtn">
+                                            <i class="fas fa-times mr-1"></i>Clear
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Selected date chip -->
+                            <div id="selectedDateBadge" class="hidden items-center gap-1.5 bg-brand-50 border border-brand-200 text-brand-700 text-xs font-semibold px-2.5 py-1.5 rounded-lg">
+                                <i class="fas fa-calendar-check text-brand-500 text-[10px]"></i>
+                                <span id="selectedDateText"></span>
+                            </div>
+
+                            <!-- Search -->
+                            <div class="relative flex-1">
+                                <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search customer or restaurant..." class="w-full pl-9 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all">
+                            </div>
+                        </div>
+                        <button onclick="exportPDF()" class="w-full sm:w-auto px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm transition-colors flex items-center justify-center gap-2 shrink-0">
+                            <i class="fas fa-file-pdf text-red-500"></i> Export PDF
+                        </button>
+                    </div>
+
+                    <!-- Result Info Banner -->
+                    <div id="resultInfo" class="hidden text-sm text-slate-500 font-medium px-1">
+                        Showing <span id="resultCount" class="font-bold text-slate-700">0</span> booking(s) for
+                        <span id="resultDate" class="text-brand-600 font-bold"></span>
+                    </div>
+
+                    <!-- Default State (no date selected) -->
+                    <div id="defaultState" class="empty-state bg-white rounded-2xl border border-slate-200 shadow-sm py-24 text-center">
+                        <div class="w-20 h-20 bg-brand-50 rounded-full flex items-center justify-center mx-auto mb-5">
+                            <i class="fas fa-calendar-alt text-3xl text-brand-400"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-700 mb-2">Select a Date</h3>
+                        <p class="text-sm text-slate-400 max-w-xs mx-auto">Pick a date from the calendar on the left to see all bookings for that day.</p>
+                    </div>
+
+                    <!-- Bookings Table -->
+                    <div id="bookingsSection" class="hidden bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden anim-fade">
+                        <div class="overflow-x-auto">
+                            <table id="bookingsTable" class="w-full text-left border-collapse min-w-[700px]">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-400 text-xs font-bold uppercase tracking-wider">
+                                        <th class="py-4 px-4 w-12">#</th>
+                                        <th class="py-4 px-4">Restaurant</th>
+                                        <th class="py-4 px-4">Customer Name</th>
+                                        <th class="py-4 px-4">Contact</th>
+                                        <th class="py-4 px-4">Members</th>
+                                        <th class="py-4 px-4">Time</th>
+                                        <th class="py-4 px-4">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bookingsTbody" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- No Bookings for selected date -->
+                    <div id="noBookingsState" class="hidden empty-state bg-white rounded-2xl border border-slate-200 shadow-sm py-20 text-center">
+                        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-calendar-times text-2xl text-slate-300"></i>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-600 mb-1">No Bookings Found</h3>
+                        <p class="text-sm text-slate-400">There are no table bookings for the selected date.</p>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ── Booking data from Django (JSON) ── -->
+    <script id="bookingsData" type="application/json">
+        {% timezone "Asia/Kolkata" %}[{% for booking in bookings %}{"date":"{{ booking.booking_time|date:'Y-m-d' }}","restaurant":"{{ booking.restaurant.name|escapejs }}","customer":"{{ booking.customer_name|escapejs }}","contact":"{{ booking.contact_number|escapejs }}","members":{{ booking.members }},"time":"{{ booking.booking_time|date:'h:i A' }}","status":"{{ booking.status|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]{% endtimezone %}
+    </script>
+
+    <script>
+    // ── All bookings from server ──
+    const ALL_BOOKINGS = JSON.parse(document.getElementById('bookingsData').textContent);
+    const BOOKED_DATES = new Set(ALL_BOOKINGS.map(b => b.date));
+
+    // ── Calendar state ──
+    const TODAY = new Date();
+    let calYear  = TODAY.getFullYear();
+    let calMonth = TODAY.getMonth();   // 0-indexed
+    let selectedDate = null;           // 'YYYY-MM-DD'
+
+    const MONTHS = ["January","February","March","April","May","June",
+                    "July","August","September","October","November","December"];
+
+    function pad(n){ return String(n).padStart(2,'0'); }
+    function toDateStr(y,m,d){ return `${y}-${pad(m+1)}-${pad(d)}`; }
+
+    // ── Render Calendar ──
+    function renderCalendar(){
+        document.getElementById('calMonthYear').textContent = `${MONTHS[calMonth]} ${calYear}`;
+        const grid = document.getElementById('calGrid');
+        grid.innerHTML = '';
+
+        const firstDay    = new Date(calYear, calMonth, 1).getDay();
+        const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+        const todayStr    = toDateStr(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate());
+
+        for(let i=0; i<firstDay; i++){
+            const e = document.createElement('div');
+            e.className = 'cal-day empty';
+            grid.appendChild(e);
+        }
+
+        for(let d=1; d<=daysInMonth; d++){
+            const ds  = toDateStr(calYear, calMonth, d);
+            const el  = document.createElement('div');
+            el.className = 'cal-day';
+            el.textContent = d;
+
+            if(ds === todayStr)    el.classList.add('today');
+            if(ds === selectedDate) el.classList.add('selected');
+            if(BOOKED_DATES.has(ds)) el.classList.add('has-booking');
+
+            el.addEventListener('click', ()=> selectDate(ds, d));
+            grid.appendChild(el);
+        }
+    }
+
+    // ── Select a date ──
+    function selectDate(ds, day){
+        selectedDate = ds;
+        renderCalendar();
+
+        // Update toggle button label
+        document.getElementById('calBtnLabel').textContent = `${MONTHS[calMonth].slice(0,3)} ${day}`;
+
+        // Chip badge
+        const badge = document.getElementById('selectedDateBadge');
+        badge.classList.remove('hidden');
+        badge.classList.add('flex');
+        document.getElementById('selectedDateText').textContent = `${MONTHS[calMonth]} ${day}, ${calYear}`;
+
+        // Show clear button inside popup
+        document.getElementById('clearDateBtn').classList.remove('hidden');
+
+        // Close popup
+        document.getElementById('calPopup').classList.remove('open');
+        document.getElementById('calArrow').style.transform = '';
+
+        showBookingsForDate(ds, day);
+    }
+
+    // ── Show filtered bookings ──
+    function showBookingsForDate(ds, day){
+        const filtered = ALL_BOOKINGS.filter(b => b.date === ds);
+
+        document.getElementById('defaultState').classList.add('hidden');
+
+        // Result info
+        document.getElementById('resultInfo').classList.remove('hidden');
+        document.getElementById('resultCount').textContent = filtered.length;
+        document.getElementById('resultDate').textContent  = ds;
+
+        if(filtered.length === 0){
+            document.getElementById('bookingsSection').classList.add('hidden');
+            document.getElementById('noBookingsState').classList.remove('hidden');
+        } else {
+            document.getElementById('noBookingsState').classList.add('hidden');
+
+            const section = document.getElementById('bookingsSection');
+            section.classList.remove('hidden', 'anim-fade');
+            void section.offsetWidth;           // reflow to retrigger animation
+            section.classList.add('anim-fade');
+
+            const tbody = document.getElementById('bookingsTbody');
+            tbody.innerHTML = '';
+
+            filtered.forEach((b, i)=>{
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50/60 transition-colors booking-row';
+
+                // Status badge
+                const statusMap = {
+                    'Pending':   ['status-pending',   'fa-clock',        'Pending'],
+                    'Confirmed': ['status-confirmed',  'fa-check-circle', 'Confirmed'],
+                    'Cancelled': ['status-cancelled',  'fa-ban',          'Cancelled'],
+                    'Completed': ['status-completed',  'fa-flag-checkered','Completed'],
+                };
+                const [cls, icon, label] = statusMap[b.status] || ['status-pending','fa-clock', b.status || 'Pending'];
+
+                tr.innerHTML = `
+                    <td class="py-4 px-4 font-semibold text-slate-400">${i+1}</td>
+                    <td class="py-4 px-4 font-semibold text-slate-800">${esc(b.restaurant)}</td>
+                    <td class="py-4 px-4 font-medium text-slate-700">${esc(b.customer)}</td>
+                    <td class="py-4 px-4 text-slate-500">${esc(b.contact)}</td>
+                    <td class="py-4 px-4">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-orange-50 text-orange-600 border border-orange-200">
+                            <i class="fas fa-users mr-1"></i> ${b.members} Members
+                        </span>
+                    </td>
+                    <td class="py-4 px-4 font-semibold text-slate-600">
+                        <span class="inline-flex items-center gap-1.5">
+                            <i class="fas fa-clock text-orange-400 text-xs"></i> ${esc(b.time)}
+                        </span>
+                    </td>
+                    <td class="py-4 px-4">
+                        <span class="status-badge ${cls}">
+                            <i class="fas ${icon}"></i> ${label}
+                        </span>
+                    </td>`;
+                tbody.appendChild(tr);
+            });
+        }
+    }
+
+    function esc(s){
+        const d = document.createElement('div');
+        d.textContent = s;
+        return d.innerHTML;
+    }
+
+    // ── Clear date ──
+    document.getElementById('clearDateBtn').addEventListener('click', ()=>{
+        selectedDate = null;
+        renderCalendar();
+        const badge = document.getElementById('selectedDateBadge');
+        badge.classList.add('hidden');
+        badge.classList.remove('flex');
+        document.getElementById('defaultState').classList.remove('hidden');
+        document.getElementById('bookingsSection').classList.add('hidden');
+        document.getElementById('noBookingsState').classList.add('hidden');
+        document.getElementById('resultInfo').classList.add('hidden');
+
+        document.getElementById('searchInput').value = '';
+        document.getElementById('calBtnLabel').textContent = 'Pick date';
+        document.getElementById('clearDateBtn').classList.add('hidden');
+        // Close popup
+        document.getElementById('calPopup').classList.remove('open');
+    });
+
+    // ── Calendar navigation ──
+    document.getElementById('calPrev').addEventListener('click', e=>{
+        e.stopPropagation();
+        if(--calMonth < 0){ calMonth=11; calYear--; }
+        renderCalendar();
+    });
+    document.getElementById('calNext').addEventListener('click', e=>{
+        e.stopPropagation();
+        if(++calMonth > 11){ calMonth=0; calYear++; }
+        renderCalendar();
+    });
+
+    // ── Calendar popup toggle ──
+    document.getElementById('calToggleBtn').addEventListener('click', e=>{
+        e.stopPropagation();
+        const popup = document.getElementById('calPopup');
+        const arrow = document.getElementById('calArrow');
+        popup.classList.toggle('open');
+        arrow.style.transform = popup.classList.contains('open') ? 'rotate(180deg)' : '';
+    });
+    // Close popup on outside click
+    document.addEventListener('click', e=>{
+        const container = document.getElementById('calContainer');
+        if(container && !container.contains(e.target)){
+            document.getElementById('calPopup').classList.remove('open');
+            document.getElementById('calArrow').style.transform = '';
+        }
+    });
+
+    // ── Search filter ──
+    function filterTable(){
+        const q = document.getElementById('searchInput').value.toUpperCase();
+        document.querySelectorAll('#bookingsTbody .booking-row').forEach(row=>{
+            row.style.display = row.textContent.toUpperCase().includes(q) ? '' : 'none';
+        });
+    }
+
+    // ── Export PDF ──
+    function exportPDF(){
+        if(!selectedDate || document.getElementById('bookingsSection').classList.contains('hidden')){
+            alert('Please select a date first to export bookings.');
+            return;
+        }
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF('landscape');
+        doc.text(`Restaurant Bookings — ${selectedDate}`, 14, 15);
+        doc.autoTable({ html:'#bookingsTable', startY:22, theme:'grid', headStyles:{fillColor:[255,111,0]} });
+        doc.save(`bookings-${selectedDate}.pdf`);
+    }
+
+    // ── Profile Dropdown ──
+    document.addEventListener('DOMContentLoaded', ()=>{
+        const btn  = document.getElementById('adminProfileBtn');
+        const menu = document.getElementById('adminDropdownMenu');
+        const arr  = document.getElementById('dropdownArrow');
+        if(btn && menu){
+            btn.addEventListener('click', e=>{ e.stopPropagation(); menu.classList.toggle('hidden'); arr && arr.classList.toggle('rotate-180'); });
+            document.addEventListener('click', e=>{ if(!btn.contains(e.target) && !menu.contains(e.target)){ menu.classList.add('hidden'); arr && arr.classList.remove('rotate-180'); } });
+        }
+    });
+
+
+    // ── Init: render calendar + auto-select today ──
+    renderCalendar();
+    const todayDateStr = toDateStr(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate());
+    selectDate(todayDateStr, TODAY.getDate());
+    </script>
+</body>
+</html>

@@ -1,0 +1,574 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Delivery Partner - Foodeat{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="{% static 'js/3.4.js' %}"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f9fafb',
+                            100: '#f3f4f6',
+                            500: '#000000', // Black Primary
+                            600: '#171717',
+                            accent: '#000000', // Black Accent
+                            cyan: '#000000', 
+                            cyanDark: '#171717',
+                            violet: '#000000',
+                            violetDark: '#171717',
+                        },
+                        obsidian: {
+                            base: '#000000', 
+                            card: '#171717', 
+                            border: '#262626', 
+                            light: '#404040', 
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        /* Responsive Layout Rules */
+        @media (min-width: 1024px) {
+            .main-content {
+                margin-left: 260px !important;
+                width: calc(100% - 260px) !important;
+            }
+        }
+
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .main-content {
+                margin-left: 70px !important;
+                width: calc(100% - 70px) !important;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .main-content {
+                margin-left: 0 !important;
+                width: 100% !important;
+                padding-top: 4rem; /* Spacing for fixed mobile header */
+            }
+
+            .sidebar.active {
+                transform: translateX(0) !important;
+            }
+        }
+
+        .sidebar-scroll {
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            display: none;
+        }
+
+        .sidebar-surface {
+            background: #000000;
+            border-right: 1px solid #262626;
+        }
+
+        .menu-link {
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
+            transform: translateX(0);
+            transition: color 220ms ease, background-color 220ms ease, transform 220ms ease, box-shadow 220ms ease;
+        }
+
+        .menu-link::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            opacity: 0;
+            transform: translateX(-14px);
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+            transition: opacity 220ms ease, transform 220ms ease;
+        }
+
+        .menu-link:hover {
+            transform: translateX(4px);
+        }
+
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .menu-link:hover {
+                transform: translateY(-1px);
+            }
+        }
+
+        .menu-link:hover::before {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .menu-link.is-active {
+            background: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            color: #000000 !important;
+        }
+
+        .menu-link.is-active::after {
+            content: "";
+            position: absolute;
+            right: 0.55rem;
+            top: 50%;
+            width: 0.38rem;
+            height: 0.38rem;
+            border-radius: 999px;
+            background: #000000;
+            box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.2);
+            transform: translateY(-50%);
+        }
+
+        @media (min-width: 768px) and (max-width: 1023px) {
+            .menu-link.is-active::after {
+                right: 0.3rem;
+            }
+        }
+
+        /* Glassmorphism utility */
+        .glass-header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .status-badge-online {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .status-badge-offline {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+            100% { transform: scale(0.95); opacity: 0.5; }
+        }
+
+        .pulse-indicator {
+            animation: pulse-ring 2s infinite ease-in-out;
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen">
+
+    <!-- Mobile Header/Navbar -->
+    <header class="md:hidden fixed top-0 left-0 right-0 h-16 bg-white/95 border-b border-slate-200 shadow-sm backdrop-blur-md flex items-center justify-between px-4 z-50">
+        <div class="flex items-center gap-3">
+            <button
+                type="button"
+                id="sidebarOpen"
+                class="w-10 h-10 bg-white border border-slate-200 text-slate-600 rounded-xl flex items-center justify-center hover:bg-slate-50 transition active:scale-95"
+                aria-label="Open navigation menu"
+            >
+                <i class="fa-solid fa-bars text-base"></i>
+            </button>
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-brand-violet rounded-lg flex items-center justify-center text-white">
+                    <i class="fa-solid fa-motorcycle text-sm"></i>
+                </div>
+                <div>
+                    <span class="font-extrabold tracking-tight text-slate-800 text-sm">Foodeat</span>
+                    <span class="text-[9px] text-brand-violet font-bold block leading-none">Partner</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <!-- Mobile Notification Bell -->
+            <div class="relative mr-1">
+                <a href="{% url 'delivery_notifications' %}" class="relative text-slate-500 hover:text-slate-700 transition" title="Notifications">
+                    <i class="fa-solid fa-bell text-lg"></i>
+                    {% if unread_notifications_count %}
+                        <span class="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[8px] font-black h-3.5 w-3.5 rounded-full flex items-center justify-center border border-white">{{ unread_notifications_count }}</span>
+                    {% endif %}
+                </a>
+            </div>
+
+            <!-- Mobile Profile Dropdown Container -->
+            <div class="relative" id="mobileProfileDropdownContainer">
+                <button type="button" id="mobileProfileDropdownBtn" class="w-8 h-8 rounded-full overflow-hidden border border-brand-violet flex-shrink-0 focus:outline-none block">
+                    {% if boy.image %}
+                        <img src="{{ boy.image.url }}" alt="{{ boy.name }}" class="w-full h-full object-cover">
+                    {% else %}
+                        <div class="w-full h-full bg-slate-200 flex items-center justify-center text-[10px]">🚴</div>
+                    {% endif %}
+                </button>
+                <!-- Mobile Dropdown Menu -->
+                <div id="mobileProfileDropdownMenu" class="absolute right-0 mt-2.5 w-44 rounded-2xl bg-white border border-slate-200 shadow-xl p-2 z-[99] hidden opacity-0 transform translate-y-2 transition-all duration-200">
+                    <div class="px-3 py-2 border-b border-slate-100 mb-1">
+                        <p class="text-xs font-extrabold text-slate-800 truncate">{{ boy.name }}</p>
+                        <p class="text-[9px] text-slate-500 truncate mt-0.5">{{ boy.phone_number }}</p>
+                    </div>
+                    <a href="{% url 'delivery_profile_edit' %}" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition">
+                        <i class="fa-solid fa-user-pen text-brand-violet w-4 text-center"></i>
+                        Edit Profile
+                    </a>
+                    <a href="{% url 'delivery_logout' %}" class="flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-bold text-rose-500 hover:bg-rose-50 transition">
+                        <i class="fa-solid fa-right-from-bracket w-4 text-center"></i>
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div
+        id="sidebarOverlay"
+        class="fixed inset-0 z-[55] hidden bg-slate-950/60 opacity-0 backdrop-blur-sm transition-opacity duration-300 md:hidden"
+        aria-hidden="true"
+    ></div>
+
+    <!-- Sidebar Aside -->
+    <aside
+        id="sidebar"
+        class="sidebar sidebar-scroll bg-black border-r border-neutral-800 fixed left-0 top-0 z-[60] flex h-screen w-[260px] -translate-x-full flex-col text-neutral-200 transition-transform duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] md:translate-x-0 md:w-[70px] lg:w-[260px] shadow-2xl"
+    >
+        <!-- Sidebar Header (Brand Logo) -->
+        <div class="h-16 flex items-center justify-between px-4 border-b border-neutral-800 flex-shrink-0 lg:justify-start lg:gap-3 md:justify-center md:px-2">
+            <div class="flex items-center gap-3 md:hidden lg:flex">
+                <div class="w-10 h-10 bg-white border border-neutral-200 rounded-xl flex items-center justify-center text-black shadow-lg">
+                    <i class="fa-solid fa-motorcycle text-lg"></i>
+                </div>
+                <div>
+                    <span class="font-black text-slate-100 text-lg tracking-tight">Foodeat</span>
+                    <span class="text-xs text-neutral-400 font-bold block leading-none">Delivery Partner</span>
+                </div>
+            </div>
+            
+            <!-- Icon-only for Tablet mode -->
+            <div class="hidden md:flex lg:hidden w-10 h-10 bg-white border border-neutral-200 rounded-xl items-center justify-center text-black shadow-lg">
+                <i class="fa-solid fa-motorcycle text-lg"></i>
+            </div>
+  
+            <button
+                type="button"
+                id="sidebarClose"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-800 hover:text-white transition md:hidden"
+                aria-label="Close navigation menu"
+            >
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        <!-- Static Driver Info Identity Card & Sidebar Duty Toggle -->
+        <div class="px-3 pt-4 pb-3 border-b border-neutral-800 flex-shrink-0 md:px-2 lg:px-3">
+            <div class="rounded-2xl p-3.5 bg-neutral-900 border border-neutral-800 flex flex-col gap-3 justify-center items-stretch">
+                <!-- Driver Info Details -->
+                <div class="min-w-0 md:hidden lg:block">
+                    <p class="truncate text-sm font-black leading-none text-white">{{ boy.name }}</p>
+                    <p class="truncate text-[10px] text-neutral-400 font-bold mt-1.5">{{ boy.email }}</p>
+                </div>
+
+                <!-- Duty Toggle Option inside driver card box -->
+                <a href="{% url 'delivery_toggle_duty' %}" class="flex items-center justify-between p-2 rounded-xl bg-black border border-neutral-800 hover:bg-neutral-950 transition-all md:justify-center lg:justify-between" title="Toggle Duty Status">
+                    <div class="flex items-center gap-1.5 md:hidden lg:flex">
+                        <span class="h-2 w-2 rounded-full {% if boy.status == 'Off-duty' %}bg-rose-500{% else %}bg-emerald-500 pulse-indicator{% endif %}"></span>
+                        <span class="text-[10px] font-black text-neutral-350 uppercase tracking-wider">{% if boy.status == 'Off-duty' %}Offline{% else %}Online{% endif %}</span>
+                    </div>
+                    <!-- Toggle Switch -->
+                    <div class="relative w-8 h-4.5 rounded-full transition-colors {% if boy.status == 'Off-duty' %}bg-neutral-800{% else %}bg-emerald-500{% endif %} flex items-center px-0.5 shrink-0">
+                        <div class="w-3.5 h-3.5 bg-white rounded-full shadow-md transform transition-transform duration-200 {% if boy.status == 'Off-duty' %}translate-x-0{% else %}translate-x-3.5{% endif %}"></div>
+                    </div>
+                </a>
+            </div>
+        </div>
+  
+        <!-- Navigation Menu -->
+        <nav class="flex-1 px-3 py-4 md:px-2 lg:px-3 space-y-1">
+            <a href="{% url 'delivery_dashboard' %}" class="menu-link flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold transition md:justify-center lg:justify-start {% if request.path == '/delivery/dashboard/' %}is-active{% else %}text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900{% endif %}">
+                <i class="fa-solid fa-gauge-high w-5 text-center text-base"></i>
+                <span class="md:hidden lg:inline">Dashboard</span>
+            </a>
+            
+            <a href="{% url 'delivery_vehicle_info' %}" class="menu-link flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold transition md:justify-center lg:justify-start {% if request.path == '/delivery/vehicle-info/' %}is-active{% else %}text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900{% endif %}">
+                <i class="fa-solid fa-motorcycle w-5 text-center text-base"></i>
+                <span class="md:hidden lg:inline">Vehicle Info</span>
+            </a>
+ 
+            <a href="{% url 'delivery_bank_details' %}" class="menu-link flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold transition md:justify-center lg:justify-start {% if request.path == '/delivery/bank-details/' %}is-active{% else %}text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900{% endif %}">
+                <i class="fa-solid fa-building-columns w-5 text-center text-base"></i>
+                <span class="md:hidden lg:inline">Bank Details</span>
+            </a>
+ 
+            <a href="{% url 'delivery_help_support' %}" class="menu-link flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold transition md:justify-center lg:justify-start {% if request.path == '/delivery/help/' %}is-active{% else %}text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900{% endif %}">
+                <i class="fa-solid fa-circle-question w-5 text-center text-base"></i>
+                <span class="md:hidden lg:inline">Help Us</span>
+            </a>
+        </nav>
+  
+
+        <!-- Sidebar Footer (Logout) -->
+        <div class="mt-auto border-t border-neutral-800 p-3 md:p-2 lg:p-3 flex-shrink-0">
+            <a href="{% url 'delivery_logout' %}" class="menu-link flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-neutral-400 hover:text-rose-400 hover:bg-rose-950/20 transition md:justify-center lg:justify-start">
+                <i class="fa-solid fa-right-from-bracket w-5 text-center text-base"></i>
+                <span class="md:hidden lg:inline">Logout</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Top Sticky Header for Desktop and Tablet -->
+    <header class="hidden md:flex fixed top-0 right-0 h-16 bg-white border-b border-slate-200 shadow-sm items-center justify-between px-6 z-40 transition-all duration-300 main-content">
+        <div>
+            <!-- Breadcrumbs / Page Context Title -->
+            <h1 class="text-base font-extrabold text-slate-800 tracking-tight">
+                {% block header_title %}Dashboard{% endblock %}
+            </h1>
+        </div>
+
+        <div class="flex items-center gap-6">
+            <!-- Notification Bell -->
+            <div class="relative mr-2">
+                <a href="{% url 'delivery_notifications' %}" class="relative text-slate-500 hover:text-slate-700 transition" title="Notifications">
+                    <i class="fa-solid fa-bell text-xl"></i>
+                    {% if unread_notifications_count %}
+                        <span class="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[9px] font-black h-4 w-4 rounded-full flex items-center justify-center border border-white">{{ unread_notifications_count }}</span>
+                    {% endif %}
+                </a>
+            </div>
+
+            <!-- Desktop Profile Dropdown Container -->
+            <div class="relative" id="profileDropdownContainer">
+                <button type="button" id="profileDropdownBtn" class="flex items-center gap-3 focus:outline-none text-left">
+                    <div class="text-right">
+                        <p class="text-xs font-black text-slate-800 leading-tight">{{ boy.name }}</p>
+                        <p class="text-[10px] text-slate-505 font-bold leading-normal mt-0.5">{{ boy.type_of_bike }} / {{ boy.bike_number }}</p>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl overflow-hidden border border-brand-violet hover:border-brand-violet/80 transition flex-shrink-0">
+                        {% if boy.image %}
+                            <img src="{{ boy.image.url }}" alt="{{ boy.name }}" class="w-full h-full object-cover">
+                        {% else %}
+                            <div class="w-full h-full bg-slate-100 flex items-center justify-center text-sm">🚴</div>
+                        {% endif %}
+                    </div>
+                </button>
+
+                <!-- Desktop Dropdown Menu -->
+                <div id="profileDropdownMenu" class="absolute right-0 mt-2.5 w-48 rounded-2xl bg-white border border-slate-200 shadow-lg p-2 z-[99] hidden opacity-0 transform translate-y-2 transition-all duration-200">
+                    <div class="px-3.5 py-2 border-b border-slate-100 mb-1">
+                        <p class="text-xs font-extrabold text-slate-800 truncate">{{ boy.name }}</p>
+                        <p class="text-[9px] text-slate-500 truncate mt-0.5">{{ boy.email }}</p>
+                    </div>
+                    <a href="{% url 'delivery_profile_edit' %}" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition">
+                        <i class="fa-solid fa-user-pen text-brand-violet w-4 text-center"></i>
+                        Edit Profile
+                    </a>
+                    <a href="{% url 'delivery_logout' %}" class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-rose-500 hover:bg-rose-50 transition">
+                        <i class="fa-solid fa-right-from-bracket w-4 text-center"></i>
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Wrapper for Content -->
+    <div class="main-content min-h-screen flex flex-col transition-all duration-300">
+        <!-- Desktop Page Top Margin Compensation -->
+        <div class="hidden md:block h-16 flex-shrink-0"></div>
+
+        <!-- Main Content Area -->
+        <main class="flex-grow p-4 md:p-6 lg:p-8">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <!-- SweetAlert2 notifications script -->
+    {% if messages %}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            {% for message in messages %}
+                var icon = 'info';
+                {% if message.tags == 'success' %}
+                    icon = 'success';
+                {% elif message.tags == 'error' or message.tags == 'danger' %}
+                    icon = 'error';
+                {% elif message.tags == 'warning' %}
+                    icon = 'warning';
+                {% endif %}
+
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    showCloseButton: true,
+                    timer: 4000,
+                    timerProgressBar: true,
+                    icon: icon,
+                    title: "{{ message|escapejs }}",
+                    background: '#0b1523',
+                    color: '#f8fafc',
+                    iconColor: icon === 'success' ? '#10b981' : (icon === 'error' ? '#f43f5e' : '#f59e0b'),
+                    didOpen: (toast) => {
+                        toast.onmouseenter = Swal.stopTimer;
+                        toast.onmouseleave = Swal.resumeTimer;
+                    }
+                });
+            {% endfor %}
+        });
+    </script>
+    {% endif %}
+
+    <!-- Dropdown and Drawer Controls -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Mobile Sidebar Drawer
+            const sidebar = document.getElementById("sidebar");
+            const overlay = document.getElementById("sidebarOverlay");
+            const openBtn = document.getElementById("sidebarOpen");
+            const closeBtn = document.getElementById("sidebarClose");
+            const mobileQuery = window.matchMedia("(max-width: 767px)");
+
+            function openSidebar() {
+                sidebar.classList.remove("-translate-x-full");
+                sidebar.classList.add("translate-x-0", "active");
+                overlay.classList.remove("hidden");
+                requestAnimationFrame(function() {
+                    overlay.classList.remove("opacity-0");
+                    overlay.classList.add("opacity-100");
+                });
+                document.body.classList.add("overflow-hidden");
+                if (openBtn) openBtn.classList.add("hidden");
+            }
+
+            function closeSidebar() {
+                sidebar.classList.add("-translate-x-full");
+                sidebar.classList.remove("translate-x-0", "active");
+                overlay.classList.add("opacity-0");
+                overlay.classList.remove("opacity-100");
+                if (openBtn) openBtn.classList.remove("hidden");
+                window.setTimeout(function() {
+                    overlay.classList.add("hidden");
+                }, 300);
+                document.body.classList.remove("overflow-hidden");
+            }
+
+            openBtn && openBtn.addEventListener("click", openSidebar);
+            closeBtn && closeBtn.addEventListener("click", closeSidebar);
+            overlay && overlay.addEventListener("click", closeSidebar);
+
+            if (sidebar) {
+                sidebar.querySelectorAll("a").forEach(function(link) {
+                    link.addEventListener("click", function() {
+                        if (mobileQuery.matches) {
+                            closeSidebar();
+                        }
+                    });
+                });
+            }
+
+            const handleMediaChange = function(event) {
+                if (!event.matches) {
+                    closeSidebar();
+                }
+            };
+
+            if (mobileQuery.addEventListener) {
+                mobileQuery.addEventListener("change", handleMediaChange);
+            } else if (mobileQuery.addListener) {
+                mobileQuery.addListener(handleMediaChange);
+            }
+
+            // --- Profile Dropdowns Functionality ---
+            const profileBtn = document.getElementById("profileDropdownBtn");
+            const profileMenu = document.getElementById("profileDropdownMenu");
+            
+            const mobileProfileBtn = document.getElementById("mobileProfileDropdownBtn");
+            const mobileProfileMenu = document.getElementById("mobileProfileDropdownMenu");
+
+            function toggleDropdown(btn, menu) {
+                if (!btn || !menu) return;
+                
+                const isHidden = menu.classList.contains("hidden");
+                
+                // Close other dropdown
+                if (menu === profileMenu && mobileProfileMenu) closeDropdown(mobileProfileMenu);
+                if (menu === mobileProfileMenu && profileMenu) closeDropdown(profileMenu);
+
+                if (isHidden) {
+                    menu.classList.remove("hidden");
+                    // Force repaint
+                    menu.offsetHeight; 
+                    menu.classList.remove("opacity-0", "translate-y-2");
+                    menu.classList.add("opacity-100", "translate-y-0");
+                } else {
+                    closeDropdown(menu);
+                }
+            }
+
+            function closeDropdown(menu) {
+                if (!menu || menu.classList.contains("hidden")) return;
+                menu.classList.remove("opacity-100", "translate-y-0");
+                menu.classList.add("opacity-0", "translate-y-2");
+                window.setTimeout(() => {
+                    menu.classList.add("hidden");
+                }, 200);
+            }
+
+            profileBtn && profileBtn.addEventListener("click", function(e) {
+                e.stopPropagation();
+                toggleDropdown(profileBtn, profileMenu);
+            });
+
+            mobileProfileBtn && mobileProfileBtn.addEventListener("click", function(e) {
+                e.stopPropagation();
+                toggleDropdown(mobileProfileBtn, mobileProfileMenu);
+            });
+
+            // Close when clicking anywhere outside
+            document.addEventListener("click", function(e) {
+                if (profileMenu && !profileMenu.classList.contains("hidden")) {
+                    if (!profileMenu.contains(e.target) && !profileBtn.contains(e.target)) {
+                        closeDropdown(profileMenu);
+                    }
+                }
+                if (mobileProfileMenu && !mobileProfileMenu.classList.contains("hidden")) {
+                    if (!mobileProfileMenu.contains(e.target) && !mobileProfileBtn.contains(e.target)) {
+                        closeDropdown(mobileProfileMenu);
+                    }
+                }
+            });
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

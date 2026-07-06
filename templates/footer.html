@@ -1,0 +1,155 @@
+{% load static %}
+<footer class="footer-block mt-auto py-12 text-slate-300 bg-slate-950 border-t border-slate-900 relative">
+    <!-- Back to Top Button -->
+    <button id="back-to-top" class="absolute -top-5 right-10 w-10 h-10 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 hover:scale-110 text-white flex items-center justify-center shadow-lg shadow-orange-500/25 transition-all opacity-0 pointer-events-none z-40" title="Back to Top">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
+
+    <div class="max-w-6xl w-full mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
+        <!-- Brand & Live Status -->
+        <div class="space-y-5">
+            <h5 class="text-xl font-extrabold text-white tracking-tight flex items-center gap-2">
+                <i class="fa-solid fa-utensils text-[#FF4D30]"></i>
+                Foodeat
+            </h5>
+            <p class="text-xs leading-relaxed text-slate-400">
+                Discover the best food & drinks in your city. Order online, explore top restaurants, and book dining tables with ease.
+            </p>
+            <!-- Live Status indicator -->
+            <div class="inline-flex items-center gap-2 bg-slate-900/60 rounded-xl px-3 py-2 border border-slate-905">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span class="text-[10px] font-extrabold text-emerald-400 uppercase tracking-wider">Kitchen Live & Open</span>
+            </div>
+        </div>
+
+        <!-- Quick Links -->
+        <div class="space-y-4">
+            <h5 class="text-sm font-bold uppercase tracking-wider text-slate-200">Company</h5>
+            <ul class="space-y-2.5 text-xs">
+                <li><a href="/aboutus" class="text-slate-400 hover:text-[#FF4D30] transition-colors flex items-center gap-1.5"><i class="fa-solid fa-chevron-right text-[8px] text-slate-655"></i> About Us</a></li>
+                <li><a href="/contactus" class="text-slate-400 hover:text-[#FF4D30] transition-colors flex items-center gap-1.5"><i class="fa-solid fa-chevron-right text-[8px] text-slate-655"></i> Contact Us</a></li>
+                <li><a href="/menu" class="text-slate-400 hover:text-[#FF4D30] transition-colors flex items-center gap-1.5"><i class="fa-solid fa-chevron-right text-[8px] text-slate-655"></i> Our Menu</a></li>
+                <li><a href="/restaurant_view" class="text-slate-400 hover:text-[#FF4D30] transition-colors flex items-center gap-1.5"><i class="fa-solid fa-chevron-right text-[8px] text-slate-655"></i> Restaurants</a></li>
+                <li><a href="{% url 'delivery_register' %}" class="text-slate-400 hover:text-[#FF4D30] transition-colors flex items-center gap-1.5"><i class="fa-solid fa-motorcycle text-[10px] text-[#FF4D30]"></i> Delivery Registration</a></li>
+                <li><a href="{% url 'delivery_login' %}" class="text-slate-400 hover:text-[#FF4D30] transition-colors flex items-center gap-1.5"><i class="fa-solid fa-right-to-bracket text-[10px] text-[#FF4D30]"></i> Delivery Login</a></li>
+            </ul>
+        </div>
+
+        <!-- Services -->
+        <div class="space-y-4">
+            <h5 class="text-sm font-bold uppercase tracking-wider text-slate-200">For Foodies</h5>
+            <ul class="space-y-2.5 text-xs">
+                <li><a href="/menu" class="text-slate-400 hover:text-[#FF4D30] transition-colors flex items-center gap-1.5"><i class="fa-solid fa-chevron-right text-[8px] text-slate-655"></i> Order Online</a></li>
+                <li><a href="/restaurant_view" class="text-slate-400 hover:text-[#FF4D30] transition-colors flex items-center gap-1.5"><i class="fa-solid fa-chevron-right text-[8px] text-slate-655"></i> Book Table</a></li>
+                <li><a href="/my_orders" class="text-slate-400 hover:text-[#FF4D30] transition-colors flex items-center gap-1.5"><i class="fa-solid fa-chevron-right text-[8px] text-slate-655"></i> Track Orders</a></li>
+                <li><a href="/my_booking" class="text-slate-400 hover:text-[#FF4D30] transition-colors flex items-center gap-1.5"><i class="fa-solid fa-chevron-right text-[8px] text-slate-655"></i> Reservation List</a></li>
+            </ul>
+        </div>
+
+        <!-- Interactive Newsletter -->
+        <div class="space-y-4">
+            <h5 class="text-sm font-bold uppercase tracking-wider text-slate-200">Foodie Club</h5>
+            <p class="text-xs text-slate-450 leading-relaxed">Subscribe to receive recipe insights, food festival alerts, and secret promo discounts.</p>
+            
+            <form id="newsletter-form" class="space-y-2" onsubmit="handleNewsletterSubmit(event)">
+                <div class="relative flex items-center">
+                    <i class="fa-regular fa-envelope absolute left-3.5 text-slate-400 text-xs"></i>
+                    <input type="email" required placeholder="Your email address" class="w-full h-10 pl-9 pr-12 text-xs bg-slate-900 border border-slate-800 rounded-xl text-white outline-none focus:border-[#FF4D30] transition-colors placeholder:text-slate-500">
+                    <button type="submit" class="absolute right-1 w-8 h-8 rounded-lg bg-[#FF4D30] hover:bg-[#ea361b] text-white flex items-center justify-center transition-colors">
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Contact details strip -->
+    <div class="max-w-6xl w-full mx-auto px-4 mt-8 pt-6 border-t border-slate-900/60 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-400">
+        <p class="flex items-center justify-center md:justify-start gap-2">
+            <i class="fa-solid fa-location-dot text-[#FF4D30]"></i>
+            <span>Surat,India</span>
+        </p>
+        <p class="flex items-center justify-center gap-2">
+            <i class="fa-solid fa-envelope text-[#FF4D30]"></i>
+            <a href="mailto:support@foodeat.com" class="hover:text-[#FF4D30] transition-colors">support@foodeat.com</a>
+        </p>
+        <p class="flex items-center justify-center md:justify-end gap-2">
+            <i class="fa-solid fa-phone text-[#FF4D30]"></i>
+            <a href="tel:+911234567890" class="hover:text-[#FF4D30] transition-colors">+91 12345 67890</a>
+        </p>
+    </div>
+
+    <!-- Bottom copyrights and social -->
+    <div class="max-w-6xl w-full mx-auto px-4 mt-6 pt-6 border-t border-slate-900/60 flex flex-col md:flex-row items-center justify-between gap-4">
+        <p class="text-[11px] text-slate-500">
+            &copy; 2026 Foodeat Private Limited. All Rights Reserved.
+        </p>
+
+        <!-- Social Links -->
+        <div class="flex items-center gap-3">
+            <a href="#" class="w-8 h-8 rounded-full bg-slate-900 hover:bg-[#FF4D30] hover:text-white flex items-center justify-center transition-all text-slate-400" title="Facebook">
+                <i class="fa-brands fa-facebook-f text-xs"></i>
+            </a>
+            <a href="#" class="w-8 h-8 rounded-full bg-slate-900 hover:bg-[#FF4D30] hover:text-white flex items-center justify-center transition-all text-slate-400" title="Twitter">
+                <i class="fa-brands fa-x-twitter text-xs"></i>
+            </a>
+            <a href="#" class="w-8 h-8 rounded-full bg-slate-900 hover:bg-[#FF4D30] hover:text-white flex items-center justify-center transition-all text-slate-400" title="Instagram">
+                <i class="fa-brands fa-instagram text-xs"></i>
+            </a>
+            <a href="#" class="w-8 h-8 rounded-full bg-slate-900 hover:bg-[#FF4D30] hover:text-white flex items-center justify-center transition-all text-slate-400" title="YouTube">
+                <i class="fa-brands fa-youtube text-xs"></i>
+            </a>
+        </div>
+    </div>
+</footer>
+
+<!-- Newsletter and Scroll Script -->
+<script>
+    // Smooth Scroll back to top
+    const backToTopBtn = document.getElementById('back-to-top');
+    if (backToTopBtn) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 400) {
+                backToTopBtn.classList.remove('opacity-0', 'pointer-events-none');
+                backToTopBtn.classList.add('opacity-100');
+            } else {
+                backToTopBtn.classList.add('opacity-0', 'pointer-events-none');
+                backToTopBtn.classList.remove('opacity-100');
+            }
+        });
+
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+
+    // Newsletter handle
+    function handleNewsletterSubmit(e) {
+        e.preventDefault();
+        const input = e.target.querySelector('input[type="email"]');
+        const email = input ? input.value : '';
+        
+        // Show success alert (using SweetAlert2 if loaded, fallback to default alert)
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                title: 'Welcome to Foodie Club! 🍕',
+                text: `Thank you for subscribing with ${email}! Keep an eye on your inbox for exclusive deals.`,
+                icon: 'success',
+                confirmButtonColor: '#FF4D30',
+                customClass: {
+                    popup: 'rounded-3xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100'
+                }
+            });
+        } else {
+            alert(`Thank you for subscribing with ${email}!`);
+        }
+        
+        if (input) input.value = '';
+    }
+</script>

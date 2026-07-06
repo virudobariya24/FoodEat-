@@ -1,0 +1,68 @@
+{% extends 'delivery/base.html' %}
+{% load static %}
+
+{% block title %}Vehicle Information - Delivery Partner - Foodeat{% endblock %}
+
+{% block header_title %}Vehicle Details{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white border border-neutral-200 rounded-3xl shadow-sm overflow-hidden text-neutral-900">
+    
+    <!-- Header -->
+    <div class="px-6 py-5 border-b border-neutral-200 flex items-center justify-between">
+        <div>
+            <h2 class="text-lg font-extrabold text-neutral-800">Vehicle & License Info</h2>
+            <p class="text-[11px] text-neutral-500 mt-0.5">Assigned delivery vehicle and driver license verification</p>
+        </div>
+        <i class="fa-solid fa-motorcycle text-2xl text-black"></i>
+    </div>
+
+    <!-- Body -->
+    <div class="p-6 md:p-8 space-y-6">
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <!-- Vehicle Model / Type -->
+            <div class="p-4 bg-neutral-50 border border-neutral-200 rounded-2xl flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-white border border-neutral-200 text-black flex items-center justify-center text-lg flex-shrink-0">
+                    <i class="fa-solid fa-motorcycle"></i>
+                </div>
+                <div>
+                    <span class="block text-[10px] font-bold text-neutral-455 uppercase tracking-wider">Vehicle Model</span>
+                    <span class="text-sm font-extrabold text-neutral-800">{{ boy.type_of_bike }}</span>
+                </div>
+            </div>
+
+            <!-- Plate Number -->
+            <div class="p-4 bg-neutral-50 border border-neutral-200 rounded-2xl flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-white border border-neutral-200 text-black flex items-center justify-center text-lg flex-shrink-0">
+                    <i class="fa-solid fa-hashtag"></i>
+                </div>
+                <div>
+                    <span class="block text-[10px] font-bold text-neutral-455 uppercase tracking-wider">Number Plate</span>
+                    <span class="text-sm font-extrabold text-neutral-800 tracking-wide">{{ boy.bike_number }}</span>
+                </div>
+            </div>
+
+            <!-- Driving License -->
+            <div class="p-4 bg-neutral-50 border border-neutral-200 rounded-2xl flex items-center gap-4 sm:col-span-2">
+                <div class="w-10 h-10 rounded-xl bg-white border border-neutral-200 text-black flex items-center justify-center text-lg flex-shrink-0">
+                    <i class="fa-solid fa-id-card"></i>
+                </div>
+                <div>
+                    <span class="block text-[10px] font-bold text-neutral-455 uppercase tracking-wider">Driving License Number</span>
+                    <span class="text-sm font-extrabold text-neutral-800 tracking-wide">{{ boy.license_number }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 bg-neutral-50 border border-neutral-200 rounded-2xl">
+            <h4 class="text-xs font-extrabold text-neutral-800 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-neutral-900"></i> Partner Profile Verified</h4>
+            <p class="text-xs text-neutral-500 leading-relaxed">Your driver details and vehicle registration have been verified by the platform administration. Please ensure you update these immediately in edit profile if you switch vehicles.</p>
+        </div>
+
+
+
+    </div>
+
+</div>
+{% endblock %}

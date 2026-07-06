@@ -1,0 +1,419 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Checkout</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="{% static 'js/3.4.js' %}"></script>
+    <style>
+        :root {
+            --primary-color: #F05941;
+            --secondary-color: #4CAF50;
+            --background-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+            --text-color: #555;
+            --heading-color: #222;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .checkout-container {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            max-width: 1100px;
+            width: 100%;
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .order-summary {
+            padding: 40px;
+            border-right: 1px solid var(--border-color);
+        }
+        .payment-details {
+            padding: 40px;
+            background-color: #fafafa;
+        }
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--heading-color);
+            margin-top: 0;
+            margin-bottom: 30px;
+        }
+        .item-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .item-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .item-list li:last-child {
+            border-bottom: none;
+        }
+        .item-name {
+            font-weight: 500;
+            color: var(--heading-color);
+        }
+        .item-quantity {
+            color: #999;
+            font-size: 0.9em;
+        }
+        .price-breakdown {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid var(--border-color);
+        }
+        .price-breakdown div {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 1rem;
+        }
+        .price-breakdown .total {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--heading-color);
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--border-color);
+        }
+        .discount {
+            color: var(--secondary-color);
+        }
+        #rzp-button {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(45deg, var(--primary-color), #ff7e5f);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(240, 89, 65, 0.4);
+        }
+        #rzp-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(240, 89, 65, 0.6);
+        }
+        .secure-payment-info {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #888;
+        }
+        .secure-payment-info i {
+            color: var(--secondary-color);
+            margin-right: 5px;
+        }
+        @media (max-width: 900px) {
+            body {
+                align-items: flex-start;
+                padding: 10px;
+            }
+            .checkout-container {
+                grid-template-columns: 1fr;
+                margin: 10px 0;
+            }
+            .order-summary {
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                padding: 20px;
+            }
+            .payment-details {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="checkout-container">
+        <div class="order-summary">
+            <h2>Order Summary</h2>
+            <ul class="item-list">
+                {% for item in cart_items %}
+                <li style="display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        {% if item.food.food_image %}
+                            <img src="{{ item.food.food_image.url }}" alt="{{ item.food.food_name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border-color);">
+                        {% else %}
+                            <div style="width: 50px; height: 50px; border-radius: 8px; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #aaa;"><i class="fas fa-utensils"></i></div>
+                        {% endif %}
+                        <div>
+                            <div class="item-name" style="font-weight: 600; color: var(--heading-color);">{{ item.food.food_name }}</div>
+                            <div class="item-quantity" style="color: #999; font-size: 0.8rem; margin-top: 2px;">Quantity: {{ item.quantity }}</div>
+                        </div>
+                    </div>
+                    <span class="item-price">
+                        {% if item.discount_percent > 0 %}
+                            <span class="line-through text-slate-400 text-xs mr-1">₹{{ item.food.price|floatformat:2 }}</span>
+                            <span class="text-rose-500 font-bold">₹{{ item.discounted_unit_price|floatformat:2 }}</span>
+                        {% else %}
+                            <span>₹{{ item.food.price|floatformat:2 }}</span>
+                        {% endif %}
+                    </span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="payment-details">
+            <h2>Payment Details</h2>
+            {% if is_offline %}
+                <div style="background-color: #FEF3C7; border: 1px solid #F59E0B; color: #D97706; padding: 12px; border-radius: 10px; font-size: 0.8rem; margin-bottom: 20px; text-align: left; line-height: 1.4;">
+                    <i class="fas fa-exclamation-triangle" style="margin-right: 5px;"></i> <strong>Offline Sandbox Mode:</strong> Razorpay API is unreachable. Clicking payment button will bypass live checkout and simulate a successful payment locally.
+                </div>
+            {% endif %}
+            
+            <!-- Delivery Address Selection -->
+            <div class="mb-6 text-left">
+                <h3 class="text-sm font-bold text-slate-800 mb-3 flex items-center gap-1.5" style="color: var(--heading-color);">
+                    <i class="fas fa-map-marker-alt" style="color: var(--primary-color);"></i> Select Delivery Address
+                </h3>
+                <div class="space-y-3 max-h-[185px] overflow-y-auto pr-1" style="margin-bottom: 25px;">
+                    {% for addr in saved_addresses %}
+                        <label class="flex items-start gap-3 p-3 bg-white border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-all select-none relative" style="display: flex; align-items: flex-start; gap: 10px; border: 1px solid var(--border-color); padding: 12px; border-radius: 10px; margin-bottom: 10px; background: white;">
+                            <input type="radio" name="selected_address" value="{{ addr.id }}" class="mt-1" style="accent-color: var(--primary-color); margin-top: 4px;" {% if forloop.first %}checked{% endif %}>
+                            <div class="text-xs" style="text-align: left; font-size: 0.8rem;">
+                                <span class="font-bold text-slate-800 flex items-center gap-1" style="font-weight: 600; color: var(--heading-color);">
+                                    {% if addr.address_type == 'Home' %}
+                                        <i class="fas fa-home" style="color: #999; margin-right: 4px;"></i>
+                                    {% elif addr.address_type == 'Work' %}
+                                        <i class="fas fa-briefcase" style="color: #999; margin-right: 4px;"></i>
+                                    {% else %}
+                                        <i class="fas fa-map-pin" style="color: #999; margin-right: 4px;"></i>
+                                    {% endif %}
+                                    {{ addr.address_type }}
+                                </span>
+                                <p style="color: var(--text-color); margin: 4px 0 0 0; line-height: 1.4;">{{ addr.full_address }}</p>
+                            </div>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="price-breakdown">
+                <div>
+                    <span>Subtotal</span>
+                    <span>₹{{ subtotal|floatformat:2 }}</span>
+                </div>
+                <div>
+                    <span>Discount</span>
+                    <span class="discount">- ₹{{ total_discount|floatformat:2 }}</span>
+                </div>
+                <div>
+                    <span>Delivery Charges</span>
+                    <span>₹{{ delivery_charge|floatformat:2 }}</span>
+                </div>
+                <div class="total">
+                    <span>Payable Amount</span>
+                    <span>₹{{ final_total|floatformat:2 }}</span>
+                </div>
+            </div>
+            <br>
+            <!-- Wallet Payment Option -->
+            <div class="mb-5 p-4 rounded-xl border border-slate-200 bg-white text-left" style="border: 1px solid var(--border-color); padding: 15px; border-radius: 10px; margin-bottom: 20px; background: white;">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                    <label class="flex items-center gap-2 cursor-pointer font-bold text-slate-800" style="display: flex; align-items: center; gap: 8px; font-weight: 600; color: var(--heading-color);">
+                        <input type="checkbox" id="use-wallet" style="accent-color: #10B981; width: 16px; height: 16px;">
+                        <span>Pay with Foodeat Wallet</span>
+                    </label>
+                    <span style="font-size: 0.9rem; font-weight: 700; color: #10B981;">Balance: ₹{{ user_wallet_balance|floatformat:2 }}</span>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-1" style="color: #999; margin: 4px 0 0 0; font-size: 0.75rem;" id="wallet-description">
+                    {% if user_wallet_balance >= final_total %}
+                        Sufficient balance to cover full order.
+                    {% else %}
+                        Deduct ₹{{ user_wallet_balance|floatformat:2 }} from wallet, pay remaining with Razorpay.
+                    {% endif %}
+                </p>
+            </div>
+
+            <button id="rzp-button">Pay Securely with Razorpay</button>
+            <button id="wallet-pay-btn" style="display: none; width: 100%; padding: 15px; font-size: 1.1rem; font-weight: 600; color: #fff; background: linear-gradient(45deg, #10B981, #059669); border: none; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);">Pay Securely with Wallet</button>
+            
+            <div class="secure-payment-info">
+                <i class="fas fa-lock"></i> All transactions are secure and encrypted.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Setup initial variables
+        const walletBalance = parseFloat("{{ user_wallet_balance }}");
+        const finalTotal = parseFloat("{{ final_total }}");
+        const callbackUrl = "{{ callback_url }}";
+        const initialRazorpayOrderId = "{{ razorpay_order_id }}";
+        const razorpayKeyId = "{{ razorpay_key_id }}";
+
+        const useWalletCheckbox = document.getElementById('use-wallet');
+        const rzpBtn = document.getElementById('rzp-button');
+        const walletBtn = document.getElementById('wallet-pay-btn');
+        const payableAmountSpan = document.querySelector('.price-breakdown .total span:last-child');
+
+        // Helper to update display prices
+        function updatePrices() {
+            if (useWalletCheckbox && useWalletCheckbox.checked) {
+                if (walletBalance >= finalTotal) {
+                    payableAmountSpan.innerText = "₹0.00";
+                    rzpBtn.style.display = 'none';
+                    walletBtn.style.display = 'block';
+                } else {
+                    const remaining = finalTotal - walletBalance;
+                    payableAmountSpan.innerText = "₹" + remaining.toFixed(2);
+                    rzpBtn.style.display = 'block';
+                    walletBtn.style.display = 'none';
+                    rzpBtn.innerText = "Pay Securely ₹" + remaining.toFixed(2) + " with Razorpay";
+                }
+            } else {
+                payableAmountSpan.innerText = "₹" + finalTotal.toFixed(2);
+                rzpBtn.style.display = 'block';
+                walletBtn.style.display = 'none';
+                rzpBtn.innerText = "Pay Securely with Razorpay";
+            }
+        }
+
+        if (useWalletCheckbox) {
+            useWalletCheckbox.addEventListener('change', updatePrices);
+        }
+
+        // Razorpay handler
+        if (rzpBtn) {
+            rzpBtn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                const selectedAddressRadio = document.querySelector('input[name="selected_address"]:checked');
+                if (!selectedAddressRadio) {
+                    alert("Please select a delivery address.");
+                    return;
+                }
+                const addressId = selectedAddressRadio.value;
+
+                // Disable button
+                rzpBtn.disabled = true;
+                rzpBtn.innerText = "Initializing payment...";
+
+                let orderId = initialRazorpayOrderId;
+                let amountPaise = parseInt("{{ final_total_paise }}");
+
+                // If using partial wallet contribution, fetch the correct Razorpay order for the remaining amount
+                if (useWalletCheckbox && useWalletCheckbox.checked && walletBalance < finalTotal) {
+                    try {
+                        const response = await fetch(`/checkout/get_payment_order/?use_wallet=true`);
+                        const data = await response.json();
+                        if (data.status === 'success') {
+                            orderId = data.razorpay_order_id;
+                            amountPaise = data.amount_paise;
+                        } else {
+                            alert(data.message || "Could not generate order. Try again.");
+                            rzpBtn.disabled = false;
+                            updatePrices();
+                            return;
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert("Error initializing payment.");
+                        rzpBtn.disabled = false;
+                        updatePrices();
+                        return;
+                    }
+                }
+
+                // Initialize and open Razorpay
+                if (orderId && orderId.startsWith('offline_')) {
+                    const dummyPaymentId = "pay_offline_" + Math.random().toString(36).substr(2, 9);
+                    window.location.href = `${callbackUrl}?payment_id=${dummyPaymentId}&order_id=${orderId}&address_id=${addressId}`;
+                    return;
+                }
+
+                var options = {
+                    "key": razorpayKeyId,
+                    "amount": amountPaise,
+                    "currency": "INR",
+                    "name": "Zomato Aryan",
+                    "description": "Food Order Transaction",
+                    "order_id": orderId,
+                    "handler": function (response){
+                        window.location.href = `${callbackUrl}?payment_id=${response.razorpay_payment_id}&order_id=${orderId}&address_id=${addressId}`;
+                    },
+                    "prefill": {
+                        "name": "{{ request.user.first_name|default:'' }} {{ request.user.last_name|default:'' }}",
+                        "email": "{{ request.user.email|default:'' }}",
+                        "contact": "{{ request.user.phone_number|default:'' }}"
+                    },
+                    "theme": {
+                        "color": "#F05941"
+                    }
+                };
+                var rzp1 = new Razorpay(options);
+                rzp1.open();
+                
+                // Reset button state after opening
+                setTimeout(() => {
+                    rzpBtn.disabled = false;
+                    updatePrices();
+                }, 1500);
+            });
+        }
+
+        // Wallet Checkout logic (for 100% wallet payment)
+        if (walletBtn) {
+            walletBtn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                const selectedAddressRadio = document.querySelector('input[name="selected_address"]:checked');
+                if (!selectedAddressRadio) {
+                    alert("Please select a delivery address.");
+                    return;
+                }
+                
+                walletBtn.disabled = true;
+                walletBtn.innerText = "Processing wallet transaction...";
+                
+                const formData = new FormData();
+                formData.append('address_id', selectedAddressRadio.value);
+                formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                try {
+                    const response = await fetch('/checkout/wallet_payment/', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        window.location.href = data.redirect_url;
+                    } else {
+                        alert(data.message || "An error occurred.");
+                        walletBtn.disabled = false;
+                        walletBtn.innerText = "Pay Securely with Wallet";
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("An error occurred during payment processing.");
+                    walletBtn.disabled = false;
+                    walletBtn.innerText = "Pay Securely with Wallet";
+                }
+            });
+        }
+    </script>
+</body>
+</html>

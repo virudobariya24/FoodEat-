@@ -1,0 +1,477 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Foodeat</title>
+
+    <!-- Google Fonts & Font Awesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="{% static 'css/css2.css' %}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <script src="{% static 'js/3.4.js' %}"></script>
+
+    <style>
+        :root {
+            --body-bg: #FCFAF8;
+            --card-bg: #FFFFFF;
+            --main-text: #19202E;
+            --secondary-text: #62728D;
+            --border-color: #F1EBE4;
+            --shadow-color: rgba(164, 132, 98, 0.08);
+            --accent-color: #D4AF37;
+            --orange-accent: #FF4D30;
+            --header-text: #19202E;
+        }
+
+        body[data-theme="dark"] {
+            --body-bg: #0A0F1D;
+            --card-bg: #121A2E;
+            --main-text: #F1F5F9;
+            --secondary-text: #8FA0DD;
+            --border-color: #1E294B;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --header-text: #F1F5F9;
+        }
+
+        /* --- Global Dark Mode Styles & Overrides --- */
+        body[data-theme="dark"],
+        body[data-theme="dark"] section,
+        body[data-theme="dark"] .container,
+        body[data-theme="dark"] .content-block,
+        body[data-theme="dark"] .text-content,
+        body[data-theme="dark"] .grid-layout,
+        body[data-theme="dark"] .about-section,
+        body[data-theme="dark"] .contact-section,
+        body[data-theme="dark"] .menu-section,
+        body[data-theme="dark"] .locations-section,
+        body[data-theme="dark"] .locations-nav-container,
+        body[data-theme="dark"] .location-content-panel,
+        body[data-theme="dark"] .booking-section,
+        body[data-theme="dark"] .profile-section,
+        body[data-theme="dark"] .orders-section,
+        body[data-theme="dark"] .cart-section,
+        body[data-theme="dark"] .view-section,
+        body[data-theme="dark"] .checkout-section {
+            background-color: var(--body-bg) !important;
+            color: var(--main-text) !important;
+        }
+
+        body[data-theme="dark"] h1,
+        body[data-theme="dark"] h2,
+        body[data-theme="dark"] h3,
+        body[data-theme="dark"] h4,
+        body[data-theme="dark"] h5,
+        body[data-theme="dark"] h6,
+        body[data-theme="dark"] p,
+        body[data-theme="dark"] span,
+        body[data-theme="dark"] li,
+        body[data-theme="dark"] strong,
+        body[data-theme="dark"] label,
+        body[data-theme="dark"] td,
+        body[data-theme="dark"] th,
+        body[data-theme="dark"] legend {
+            color: var(--main-text) !important;
+        }
+
+        body[data-theme="dark"] .text-muted,
+        body[data-theme="dark"] .text-slate-500,
+        body[data-theme="dark"] .text-gray-500,
+        body[data-theme="dark"] .text-slate-400,
+        body[data-theme="dark"] .text-gray-400,
+        body[data-theme="dark"] .text-secondary {
+            color: var(--secondary-text) !important;
+        }
+
+        /* Forms, inputs, and selects in dark mode */
+        body[data-theme="dark"] input[type="text"],
+        body[data-theme="dark"] input[type="number"],
+        body[data-theme="dark"] input[type="email"],
+        body[data-theme="dark"] input[type="password"],
+        body[data-theme="dark"] input[type="date"],
+        body[data-theme="dark"] input[type="time"],
+        body[data-theme="dark"] textarea,
+        body[data-theme="dark"] select {
+            background-color: #222222 !important;
+            color: #ffffff !important;
+            border-color: var(--border-color) !important;
+        }
+
+        /* Card panels, containers in dark mode */
+        body[data-theme="dark"] .card,
+        body[data-theme="dark"] .bg-white,
+        body[data-theme="dark"] .new-menu-card,
+        body[data-theme="dark"] .menu-card,
+        body[data-theme="dark"] .restaurant-card,
+        body[data-theme="dark"] .booking-card,
+        body[data-theme="dark"] .cart-item,
+        body[data-theme="dark"] .profile-card,
+        body[data-theme="dark"] .order-card {
+            background-color: var(--card-bg) !important;
+            border-color: var(--border-color) !important;
+            box-shadow: 0 4px 12px var(--shadow-color) !important;
+            color: var(--main-text) !important;
+        }
+
+        /* Tables and grid borders in dark mode */
+        body[data-theme="dark"] table,
+        body[data-theme="dark"] tr,
+        body[data-theme="dark"] td,
+        body[data-theme="dark"] th {
+            border-color: var(--border-color) !important;
+            background-color: var(--card-bg) !important;
+            color: var(--main-text) !important;
+        }
+
+        /* Modal window elements */
+        body[data-theme="dark"] .modal-content,
+        body[data-theme="dark"] .modal-header,
+        body[data-theme="dark"] .modal-body,
+        body[data-theme="dark"] .modal-footer {
+            background-color: var(--card-bg) !important;
+            color: var(--main-text) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        /* Secondary buttons and background blocks */
+        body[data-theme="dark"] .btn-secondary,
+        body[data-theme="dark"] .bg-slate-100,
+        body[data-theme="dark"] .bg-gray-100 {
+            background-color: #2a2a2a !important;
+            color: #ffffff !important;
+            border-color: #3b3b3b !important;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html {
+            overflow-x: hidden;
+            width: 100%;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--body-bg) !important;
+            color: var(--main-text) !important;
+            transition: background-color 0.3s, color 0.3s;
+            padding-top: 75px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+            width: 100%;
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        body.modal-open { overflow: hidden; }
+
+        /* Header */
+        .main-header {
+            position: fixed; top: 0; left: 0; width: 100%; padding: 12px 0;
+            z-index: 1000;
+            background-color: transparent;
+            border-bottom: 1px solid transparent;
+            box-shadow: none;
+            transition: background-color 0.4s ease, border-color 0.4s ease, padding 0.4s ease, box-shadow 0.4s ease;
+        }
+        .main-header.scrolled {
+            padding: 8px 0;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 4px 15px var(--shadow-color);
+        }
+        .main-header .container { display:flex; justify-content:space-between; align-items:center; }
+        .logo img { height:55px; transition: height 0.4s ease; }
+        .main-header.scrolled .logo img { height:42px; }
+
+        .desktop-nav ul { display:flex; align-items:center; gap:26px; list-style:none; }
+        .desktop-nav a {
+            text-decoration:none; color:var(--header-text); font-weight:600; font-size:0.85rem; text-transform:uppercase; padding:6px 2px; position:relative; transition:color 0.3s ease;
+        }
+        .desktop-nav a::after {
+            content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:0; height:2px; background:var(--orange-accent); transition:width 0.3s ease;
+        }
+        .desktop-nav a:hover, .desktop-nav a.active { color: var(--orange-accent); }
+        .desktop-nav a:hover::after, .desktop-nav a.active::after { width:100%; }
+
+        .header-right-items { display:flex; align-items:center; gap:18px; }
+        .action-icon { font-size:1.35rem; cursor:pointer; transition:color 0.3s; color:var(--header-text); text-decoration:none; }
+        .action-icon:hover { color:var(--orange-accent); }
+        .hamburger-menu { display:none; }
+
+        /* Profile Image */
+        .profile-img { width:36px; height:36px; border-radius:50%; object-fit:cover; border:2px solid var(--orange-accent); cursor:pointer; }
+        .profile-trigger-icon { font-size:1.6rem; cursor:pointer; color:var(--header-text); transition:color 0.3s; }
+        .profile-trigger-icon:hover { color:var(--orange-accent); }
+
+        /* Dropdown Menu */
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 48px;
+            right: 0;
+            left: auto;
+            transform: none;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            width: 220px;
+            z-index: 1002;
+            overflow: hidden;
+            padding: 6px 0;
+            text-align: left;
+        }
+        .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 18px;
+            text-decoration: none;
+            color: var(--main-text);
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .dropdown-menu a:hover {
+            background: var(--body-bg);
+            color: var(--orange-accent);
+        }
+        .dropdown-menu a i {
+            width: 18px;
+            text-align: center;
+            font-size: 0.95rem;
+            color: var(--secondary-text);
+            transition: color 0.2s;
+        }
+        .dropdown-menu a:hover i {
+            color: var(--orange-accent);
+        }
+
+        /* Mobile nav */
+        .mobile-nav { position:fixed; top:0; right:-100%; height:100%; background:var(--card-bg); z-index:1001; box-shadow:-10px 0 30px rgba(0,0,0,0.1); transition:right 0.4s ease; padding:60px 20px 20px; width:80vw; max-width:300px; }
+        .mobile-nav.open { right:0; }
+        .mobile-nav-close { position:absolute; top:20px; right:20px; font-size:2.2rem; cursor:pointer; color:var(--secondary-text); }
+        .mobile-nav-close:hover { color:var(--main-text); }
+        .mobile-nav ul { list-style:none; display:flex; flex-direction:column; }
+        .mobile-nav li { border-bottom:1px solid var(--border-color); }
+        .mobile-nav a { display:block; padding:15px 10px; text-decoration:none; color:var(--main-text); font-weight:600; font-size:1.1rem; }
+        .mobile-nav a:hover { color:var(--orange-accent); }
+
+        /* Cart Icon */
+        .cart-icon { position:relative; color:var(--header-text); text-decoration:none; font-size:1.35rem; display:inline-flex; align-items:center; }
+        .cart-icon:hover { color:var(--orange-accent); }
+        #cart-count { position:absolute; top:-6px; right:-10px; background-color:var(--orange-accent); color:white; font-size:0.75rem; font-weight:bold; padding:2px 6px; border-radius:12px; min-width:18px; text-align:center; line-height:1; pointer-events:none; }
+
+        @media (max-width:1024px) { 
+            .desktop-nav { display:none; } 
+            .hamburger-menu { display:block; } 
+            
+            /* Disable shrinking padding/logo height on scroll on mobile/tablet viewports to prevent jitter/zoom */
+            .main-header {
+                padding: 10px 0 !important;
+            }
+            .main-header.scrolled {
+                padding: 10px 0 !important;
+            }
+            .logo img {
+                height: 42px !important;
+                transition: none !important;
+            }
+            .main-header.scrolled .logo img {
+                height: 42px !important;
+                transition: none !important;
+            }
+        }
+        @media (max-width: 480px) {
+            .header-right-items { gap: 14px; }
+            .logo img { height: 42px !important; }
+        }
+    </style>
+</head>
+<body>
+<header class="main-header" id="main-header">
+    <div class="container">
+        <a href="/" class="logo"><img src="{% static 'img/logo.png' %}" alt="Foodeat Logo" /></a>
+
+        <!-- Desktop Nav -->
+        <nav class="desktop-nav">
+            <ul>
+                <li><a href="/menu">Menu</a></li>
+                <li><a href="/restaurant_view">Restaurant</a></li>
+                <li><a href="/aboutus">About Us</a></li>
+                <li><a href="/contactus">Contact Us</a></li>
+            </ul>
+        </nav>
+
+        <!-- Header Right Items -->
+        <div class="header-right-items">
+            {% if request.session.user_id %}
+            <a href="{% url 'cart_page' %}" class="cart-icon" title="Cart">
+                <i class="fas fa-shopping-cart"></i>
+                {% if cart_count > 0 %}
+                    <span id="cart-count">{{ cart_count }}</span>
+                {% endif %}
+            </a>
+            {% endif %}
+
+            <div class="user-dropdown" style="position:relative;">
+                <div id="user-profile-trigger">
+                    {% if request.session.user_id %}
+                        {% if request.session.image %}
+                            <img src="{{ request.session.image }}" alt="Profile Image" id="user-img" class="profile-img" />
+                        {% else %}
+                            <i class="fas fa-user-circle profile-trigger-icon" id="user-img"></i>
+                        {% endif %}
+                    {% else %}
+                        <i class="fas fa-user-circle profile-trigger-icon" id="user-img"></i>
+                    {% endif %}
+                </div>
+
+                <div class="dropdown-menu" id="user-menu">
+                    {% if request.session.user_id %}
+                        <a href="{% url 'profile_page' %}"><i class="fas fa-user"></i> Profile</a>
+                        <a href="{% url 'wallet_page' %}"><i class="fas fa-wallet"></i> Wallet</a>
+                        <a href="/my_orders"><i class="fas fa-box"></i> Orders</a>
+                        <a href="{% url 'my_booking' %}"><i class="fas fa-calendar-check"></i> Booking Restaurant</a>
+                        <a href="#" id="theme-switcher" onclick="event.preventDefault();"><i class="fas fa-moon" id="theme-icon-in"></i> <span id="theme-label">Dark Mode</span></a>
+                        <a href="{% url 'logout' %}" style="color: var(--orange-accent);"><i class="fas fa-sign-out-alt" style="color: var(--orange-accent);"></i> Logout</a>
+                    {% else %}
+                        <a href="/login/"><i class="fas fa-sign-in-alt"></i> Login</a>
+                        <a href="{% url 'register_page' %}"><i class="fas fa-user-plus"></i> Register</a>
+                        <a href="#" id="theme-switcher" onclick="event.preventDefault();"><i class="fas fa-moon" id="theme-icon-in"></i> <span id="theme-label">Dark Mode</span></a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="action-icon hamburger-menu" id="hamburger-menu"><i class="fas fa-bars"></i></div>
+        </div>
+    </div>
+</header>
+
+<!-- MOBILE NAV -->
+<div class="mobile-nav" id="mobile-nav">
+    <div class="mobile-nav-close" id="mobile-nav-close">&times;</div>
+    <ul>
+        <li><a href="/menu">Menu</a></li>
+        <li><a href="/restaurant_view">Restaurant</a></li>
+        <li><a href="/aboutus">About Us</a></li>
+        <li><a href="/contactus">Contact Us</a></li>
+
+        {% if request.session.user_id %}
+        <li><a href="{% url 'cart_page' %}">Cart</a></li>
+        <li><a href="{% url 'logout' %}">Logout</a></li>
+        {% endif %}
+    </ul>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Header scroll
+    const header = document.getElementById('main-header');
+    if (header) {
+        window.addEventListener('scroll', () => header.classList.toggle('scrolled', window.scrollY > 50));
+    }
+
+    // Theme toggle
+    const themeSwitcher = document.getElementById('theme-switcher');
+    const themeIcon = document.getElementById('theme-icon-in');
+    const themeLabel = document.getElementById('theme-label');
+    function setTheme(theme) {
+        document.body.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        if (themeIcon) {
+            themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+        if (themeLabel) {
+            themeLabel.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
+        }
+    }
+    function toggleTheme() {
+        const currentTheme = document.body.getAttribute('data-theme') || 'light';
+        setTheme(currentTheme === 'light' ? 'dark' : 'light');
+    }
+    if (themeSwitcher) {
+        themeSwitcher.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleTheme();
+        });
+    }
+    setTheme(localStorage.getItem('theme') || 'light');
+
+    // Mobile nav
+    const mobileNav = document.getElementById('mobile-nav');
+    const hamburgerMenu = document.getElementById('hamburger-menu');
+    const mobileNavClose = document.getElementById('mobile-nav-close');
+
+    if (hamburgerMenu && mobileNav) {
+        hamburgerMenu.addEventListener('click', () => { 
+            mobileNav.classList.add('open'); 
+            document.body.classList.add('modal-open'); 
+        });
+    }
+    if (mobileNavClose && mobileNav) {
+        mobileNavClose.addEventListener('click', () => { 
+            mobileNav.classList.remove('open'); 
+            document.body.classList.remove('modal-open'); 
+        });
+    }
+    if (mobileNav) {
+        mobileNav.addEventListener('click', (e) => { 
+            if(e.target.tagName==='A') mobileNav.classList.remove('open'); 
+        });
+    }
+
+    // User dropdown
+    const userTrigger = document.getElementById('user-profile-trigger');
+    const userMenu = document.getElementById('user-menu');
+    if(userTrigger && userMenu) {
+        userTrigger.addEventListener('click', e=>{
+            e.stopPropagation();
+            userMenu.style.display = userMenu.style.display==='block'?'none':'block';
+        });
+        document.addEventListener('click', ()=>{ 
+            userMenu.style.display='none'; 
+        });
+    }
+});
+</script>
+
+<!-- Django messages to SweetAlert2 script -->
+{% if messages %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        {% for message in messages %}
+            let icon = 'info';
+            {% if message.tags == 'success' %}
+                icon = 'success';
+            {% elif message.tags == 'error' or message.tags == 'danger' %}
+                icon = 'error';
+            {% elif message.tags == 'warning' %}
+                icon = 'warning';
+            {% endif %}
+            
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                showCloseButton: true,
+                timer: 4000,
+                timerProgressBar: true,
+                icon: icon,
+                title: "{{ message|escapejs }}",
+                didOpen: (toast) => {
+                    toast.onmouseenter = Swal.stopTimer;
+                    toast.onmouseleave = Swal.resumeTimer;
+                }
+            });
+        {% endfor %}
+    });
+</script>
+{% endif %}

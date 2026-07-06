@@ -1,0 +1,337 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - GJ3</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="{% static 'js/3.4.js' %}"></script>
+    
+    <style>
+        :root {
+            --primary-color: #333;
+            --secondary-color: #f8b602;
+            --card-bg: #fff;
+            --text-dark: #222;
+            --text-muted: #777;
+            --border-color: #ddd;
+            --shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f4f6f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        /* Login form specific styles */
+        .login-container {
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header .brand-logo {
+            background-color: var(--secondary-color);
+            color: var(--card-bg);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+        }
+
+        .login-header h2 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin: 0;
+            color: var(--text-dark);
+        }
+
+        .login-header p {
+            color: var(--text-muted);
+            margin-top: 5px;
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+        }
+
+        .input-group {
+            position: relative;
+            width: 100%;
+        }
+
+        input::-ms-reveal,
+        input::-ms-clear {
+            display: none !important;
+        }
+
+        .input-group .input-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 20px 14px 50px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+            color: var(--text-dark);
+            background-color: #fdfdff;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 4px rgba(248, 182, 2, 0.15);
+        }
+
+        /* Animated input focus underline style */
+        .input-group:focus-within + .underline-indicator .focus-line {
+            width: 100%;
+        }
+        
+        /* Shimmer effect for submit button */
+        .shimmer-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        .shimmer-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 30%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(30deg);
+            transition: all 0.5s ease;
+        }
+        .shimmer-btn:hover::after {
+            left: 130%;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--secondary-color);
+            color: var(--text-dark);
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: #e6a701;
+            box-shadow: 0 5px 15px rgba(248, 182, 2, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .messages {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .messages.error {
+            background-color: #fcebeb;
+            color: #d9534f;
+            border: 1px solid #f8d7da;
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .login-footer a {
+            color: var(--secondary-color);
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .login-footer a:hover {
+            color: var(--primary-color);
+        }
+
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px;
+            }
+            .login-card {
+                padding: 25px;
+            }
+        }
+
+        /* ---------- Manual Dark Mode Support ---------- */
+        body[data-theme="dark"] {
+            background: #121212 !important;
+            color: #ffffff !important;
+        }
+        body[data-theme="dark"] .login-card {
+            background-color: #1C1C1C !important;
+            border-color: #333333 !important;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3) !important;
+        }
+        body[data-theme="dark"] .login-header h2,
+        body[data-theme="dark"] .form-group label {
+            color: #ffffff !important;
+        }
+        body[data-theme="dark"] .input-group input {
+            background-color: #2b2b2b !important;
+            border-color: #444444 !important;
+            color: #ffffff !important;
+        }
+        body[data-theme="dark"] .input-group input:focus {
+            border-color: var(--secondary-color) !important;
+        }
+        body[data-theme="dark"] .login-footer p,
+        body[data-theme="dark"] .login-footer a {
+            color: #aaaaaa !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-content">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="brand-logo"><i class="fas fa-user-shield"></i></div>
+                    <h2>Admin Login</h2>
+                    <p>Welcome back! Please sign in to your account.</p>
+                </div>
+
+                {% if messages %}
+                    <div class="messages-container" style="margin-bottom: 20px;">
+                        {% for message in messages %}
+                            <div class="messages {% if message.tags == 'error' %}error{% else %}success{% endif %}" style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-radius: 8px; font-size: 0.9rem; font-weight: 500; {% if message.tags == 'error' %}background-color: #fcebeb; color: #d9534f; border: 1px solid #f8d7da;{% else %}background-color: #e6f9ed; color: #1f8b4c; border: 1px solid #c2f0d1;{% endif %}">
+                                <span>{{ message }}</span>
+                                <button type="button" onclick="this.parentElement.remove()" style="background: none; border: none; color: inherit; cursor: pointer; font-size: 1.1rem; line-height: 1; padding: 0; margin-left: 10px; display: inline-flex; align-items: center; opacity: 0.7; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="id_email">Email Address</label>
+                        <div class="input-group">
+                            <i class="fas fa-envelope input-icon"></i>
+                            {{ form.email }}
+                        </div>
+                        <!-- Underline Indicator -->
+                        <div class="w-full h-[2px] bg-slate-100 dark:bg-slate-800 rounded overflow-hidden relative mt-1 underline-indicator">
+                            <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-[var(--secondary-color)] transition-all duration-300 -translate-x-1/2 focus-line"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_password">Password</label>
+                        <div class="input-group" style="position: relative;">
+                            <i class="fas fa-lock input-icon"></i>
+                            {{ form.password }}
+                            <button type="button" onclick="togglePasswordVisibility()" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; z-index: 10; outline: none;">
+                                <i class="fas fa-eye" id="eyeIcon"></i>
+                            </button>
+                        </div>
+                        <!-- Underline Indicator -->
+                        <div class="w-full h-[2px] bg-slate-100 dark:bg-slate-800 rounded overflow-hidden relative mt-1 underline-indicator">
+                            <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-[var(--secondary-color)] transition-all duration-300 -translate-x-1/2 focus-line"></div>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn shimmer-btn">Login</button>
+                    <div style="text-align: right; margin-top: 15px;">
+                        <a href="{% url 'admin_forgot_password' %}" style="color: var(--secondary-color); font-size: 0.85rem; font-weight: 600; text-decoration: none;">Forgot Password?</a>
+                    </div>
+                </form>
+                
+                <script>
+                    function togglePasswordVisibility() {
+                        const input = document.getElementById("id_password");
+                        const icon = document.getElementById("eyeIcon");
+                        if (input.type === 'password') {
+                            input.type = 'text';
+                            icon.classList.remove('fa-eye');
+                            icon.classList.add('fa-eye-slash');
+                        } else {
+                            input.type = 'password';
+                            icon.classList.remove('fa-eye-slash');
+                            icon.classList.add('fa-eye');
+                        }
+                    }
+                </script>
+                
+                <div class="login-footer">
+                    <p>Don't have an account? <a href="/adminregister/">Register Here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

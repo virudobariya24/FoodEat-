@@ -1,0 +1,203 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partner Login - Foodeat</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Tailwind CSS -->
+    <script src="{% static 'js/3.4.js' %}"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#e0f2fe',
+                            100: '#bae6fd',
+                            500: '#0ea5e9', // Sky Primary
+                            600: '#0284c7', // Sky hover
+                            700: '#0369a1',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        input::-ms-reveal,
+        input::-ms-clear {
+            display: none !important;
+        }
+        /* Animated input focus underline style */
+        .django-input-field:focus-within + .underline-indicator .focus-line {
+            width: 100%;
+        }
+        
+        /* Shimmer effect for submit button */
+        .shimmer-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        .shimmer-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 30%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.25);
+            transform: rotate(30deg);
+            transition: all 0.5s ease;
+        }
+        .shimmer-btn:hover::after {
+            left: 130%;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 font-sans min-h-screen flex items-center justify-center py-6 sm:py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-5xl w-full bg-slate-900/60 rounded-3xl border border-slate-800/80 shadow-2xl overflow-hidden flex flex-col md:flex-row glass-panel">
+        
+        <!-- Left Panel: Graphic & Information Column (Unique Sky/Emerald dispatch theme) -->
+        <div class="w-full md:w-5/12 bg-gradient-to-br from-emerald-600 via-teal-650 to-indigo-850 p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden">
+            <!-- Decorative circle -->
+            <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-white/10 rounded-full blur-2xl"></div>
+            
+            <div class="relative z-10">
+                <a href="/" class="inline-flex items-center gap-2 text-white font-extrabold text-lg tracking-wider mb-8 sm:mb-12">
+                    <i class="fa-solid fa-utensils text-2xl"></i>
+                    <span>Foodeat</span>
+                </a>
+                
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white leading-tight tracking-tight">
+                    Back on the Road. <br class="hidden sm:inline">Ready to Deliver?
+                </h2>
+                <p class="text-sky-50/80 text-sm mt-3 leading-relaxed">
+                    Securely sign in to access your rider console, set your active duty status, and track your wallet earnings.
+                </p>
+            </div>
+
+            <!-- Features List -->
+            <div class="relative z-10 my-8 space-y-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center text-white">
+                        <i class="fa-solid fa-motorcycle text-xs"></i>
+                    </div>
+                    <span class="text-xs sm:text-sm font-bold text-white">Quick Shift Check-in & Duty Toggle</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center text-white">
+                        <i class="fa-solid fa-wallet text-xs"></i>
+                    </div>
+                    <span class="text-xs sm:text-sm font-bold text-white">Track Wallet & Live Payouts</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center text-white">
+                        <i class="fa-solid fa-headset text-xs"></i>
+                    </div>
+                    <span class="text-xs sm:text-sm font-bold text-white">Rider SOS & Live Dispatch Support</span>
+                </div>
+            </div>
+
+            <!-- Footer Note -->
+            <div class="relative z-10 text-[10px] text-sky-50/50">
+                &copy; 2026 Foodeat Logistics. All rights reserved.
+            </div>
+        </div>
+
+        <!-- Right Panel: Form Column -->
+        <div class="w-full md:w-7/12 p-6 sm:p-10 flex flex-col justify-center">
+            
+            <div class="mb-6 flex items-center justify-between">
+                <div>
+                    <h3 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Partner Login</h3>
+                    <p class="text-slate-400 text-xs mt-1">Access your driver dashboard and delivery schedule.</p>
+                </div>
+                <div class="block md:hidden w-10 h-10 bg-emerald-500/10 text-emerald-450 rounded-xl flex items-center justify-center border border-emerald-500/20 shadow-inner">
+                    <i class="fa-solid fa-motorcycle text-lg"></i>
+                </div>
+            </div>
+
+            <!-- Message Alerts -->
+            {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for msg in messages %}
+                        <div class="p-3.5 rounded-xl border flex items-center justify-between {% if msg.tags == 'error' %}bg-rose-500/10 border-rose-500/20 text-rose-300{% else %}bg-emerald-500/10 border-emerald-500/20 text-emerald-300{% endif %}">
+                            <span class="text-xs font-semibold">{{ msg }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="POST" class="space-y-5">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Email or Phone Number</label>
+                    <div class="relative flex items-center django-input-field">
+                        <i class="fa-solid fa-user absolute left-3.5 text-slate-500 text-xs"></i>
+                        <input type="text" name="login_id" required placeholder="e.g. rahul@example.com or 9876543210" class="w-full h-11 pl-9 pr-4 text-xs sm:text-sm bg-slate-950 bg-opacity-40 border border-slate-800 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10 rounded-xl text-white placeholder-slate-600 transition-all duration-200">
+                    </div>
+                    <!-- Underline Indicator -->
+                    <div class="w-full h-[2px] bg-slate-850 rounded overflow-hidden relative mt-1 underline-indicator">
+                        <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-emerald-500 transition-all duration-300 -translate-x-1/2 focus-line"></div>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Password</label>
+                    <div class="relative flex items-center django-input-field">
+                        <i class="fa-solid fa-lock absolute left-3.5 text-slate-500 text-xs"></i>
+                        <input type="password" id="login-password" name="password" required placeholder="Enter password" class="w-full h-11 pl-9 pr-10 text-xs sm:text-sm bg-slate-950 bg-opacity-40 border border-slate-800 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10 rounded-xl text-white placeholder-slate-600 transition-all duration-200">
+                        <button type="button" onclick="togglePasswordVisibility('login-password', this)" class="absolute right-3.5 text-slate-500 hover:text-white transition-colors focus:outline-none">
+                            <i class="fa-solid fa-eye text-xs"></i>
+                        </button>
+                    </div>
+                    <!-- Underline Indicator -->
+                    <div class="w-full h-[2px] bg-slate-850 rounded overflow-hidden relative mt-1 underline-indicator">
+                        <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-emerald-500 transition-all duration-300 -translate-x-1/2 focus-line"></div>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-650 hover:from-emerald-600 hover:to-teal-750 text-white font-extrabold text-xs sm:text-sm rounded-xl transition-all shadow-lg shadow-emerald-500/15 active:scale-[0.98] shimmer-btn">
+                    Secure Partner Login
+                </button>
+            </form>
+
+            <div class="text-center mt-8 pt-5 border-t border-slate-800/40">
+                <p class="text-xs text-slate-500">New partner? <a href="{% url 'delivery_register' %}" class="text-brand-500 hover:text-brand-650 hover:underline font-bold transition-colors">Register as a driver</a></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+</body>
+</html>

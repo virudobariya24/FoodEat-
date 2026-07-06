@@ -1,0 +1,241 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Messages - Super Admin</title>
+
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="{% static 'js/3.4.js' %}"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        brand: { 50:'#fff7ed', 100:'#ffedd5', 500:'#ff6f00', 600:'#ea580c', 700:'#c2410c' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen text-slate-800">
+
+    <!-- Sidebar & Header -->
+    {% include 'super_admin/super_sidebar.html' %}
+
+    <!-- Main Content Wrapper -->
+    <div class="main-content min-h-screen flex flex-col transition-colors duration-200">
+        <main class="p-4 md:p-8 lg:p-10 max-w-[1400px] w-full mx-auto space-y-6">
+            
+            <!-- Page Header -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-black text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-message text-brand-500"></i> Contact Messages
+                    </h2>
+                    <p class="text-xs text-slate-400 font-semibold mt-1">Review feedback, contact inquiries, and reply to messages submitted by users.</p>
+                </div>
+            </div>
+
+            <!-- Responsive Table / Card List -->
+            <div class="bg-white border border-slate-200/60 shadow-sm rounded-2xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-full md:min-w-[1000px] block md:table">
+                        <thead class="hidden md:table-header-group">
+                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-400 text-xs font-bold uppercase tracking-wider">
+                                <th class="py-4 px-6 w-20">ID</th>
+                                <th class="py-4 px-6">Full Name</th>
+                                <th class="py-4 px-6">Email Address</th>
+                                <th class="py-4 px-6">Subject</th>
+                                <th class="py-4 px-6">Message</th>
+                                <th class="py-4 px-6">Submitted At</th>
+                                <th class="py-4 px-6 text-center w-28">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="messagesTbody" class="divide-y divide-slate-100 text-sm block md:table-row-group">
+                            {% for msg in messages_list %}
+                            <tr class="hover:bg-slate-50/40 transition-colors block md:table-row p-4 md:p-0 space-y-2 md:space-y-0 relative border-b md:border-b-0 border-slate-100">
+                                <!-- ID -->
+                                <td class="py-2 md:py-5 px-0 md:px-6 font-bold text-slate-400 flex md:table-cell justify-between items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="ID">
+                                    #{{ msg.id }}
+                                </td>
+                                
+                                <!-- Full Name -->
+                                <td class="py-2 md:py-5 px-0 md:px-6 font-bold text-slate-800 flex md:table-cell justify-between items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="Sender">
+                                    {{ msg.full_name }}
+                                </td>
+                                
+                                <!-- Email Address -->
+                                <td class="py-2 md:py-5 px-0 md:px-6 text-slate-500 flex md:table-cell justify-between items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="Email">
+                                    {{ msg.email }}
+                                </td>
+                                
+                                <!-- Subject -->
+                                <td class="py-2 md:py-5 px-0 md:px-6 font-semibold text-slate-700 flex md:table-cell justify-between items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="Subject">
+                                    {{ msg.subject }}
+                                </td>
+ 
+                                <!-- Message -->
+                                <td class="py-2 md:py-5 px-0 md:px-6 text-slate-400 max-w-[280px] break-words flex md:table-cell justify-between items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="Message">
+                                    {{ msg.message }}
+                                </td>
+ 
+                                <!-- Submitted At -->
+                                <td class="py-2 md:py-5 px-0 md:px-6 text-slate-500 flex md:table-cell justify-between items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="Date">
+                                    {{ msg.created_at|date:"d M Y H:i" }}
+                                </td>
+ 
+                                <!-- Action Button (Delete removed, replaced with Reply modal trigger) -->
+                                <td class="py-2 md:py-5 px-0 md:px-6 flex md:table-cell justify-between md:justify-center items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="Action">
+                                    {% if msg.reply_message %}
+                                        <button type="button" class="px-3.5 py-1.5 bg-slate-100 text-slate-600 border border-slate-200 rounded-xl text-xs font-bold hover:bg-slate-200 transition-all shadow-sm flex items-center gap-1"
+                                                onclick="openReplyModal({{ msg.id }}, '{{ msg.email|escapejs }}', '{{ msg.message|escapejs }}', '{{ msg.reply_message|escapejs }}')">
+                                            <i class="fa-solid fa-envelope-open text-[10px]"></i> View Reply
+                                        </button>
+                                    {% else %}
+                                        <button type="button" class="px-3.5 py-1.5 bg-brand-50 text-brand-600 border border-brand-200 rounded-xl text-xs font-bold hover:bg-brand-100 hover:text-brand-700 transition-all shadow-sm flex items-center gap-1"
+                                                onclick="openReplyModal({{ msg.id }}, '{{ msg.email|escapejs }}', '{{ msg.message|escapejs }}', '')">
+                                            <i class="fa-solid fa-reply text-[10px]"></i> Reply
+                                        </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr class="block md:table-row">
+                                <td colspan="7" class="py-12 text-center text-slate-400 font-medium block md:table-cell italic">
+                                    <i class="fa-solid fa-circle-info text-lg mr-1 text-slate-300"></i> No contact messages found.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination footer block -->
+                <div class="bg-slate-50/50 border-t border-slate-100 px-6 py-4 flex items-center justify-between flex-wrap gap-4">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider" id="pageIndicator">Showing 1 to 5 entries</span>
+                    <div class="flex items-center gap-2">
+                        <button id="prevBtn" class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 bg-white hover:border-brand-400 hover:text-brand-600 transition-colors shadow-sm disabled:opacity-50 disabled:pointer-events-none">
+                            <i class="fa-solid fa-chevron-left mr-1"></i> Prev
+                        </button>
+                        <button id="nextBtn" class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 bg-white hover:border-brand-400 hover:text-brand-600 transition-colors shadow-sm disabled:opacity-50 disabled:pointer-events-none">
+                            Next <i class="fa-solid fa-chevron-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Reply Modal Overlay -->
+    <div id="replyModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-lg w-full p-6 md:p-8 mx-4 transform scale-95 transition-transform duration-300">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+                <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2"><i class="fa-solid fa-reply text-brand-500"></i> Reply to Message</h3>
+                <button type="button" class="text-slate-400 hover:text-slate-600 transition" onclick="closeReplyModal()"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            
+            <form id="replyForm" method="POST" action="" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">To</p>
+                    <p class="text-sm font-semibold text-slate-700" id="modalUserEmail">user@example.com</p>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Original Inquiry</p>
+                    <div class="bg-slate-50 border border-slate-100 rounded-xl p-3.5 mt-1 max-h-36 overflow-y-auto text-xs text-slate-500 leading-relaxed italic" id="modalUserMessage">
+                        "User message goes here..."
+                    </div>
+                </div>
+                <div>
+                    <label for="reply_text" class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Your Response</label>
+                    <textarea name="reply_text" id="reply_text" required placeholder="Type your response here..." class="w-full min-h-[140px] p-4 border-2 border-slate-200 focus:border-brand-500 focus:outline-none rounded-xl text-sm leading-relaxed text-slate-700 transition bg-slate-50 focus:bg-white"></textarea>
+                </div>
+                <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                    <button type="button" class="px-5 py-2.5 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 transition text-sm font-semibold" onclick="closeReplyModal()">Cancel</button>
+                    <button type="submit" class="px-6 py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-sm font-semibold shadow-md shadow-brand-500/10 transition flex items-center gap-1.5"><i class="fa-solid fa-paper-plane text-xs"></i> Send Reply</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script logic for Pagination & Modal -->
+    <script>
+        function openReplyModal(msgId, email, message, existingReply) {
+            const modal = document.getElementById('replyModal');
+            const form = document.getElementById('replyForm');
+            const emailEl = document.getElementById('modalUserEmail');
+            const messageEl = document.getElementById('modalUserMessage');
+            const textarea = document.getElementById('reply_text');
+            
+            form.action = `/super_admin/contact-reply/${msgId}/`;
+            emailEl.textContent = email;
+            messageEl.textContent = `"${message}"`;
+            textarea.value = existingReply || '';
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.firstElementChild.classList.remove('scale-95');
+            }, 50);
+        }
+        
+        function closeReplyModal() {
+            const modal = document.getElementById('replyModal');
+            modal.classList.add('opacity-0');
+            modal.firstElementChild.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const rowsPerPage = 5;
+            let currentPage = 0;
+
+            const tbody = document.getElementById("messagesTbody");
+            const allRows = Array.from(tbody.querySelectorAll("tr:not(.no-data)"));
+            if (allRows.length === 0) return;
+
+            const totalPages = Math.ceil(allRows.length / rowsPerPage);
+            const prevBtn = document.getElementById("prevBtn");
+            const nextBtn = document.getElementById("nextBtn");
+            const indicator = document.getElementById("pageIndicator");
+
+            function showPage(page) {
+                tbody.innerHTML = '';
+                const start = page * rowsPerPage;
+                const end = Math.min(start + rowsPerPage, allRows.length);
+                
+                allRows.slice(start, end).forEach(row => tbody.appendChild(row));
+                
+                indicator.textContent = `Showing ${start + 1} to ${end} of ${allRows.length} entries`;
+                
+                prevBtn.disabled = (page === 0);
+                nextBtn.disabled = (page === totalPages - 1);
+            }
+
+            prevBtn.addEventListener("click", () => {
+                if (currentPage > 0) {
+                    currentPage--;
+                    showPage(currentPage);
+                }
+            });
+
+            nextBtn.addEventListener("click", () => {
+                if (currentPage < totalPages - 1) {
+                    currentPage++;
+                    showPage(currentPage);
+                }
+            });
+
+            showPage(currentPage);
+        });
+    </script>
+</body>
+</html>

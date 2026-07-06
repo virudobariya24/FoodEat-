@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Placed</title>
+    <style>
+        body { font-family: Arial; background: #f2fff2; text-align: center; padding: 50px; }
+        .msg { background: white; display: inline-block; padding: 30px; border-radius: 10px; }
+        a { color: #007bff; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="msg">
+        <h2>✅ Thank you for your order!</h2>
+        <p>Your order ID: <strong>{{ order.id }}</strong></p>
+        <p>Status: {{ order.status }}</p>
+        <a href="/">Back to Home</a>
+    </div>
+</body>
+</html>

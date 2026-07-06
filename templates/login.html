@@ -1,0 +1,371 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Foodeat</title>
+    
+    <!-- Google Fonts & Font Awesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    {% comment %} <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"> {% endcomment %}
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="{% static 'js/3.4.js' %}"></script>
+     <link rel="stylesheet" href="{% static 'css/css2.css' %}">
+
+    <style>
+        /* ===== THEME & COLOR VARIABLES ===== */
+        :root {
+            --body-bg: #fffaf4;
+            --card-bg: #FFFFFF;
+            --main-text: #222222;
+            --secondary-text: #555555;
+            --border-color: #dee2e6;
+            --shadow-color: rgba(0,0,0,0.08);
+            --accent-color: #F8B602;
+            --orange-accent: #F05941;
+            --error-color: #D32F2F;
+            --input-bg: #f8f9fa;
+        }
+        body[data-theme="dark"] {
+            --body-bg: #121212;
+            --card-bg: #1C1C1C;
+            --main-text: #e0e0e0;
+            --secondary-text: #a0a0a0;
+            --border-color: #444444;
+            --shadow-color: rgba(0,0,0,0.2);
+            --input-bg: #2b2b2b;
+        }
+        /* ===== AUTH FORM STYLES ===== */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: calc(100vh - 100px);
+            padding: 50px 20px;
+        }
+        .auth-content {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 450px;
+            padding: 30px 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px var(--shadow-color);
+            border: 1px solid var(--border-color);
+        }
+        .auth-form h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-align: center;
+            color: var(--main-text);
+        }
+        .auth-form p {
+            margin-bottom: 25px;
+            color: var(--secondary-text);
+            font-size: 0.95rem;
+            text-align: center;
+        }
+        .auth-form p a {
+            color: var(--accent-color);
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .auth-form p a:hover {
+            color: var(--orange-accent);
+            text-decoration: underline;
+        }
+        .form-field { margin-bottom: 18px; }
+        .form-field label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: var(--main-text);
+        }
+        .input-group { position: relative; }
+        input::-ms-reveal,
+        input::-ms-clear {
+            display: none !important;
+        }
+        /* Animated input focus underline style */
+        .input-group:focus-within + .underline-indicator .focus-line {
+            width: 100%;
+        }
+        
+        /* Shimmer effect for submit button */
+        .shimmer-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        .shimmer-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 30%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(30deg);
+            transition: all 0.5s ease;
+        }
+        .shimmer-btn:hover::after {
+            left: 130%;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .input-group .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary-text);
+            font-size: 1rem;
+            pointer-events: none;
+        }
+        .auth-form input {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg);
+            color: var(--main-text);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .auth-form input:focus { 
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(248, 182, 2, 0.25);
+        }
+        .auth-form input.input-error {
+            border-color: var(--error-color) !important;
+            box-shadow: 0 0 0 3px rgba(211, 47, 47, 0.2);
+        }
+        .error-message { 
+            color: var(--error-color); 
+            font-size: 0.85rem; 
+            font-weight: 500;
+            display: block; 
+            min-height: 1.2em; 
+            margin-top: 6px;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--accent-color);
+            color: #111;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 10px;
+            font-family: 'Poppins', sans-serif;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .submit-btn:hover {
+            background-color: var(--orange-accent);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: var(--secondary-text);
+            margin: 25px 0;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .divider:not(:empty)::before { margin-right: 0.75em; }
+        .divider:not(:empty)::after { margin-left: 0.75em; }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 576px) {
+            .auth-container {
+                padding: 30px 15px;
+                min-height: calc(100vh - 80px);
+            }
+            .auth-content {
+                padding: 25px 20px;
+                border-radius: 12px;
+            }
+            .auth-form h2 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+   {% include 'header.html' %}
+<main class="auth-container">
+    <div class="auth-content">
+        <div id="loginView" class="auth-form">
+            <h2>Login</h2>
+            <p>Don't have an account? <a href="{% url 'register_page' %}">Create one</a></p>
+
+            <!-- Django messages display -->
+            {% if messages %}
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    {% for message in messages %}
+                        let icon = 'info';
+                        {% if message.tags == 'success' %}
+                            icon = 'success';
+                        {% elif message.tags == 'error' or message.tags == 'danger' %}
+                            icon = 'error';
+                        {% elif message.tags == 'warning' %}
+                            icon = 'warning';
+                        {% endif %}
+                        
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            showCloseButton: true,
+                            timer: 4000,
+                            timerProgressBar: true,
+                            icon: icon,
+                            title: "{{ message|escapejs }}",
+                            didOpen: (toast) => {
+                                toast.onmouseenter = Swal.stopTimer;
+                                toast.onmouseleave = Swal.resumeTimer;
+                            }
+                        });
+                    {% endfor %}
+                });
+            </script>
+            {% endif %}
+
+            <form id="loginForm" method="POST" novalidate>
+                {% csrf_token %}
+
+                <!-- Email / Phone -->
+                <div class="form-field">
+                    <label for="login-email">
+                        <i class="fas fa-envelope" style="color: var(--accent-color); margin-right: 6px;"></i> Email or Mobile Number
+                    </label>
+                    <div class="input-group">
+                        <input type="text" name="email" id="login-email" placeholder="Email or Mobile Number" required value="{{ form.email.value|default:'' }}">
+                        <i class="fas fa-envelope input-icon"></i>
+                    </div>
+                    <!-- Underline Indicator -->
+                    <div class="w-full h-[2px] bg-slate-100 dark:bg-slate-800 rounded overflow-hidden relative mt-1 underline-indicator">
+                        <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-[#F8B602] transition-all duration-300 -translate-x-1/2 focus-line"></div>
+                    </div>
+                    <div id="email-error" class="error-message">{% if form.email.errors %}{{ form.email.errors.0 }}{% endif %}</div>
+                </div>
+
+                <!-- Password -->
+                <div class="form-field">
+                    <label for="login-password">
+                        <i class="fas fa-lock" style="color: var(--accent-color); margin-right: 6px;"></i> Password
+                    </label>
+                    <div class="input-group">
+                        <input type="password" name="password" id="login-password" placeholder="Password" required style="padding-right: 45px;">
+                        <i class="fas fa-lock input-icon"></i>
+                        <button type="button" id="togglePassword" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--secondary-text); cursor: pointer; outline: none; padding: 0; z-index: 10; display: flex; align-items: center;">
+                            <i class="fas fa-eye" id="passwordEyeIcon"></i>
+                        </button>
+                    </div>
+                    <!-- Underline Indicator -->
+                    <div class="w-full h-[2px] bg-slate-100 dark:bg-slate-800 rounded overflow-hidden relative mt-1 underline-indicator">
+                        <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-[#F8B602] transition-all duration-300 -translate-x-1/2 focus-line"></div>
+                    </div>
+                    <div id="password-error" class="error-message">{% if form.password.errors %}{{ form.password.errors.0 }}{% endif %}</div>
+                </div>
+                 <div style="text-align: right; margin-top: 6px;">
+                    <a href="{% url 'forgot_password' %}" style="font-size: 0.9rem; color: var(--accent-color); font-weight: 600; text-decoration: none;">
+                        Forgot password?
+                    </a>
+                </div>
+
+                <button type="submit" class="submit-btn shimmer-btn">LOGIN</button>
+                <div class="divider">OR</div>
+            </form>
+        </div>
+    </div>
+</main>
+
+
+    <script>
+    // --- Form Validation Logic ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('login-email');
+        const passwordInput = document.getElementById('login-password');
+        
+        const emailError = document.getElementById('email-error');
+        const passwordError = document.getElementById('password-error');
+        
+        const togglePassword = document.getElementById('togglePassword');
+        if (togglePassword) {
+            togglePassword.addEventListener('click', () => {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                const eyeIcon = document.getElementById('passwordEyeIcon');
+                if (eyeIcon) {
+                    eyeIcon.classList.toggle('fa-eye');
+                    eyeIcon.classList.toggle('fa-eye-slash');
+                }
+            });
+        }
+        
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const phoneRegex = /^\d{10}$/;
+
+        const setError = (input, errorElement, message) => {
+            input.classList.add('input-error');
+            errorElement.textContent = message;
+        };
+        const clearError = (input, errorElement) => {
+            input.classList.remove('input-error');
+            errorElement.textContent = '';
+        };
+
+        emailInput.addEventListener('input', () => {
+            const val = emailInput.value.trim();
+            if (emailRegex.test(val) || phoneRegex.test(val)) clearError(emailInput, emailError);
+        });
+        passwordInput.addEventListener('input', () => {
+            if (passwordInput.value.trim() !== '') clearError(passwordInput, passwordError);
+        });
+
+        loginForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            let isValid = true;
+            clearError(emailInput, emailError);
+            clearError(passwordInput, passwordError);
+
+            const val = emailInput.value.trim();
+            if (val === '') {
+                setError(emailInput, emailError, 'Email or mobile number is required.');
+                isValid = false;
+            } else if (!emailRegex.test(val) && !phoneRegex.test(val)) {
+                setError(emailInput, emailError, 'Please enter a valid email or 10-digit mobile number.');
+                isValid = false;
+            }
+            if (passwordInput.value.trim() === '') {
+                setError(passwordInput, passwordError, 'Password is required.');
+                isValid = false;
+            }
+
+            if (isValid) {
+                loginForm.submit(); // submit to Django view
+            }
+        });
+    });
+    </script>
+</body>
+</html>

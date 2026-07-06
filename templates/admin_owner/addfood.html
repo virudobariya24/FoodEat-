@@ -1,0 +1,275 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Food Item - GJ3 Admin</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#ff6f00', // Orange matching theme
+                            600: '#ea580c',
+                            700: '#c2410c',
+                        },
+                        navy: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Premium field styling to override default widget rendering */
+        input:not([type="radio"]):not([type="checkbox"]),
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            color: #334155;
+            background-color: #f8fafc;
+            transition: all 0.2s ease-in-out;
+        }
+        input:not([type="radio"]):not([type="checkbox"]):focus,
+        select:focus,
+        textarea:focus {
+            border-color: #ff6f00;
+            background-color: #ffffff;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(255, 111, 0, 0.15);
+        }
+        input[type="checkbox"] {
+            width: 1.25rem;
+            height: 1.25rem;
+            accent-color: #ff6f00;
+            border-radius: 0.375rem;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex">
+    {% include 'admin_owner/sidebar.html' %}
+
+    <div class="w-full md:w-[calc(100%-70px)] lg:w-[calc(100%-260px)] md:ml-[70px] lg:ml-[260px] min-h-screen flex flex-col transition-all duration-300">
+        <!-- Top Header -->
+        <header class="bg-white border-b border-slate-200 h-20 px-6 md:px-8 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+            <!-- Left Side: Page Title -->
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">Add Food Item</h1>
+                <p class="text-xs md:text-sm text-slate-500 hidden sm:block">Add a new delicious dish to your restaurant's digital menu.</p>
+            </div>
+
+            <!-- Right Side: User Profile Dropdown -->
+            <div class="relative" id="adminProfileDropdownContainer">
+                <button id="adminProfileBtn" class="flex items-center gap-3 p-1.5 pr-3 hover:bg-slate-100 rounded-full transition-all duration-200 focus:outline-none">
+                    <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-brand-500 shadow-sm flex-shrink-0">
+                        {% if admin_user.profile_image %}
+                            <img src="{{ admin_user.profile_image.url }}" alt="Admin Profile" class="w-full h-full object-cover">
+                        {% else %}
+                            <img src="{% static 'images/default-profile.png' %}" alt="Default Profile" class="w-full h-full object-cover">
+                        {% endif %}
+                    </div>
+                    <div class="text-left hidden sm:block">
+                        <p class="text-sm font-semibold text-slate-800 leading-tight">{{ admin_user.full_name }}</p>
+                        <p class="text-xs text-slate-400 font-medium leading-none mt-0.5">{{ admin_user.restaurant_name|default:"No Restaurant" }}</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 hidden sm:block transition-transform duration-200" id="dropdownArrow"></i>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div id="adminDropdownMenu" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-100 py-2 z-50 transform origin-top-right transition-all duration-200">
+                    <div class="px-4 py-2 border-b border-slate-50 md:hidden">
+                        <p class="text-sm font-semibold text-slate-800">{{ admin_user.full_name }}</p>
+                        <p class="text-xs text-slate-400 font-medium">{{ admin_user.restaurant_name|default:"No Restaurant" }}</p>
+                    </div>
+                    <a href="{% url 'admin_profile' %}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-brand-600 transition-colors">
+                        <i class="fa-solid fa-user text-slate-400 w-5"></i>
+                        <span>My Profile</span>
+                    </a>
+                    <hr class="my-1 border-slate-100">
+                    <a href="/admin_logout/" class="flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors">
+                        <i class="fa-solid fa-right-from-bracket w-5"></i>
+                        <span>Log Out</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow p-6 md:p-8 max-w-4xl w-full mx-auto">
+            <div class="bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+                <div class="bg-gradient-to-r from-brand-500 to-orange-600 p-6 text-white flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-2xl">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg md:text-xl font-bold">Add Food Item</h2>
+                        <p class="text-xs text-brand-100">Publish a new item on the menu card.</p>
+                    </div>
+                </div>
+
+                <form method="post" enctype="multipart/form-data" class="p-6 md:p-8 space-y-6">
+                    {% csrf_token %}
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Restaurant Name -->
+                        <div class="flex flex-col">
+                            <label class="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                <i class="fas fa-store text-brand-500"></i> Restaurant Name
+                            </label>
+                            {{ form.restaurant_name }}
+                            {% for error in form.restaurant_name.errors %}
+                                <div class="text-rose-500 text-xs font-medium mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Food Name -->
+                        <div class="flex flex-col">
+                            <label class="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                <i class="fas fa-utensils text-brand-500"></i> Food Name
+                            </label>
+                            {{ form.food_name }}
+                            {% for error in form.food_name.errors %}
+                                <div class="text-rose-500 text-xs font-medium mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Description -->
+                        <div class="flex flex-col md:col-span-2">
+                            <label class="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                <i class="fas fa-align-left text-brand-500"></i> Description
+                            </label>
+                            {{ form.description }}
+                            {% for error in form.description.errors %}
+                                <div class="text-rose-500 text-xs font-medium mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Price -->
+                        <div class="flex flex-col">
+                            <label class="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                <i class="fas fa-money-bill-wave text-brand-500"></i> Price
+                            </label>
+                            {{ form.price }}
+                            {% for error in form.price.errors %}
+                                <div class="text-rose-500 text-xs font-medium mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Category -->
+                        <div class="flex flex-col">
+                            <label class="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                <i class="fas fa-list text-brand-500"></i> Category
+                            </label>
+                            {{ form.category }}
+                            {% for error in form.category.errors %}
+                                <div class="text-rose-500 text-xs font-medium mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Checkboxes: Veg / Spicy / Available -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row justify-around gap-4 mt-6">
+                        <!-- Veg Checkbox -->
+                        <label class="flex items-center gap-3 cursor-pointer select-none">
+                            <div class="relative flex items-center">
+                                {{ form.is_veg }}
+                            </div>
+                            <span class="text-sm font-semibold text-slate-700">Veg</span>
+                        </label>
+
+                        <!-- Spicy Checkbox -->
+                        <label class="flex items-center gap-3 cursor-pointer select-none">
+                            <div class="relative flex items-center">
+                                {{ form.is_spicy }}
+                            </div>
+                            <span class="text-sm font-semibold text-slate-700">Spicy</span>
+                        </label>
+
+                        <!-- Available Checkbox -->
+                        <label class="flex items-center gap-3 cursor-pointer select-none">
+                            <div class="relative flex items-center">
+                                {{ form.is_available }}
+                            </div>
+                            <span class="text-sm font-semibold text-slate-700">Available</span>
+                        </label>
+                    </div>
+
+                    <!-- Food Image -->
+                    <div class="flex flex-col mt-6">
+                        <label class="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                            <i class="fas fa-image text-brand-500"></i> Food Image
+                        </label>
+                        {{ form.food_image }}
+                        {% for error in form.food_image.errors %}
+                            <div class="text-rose-500 text-xs font-medium mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="pt-6 border-t border-slate-100 flex justify-end">
+                        <button type="submit" class="w-full sm:w-auto px-8 py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold shadow-md shadow-brand-500/20 hover:shadow-lg hover:shadow-brand-500/30 transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2">
+                            <i class="fas fa-plus"></i> Add Food Item
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Dropdown Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileBtn = document.getElementById('adminProfileBtn');
+            const dropdownMenu = document.getElementById('adminDropdownMenu');
+            const dropdownArrow = document.getElementById('dropdownArrow');
+
+            if (profileBtn && dropdownMenu) {
+                profileBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdownMenu.classList.toggle('hidden');
+                    if (dropdownArrow) {
+                        dropdownArrow.classList.toggle('rotate-180');
+                    }
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                        dropdownMenu.classList.add('hidden');
+                        if (dropdownArrow) {
+                            dropdownArrow.classList.remove('rotate-180');
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

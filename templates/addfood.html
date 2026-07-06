@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Food Item - GJ3 Admin</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+       :root {
+            --primary-color: #ff6f00;
+            --secondary-color: #f8b602;
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --text-dark: #2c3e50;
+            --text-muted: #7f8c8d;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Main content */
+        .main-content {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+       /* Food Form */
+        .food-form-container {
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .food-card {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .form-header p {
+            color: var(--text-muted);
+            margin-top: 5px;
+            font-size: 1rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+            flex: 1;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 14px 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+            background-color: #fdfdff;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"] {
+            padding-left: 15px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 4px rgba(248, 182, 2, 0.15);
+        }
+
+        .form-group textarea {
+            padding-top: 14px;
+        }
+
+        /* Submit button */
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            box-shadow: 0 5px 15px rgba(248, 182, 2, 0.3);
+            transform: translateY(-3px);
+        }
+
+        @media (max-width: 768px) {
+            .food-card {
+                padding: 25px;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .form-row .form-group {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="food-form-container">
+            <div class="food-card">
+                <div class="form-header">
+                    <h2>Add New Food Item</h2>
+                    <p>Fill out the details to add a new item to a restaurant's menu.</p>
+                </div>
+
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        {{ form.restaurant_name.label_tag }}
+                        {{ form.restaurant_name }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.food_name.label_tag }}
+                        {{ form.food_name }}
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.description.label_tag }}
+                        {{ form.description }}
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            {{ form.price.label_tag }}
+                            {{ form.price }}
+                        </div>
+                        <div class="form-group">
+                            {{ form.category.label_tag }}
+                            {{ form.category }}
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            {{ form.is_veg }} {{ form.is_veg.label_tag }}
+                        </div>
+                        <div class="form-group">
+                            {{ form.is_spicy }} {{ form.is_spicy.label_tag }}
+                        </div>
+                        <div class="form-group">
+                            {{ form.is_available }} {{ form.is_available.label_tag }}
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        {{ form.food_image.label_tag }}
+                        {{ form.food_image }}
+                    </div>
+
+                    <button type="submit" class="submit-btn">Add Food Item</button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

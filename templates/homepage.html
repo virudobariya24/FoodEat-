@@ -1,0 +1,1202 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zesty Bite - Welcome to Our Restaurant</title>
+    {% comment %} <script src="https://cdn.tailwindcss.com"></script> {% endcomment %}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    {% comment %} <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"> {% endcomment %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+
+
+
+    
+    <script src="{% static 'js/3.4.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'css/css2.css' %}">
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* --- Base and Color Variables --- */
+        :root {
+            --body-bg: #fffaf4;
+            --card-bg: #FFFFFF;
+            --main-text: #222222;
+            --secondary-text: #555555;
+            --border-color: #EAEAEA;
+            --shadow-color: rgba(0,0,0,0.08);
+            --accent-color: #F8B602; /* Yellow */
+            --orange-accent: #F05941; /* Orange/Red */
+            --header-text: #333;
+        }
+
+        body[data-theme="dark"] {
+            --body-bg: #121212;
+            --card-bg: #1C1C1C;
+            --main-text: #e0e0e0;
+            --secondary-text: #a0a0a0;
+            --border-color: #444444;
+            --shadow-color: rgba(0,0,0,0.2);
+            --header-text: #e0e0e0;
+        }
+
+        /* --- Base Body Styles --- */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--body-bg);
+            color: var(--main-text);
+            transition: background-color 0.3s, color 0.3s;
+            padding-top: 100px;
+            scroll-behavior: smooth;
+        }
+        .hidden { display: none !important; }
+
+        /* --- Reusable Section Styling --- */
+        .section-padding {
+            padding: 4rem 1.5rem;
+        }
+        @media (min-width: 768px) {
+            .section-padding {
+                padding: 6rem 2rem;
+            }
+        }
+        .section-header { text-align: center; margin-bottom: 3rem; }
+        .section-header h2 { font-size: 2.5rem; font-weight: 800; color: var(--main-text); margin-bottom: 1rem; }
+        .section-header p { font-size: 1.125rem; color: var(--secondary-text); max-width: 600px; margin: 0 auto; }
+        
+        /* --- Animation --- */
+        .scroll-animate { opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+        .scroll-animate.visible { opacity: 1; transform: translateY(0); }
+
+        /* --- HERO SECTION SLIDESHOW (NEW) --- */
+        .hero-slide-image {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            opacity: 0;
+            transition: opacity 1s ease-in-out; /* Smooth fade transition */
+            filter: drop-shadow(0 25px 25px rgba(0,0,0,0.25));
+        }
+        .hero-slide-image.active {
+            opacity: 1;
+        }
+
+        /* --- Hero Section Spacing --- */
+        .hero-section {
+            padding: 4rem 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        @media (min-width: 768px) {
+            .hero-section {
+                padding: 6rem 2rem;
+            }
+        }
+
+        /* --- Food Showcase Carousel (UPDATED FOR RESPONSIVENESS) --- */
+        #new-carousel-container {
+            position: relative;
+            margin: auto;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1 / 1;
+            max-width: 550px;
+            max-height: 550px;
+        }
+        @media (max-width: 640px) {
+            #new-carousel-container {
+                max-width: 85vw;
+                max-height: 85vw;
+            }
+        }
+        #new-carousel-container > svg {
+            width: 100%;
+            height: 100%;
+        }
+        #new-thumbnails-container {
+            position: absolute;
+            inset: 0;
+        }
+        .thumbnail-item { 
+            cursor: pointer; 
+            position: absolute;
+        }
+        .thumb-wrapper {
+            /* Handled smoothly via requestAnimationFrame in JavaScript */
+        }
+        body[data-theme="dark"] #new-nav-container button {
+            background-color: var(--card-bg);
+            box-shadow: 0 8px 20px var(--shadow-color);
+        }
+        body[data-theme="dark"] #new-nav-container button i, body[data-theme="dark"] .thumbnail-item span, body[data-theme="dark"] #new-main-label {
+            color: var(--main-text);
+        }
+        body[data-theme="dark"] #new-nav-container button:hover { background-color: #374151; }
+        body[data-theme="dark"] .rounded-full.bg-white { background-color: var(--card-bg); }
+
+        /* --- Premium Showcase Custom Animations --- */
+        #new-carousel-container::before {
+            content: '';
+            position: absolute;
+            inset: 10%;
+            background: radial-gradient(circle, rgba(251, 191, 36, 0.16) 0%, transparent 70%);
+            z-index: -1;
+            filter: blur(40px);
+            animation: ambientGlow 7s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes ambientGlow {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.8;
+                background: radial-gradient(circle, rgba(251, 191, 36, 0.16) 0%, transparent 70%);
+            }
+            50% {
+                transform: scale(1.25);
+                opacity: 1;
+                background: radial-gradient(circle, rgba(239, 68, 68, 0.18) 0%, transparent 70%);
+            }
+        }
+
+        #new-carousel-container > svg {
+            animation: orbitalSpin 32s linear infinite;
+            transform-origin: center;
+        }
+        @keyframes orbitalSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        #new-main-image-wrapper {
+            animation: floatCenter 4.2s ease-in-out infinite;
+        }
+        @keyframes floatCenter {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-8px) scale(1.02); }
+        }
+
+        .active-glow {
+            animation: activePulse 2s infinite ease-in-out;
+        }
+        @keyframes activePulse {
+            0%, 100% {
+                box-shadow: 0 0 10px rgba(251, 191, 36, 0.4), 0 0 20px rgba(249, 115, 22, 0.2);
+            }
+            50% {
+                box-shadow: 0 0 22px rgba(251, 191, 36, 0.8), 0 0 35px rgba(249, 115, 22, 0.5);
+            }
+        }
+
+        .sparkle-particle {
+            position: absolute;
+            pointer-events: none;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fbbf24 30%, #ef4444 100%);
+            box-shadow: 0 0 8px #f97316, 0 0 15px #fbbf24;
+            z-index: 50;
+            animation: particleFade 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+        @keyframes particleFade {
+            to {
+                transform: translate(var(--dx), var(--dy)) scale(0);
+                opacity: 0;
+            }
+        }
+
+
+        /* --- Footer --- */
+        .footer {
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* --- Simplified Responsive Fixes --- */
+        @media (max-width: 767px) {
+            body { padding-top: 80px; }
+            .section-padding { padding: 3rem 1rem; }
+            .hero-section { padding-top: 1rem; padding-bottom: 3rem; }
+            .hero-section h1 { font-size: 2.5rem !important; }
+            #showcase main { flex-direction: column !important; }
+            #showcase .md\:w-1\/2 { width: 100%; text-align: center; } 
+            #showcase .md\:pl-10 { padding-left: 0; }
+        }
+
+        /* --- Menu Scrollbar Hiding --- */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        /* --- Why Choose Us Custom Styles --- */
+        .service-card {
+            background-color: var(--card-bg);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--border-color);
+        }
+        .service-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 30px var(--shadow-color);
+            border-color: var(--accent-color);
+        }
+        .service-card .icon-wrapper {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(240, 89, 65, 0.1) 100%);
+            color: var(--orange-accent);
+        }
+        
+        /* --- Testimonials Slider Custom Styles --- */
+        .testimonial-slider {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            max-width: 800px;
+            margin: auto;
+        }
+        .testimonial-track {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+        .testimonial-slide {
+            min-width: 100%;
+            box-sizing: border-box;
+            padding: 1rem;
+        }
+        .testimonial-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px var(--shadow-color);
+            padding: 2.5rem;
+            position: relative;
+        }
+        .testimonial-card::before {
+            content: '"';
+            position: absolute;
+            top: 1rem;
+            left: 2rem;
+            font-size: 6rem;
+            font-family: serif;
+            color: rgba(251, 191, 36, 0.15);
+            line-height: 1;
+        }
+
+        /* --- App Download Banner --- */
+        .app-promo-banner {
+            background: linear-gradient(135deg, #FFF6E7 0%, #FFE9D6 100%);
+            border-radius: 2.5rem;
+            overflow: hidden;
+            position: relative;
+        }
+        body[data-theme="dark"] .app-promo-banner {
+            background: linear-gradient(135deg, #1f1f1f 0%, #151515 100%);
+            border: 1px solid var(--border-color);
+        }
+        .app-mockup {
+            animation: appFloat 4s ease-in-out infinite;
+        }
+        @keyframes appFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* --- FAQ Accordion --- */
+        .faq-item {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+        .faq-item.active {
+            border-color: var(--accent-color);
+            box-shadow: 0 8px 20px var(--shadow-color);
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s cubic-bezier(0, 1, 0, 1);
+        }
+        .faq-item.active .faq-answer {
+            max-height: 1000px;
+            transition: max-height 0.3s cubic-bezier(1, 0, 1, 0);
+        }
+        .faq-chevron {
+            transition: transform 0.3s ease;
+        }
+        .faq-item.active .faq-chevron {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body>
+
+    {% include 'header.html' %}
+
+    <!-- Section 1: Hero Banner -->
+    <section class="hero-section">
+        <div class="container mx-auto flex flex-col md:flex-row items-center relative z-10">
+            <div class="md:w-1/2 text-center md:text-left mb-12 md:mb-0 scroll-animate">
+                <h1 class="text-4xl md:text-5xl lg:text-7xl font-extrabold leading-tight mb-4" style="color: var(--main-text);">
+                    Taste the <span style="color: var(--orange-accent);">Zest</span>, Feel the <span style="color: var(--accent-color);">Bite</span>!
+                </h1>
+                <p class="text-lg lg:text-xl mb-8" style="color: var(--secondary-text);">
+                    From sizzling starters to decadent desserts, every dish is a masterpiece crafted with passion and the freshest ingredients.
+                </p>
+                <a href="{% url 'menu_page' %}" class="bg-yellow-400 text-black font-bold py-4 px-10 rounded-full hover:bg-yellow-500 hover:-translate-y-1 active:translate-y-0 transition-all duration-200 text-lg md:text-xl shadow-lg inline-block transform">
+                    Explore Menu <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            <!-- HERO IMAGE SLIDESHOW CONTAINER (UPDATED) -->
+            <div class="md:w-1/2 flex flex-col items-center justify-center relative py-6 md:py-0 w-full">
+                
+                <div class="relative w-full max-w-[320px] sm:max-w-[400px] md:max-w-lg h-72 sm:h-96 md:h-[400px]">
+                    {% if food_items %}
+                        {% for item in food_items %}
+                            {% if item.food_image %}
+                                <img src="{{ item.food_image.url }}" alt="{{ item.food_name }}" class="hero-slide-image {% if forloop.first %}active{% endif %}" data-name="{{ item.food_name }}">
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <!-- Fallback Slide Images -->
+                        <img src="{% static 'img/Burger.avif' %}" alt="Delicious Burger" class="hero-slide-image active" data-name="Burger">
+                        <img src="{% static 'img/Samosa.avif' %}" alt="Tasty Samosas" class="hero-slide-image" data-name="Samosas">
+                        <img src="{% static 'img/Rolls.avif' %}" alt="Fresh Rolls" class="hero-slide-image" data-name="Rolls">
+                        <img src="{% static 'img/Cake.avif' %}" alt="Chocolate Cake" class="hero-slide-image" data-name="Chocolate Cake">
+                        <img src="{% static 'img/Noodles.avif' %}" alt="Spicy Noodles" class="hero-slide-image" data-name="Spicy Noodles">
+                    {% endif %}
+                </div>
+
+                <!-- Dynamically updated food name label -->
+                <div class="mt-6 text-center z-10">
+                    <h3 id="hero-food-label" class="text-3xl md:text-4xl font-extrabold text-slate-700 tracking-tight transition-opacity duration-300">
+                        {% if food_items %}
+                            {{ food_items.0.food_name }}
+                        {% else %}
+                            Burger
+                        {% endif %}
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 2: Food Showcase Carousel -->
+    <div id="showcase" class="w-full flex items-center justify-center py-12 md:py-20 px-4 sm:px-6 lg:px-8">
+        <main class="flex flex-col md:flex-row-reverse w-full max-w-7xl mx-auto items-center">
+            <div class="w-full md:w-1/2 lg:w-1/3 space-y-4 md:space-y-5 md:pl-10 text-center md:text-left scroll-animate">
+                <p id="details-price" class="text-5xl md:text-6xl font-bold" style="color: var(--accent-color);"></p>
+                <h1 id="details-title" class="text-5xl md:text-6xl font-bold leading-tight" style="color: var(--main-text);"></h1>
+                <p id="details-description" class="text-lg" style="color: var(--secondary-text);"></p>
+            </div>
+            <div class="w-full md:w-1/2 lg:w-2/3 flex justify-center items-center mt-12 md:mt-0">
+                <div id="new-carousel-container">
+                    <svg viewBox="0 0 550 550" class="pointer-events-none absolute inset-0 w-full h-full">
+                        <defs>
+                            <linearGradient id="neonGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#fbbf24" />
+                                <stop offset="50%" stop-color="#f97316" />
+                                <stop offset="100%" stop-color="#ef4444" />
+                            </linearGradient>
+                            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                                <feGaussianBlur stdDeviation="5" result="blur" />
+                                <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                            </filter>
+                        </defs>
+                        <!-- Glowing animated dotted neon ring -->
+                        <circle cx="275" cy="275" r="225" fill="none" stroke="url(#neonGradient)" stroke-width="3" stroke-dasharray="12,15" stroke-linecap="round" filter="url(#glow)" opacity="0.95"/>
+                    </svg>
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                        <div id="new-main-image-wrapper" class="w-28 h-28 sm:w-52 sm:h-52 md:w-72 md:h-72 rounded-full bg-white shadow-2xl flex items-center justify-center p-3 sm:p-6 pointer-events-auto cursor-pointer transition active:scale-95 duration-300"><img id="new-main-image" src="" alt="Featured Food" class="w-full h-full object-contain"></div>
+                        <h2 id="new-main-label" class="text-sm sm:text-2xl md:text-4xl font-bold mt-1.5 sm:mt-4 text-center"></h2>
+                    </div>
+                    <div id="new-thumbnails-container" class="w-full h-full"></div>
+                    <div id="new-nav-container" class="absolute bottom-[-50px] left-1/2 -translate-x-1/2 flex items-center justify-center space-x-4">
+                        <button id="new-prev-btn" class="bg-white p-4 rounded-full shadow-lg hover:bg-gray-100 transition"><i class="fas fa-arrow-left"></i></button>
+                        <div id="highlighted-thumbnail-slot"></div>
+                        <button id="new-next-btn" class="bg-white p-4 rounded-full shadow-lg hover:bg-gray-100 transition"><i class="fas fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+
+
+    <!-- Section 4: Why Choose Us (Services) -->
+    <section class="section-padding">
+        <div class="max-w-7xl mx-auto">
+            <div class="section-header scroll-animate">
+                <h2>Why Choose Us?</h2>
+                <p>We do more than just deliver food. We create delightful dining experiences right at your doorstep.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+                <!-- Card 1: Fast Delivery -->
+                <div class="service-card scroll-animate p-8 rounded-3xl flex flex-col items-center text-center">
+                    <div class="icon-wrapper w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-6">
+                        <i class="fas fa-shipping-fast"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Super Fast Delivery</h3>
+                    <p style="color: var(--secondary-text);">Get your favorite meals hot and fresh delivered directly to your door in under 30 minutes.</p>
+                </div>
+                <!-- Card 2: Premium Food -->
+                <div class="service-card scroll-animate p-8 rounded-3xl flex flex-col items-center text-center">
+                    <div class="icon-wrapper w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-6">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Best Quality Food</h3>
+                    <p style="color: var(--secondary-text);">Our meals are cooked using only organic ingredients and the highest standards of hygiene.</p>
+                </div>
+                <!-- Card 3: Easy Ordering -->
+                <div class="service-card scroll-animate p-8 rounded-3xl flex flex-col items-center text-center">
+                    <div class="icon-wrapper w-16 h-16 rounded-full flex items-center justify-center text-3xl mb-6">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Easy Online Ordering</h3>
+                    <p style="color: var(--secondary-text);">Order food in a few clicks with real-time tracking, notifications, and secure payments.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 5: Testimonials -->
+    <section class="section-padding" style="background-color: rgba(251, 191, 36, 0.03);">
+        <div class="max-w-7xl mx-auto">
+            <div class="section-header scroll-animate">
+                <h2>What Our Customers Say</h2>
+                <p>Don't just take our word for it, hear from thousands of happy food lovers who order from us daily.</p>
+            </div>
+            
+            <div class="testimonial-slider scroll-animate mt-12">
+                <div class="testimonial-track" id="testimonial-track">
+                    <!-- Slide 1 -->
+                    <div class="testimonial-slide">
+                        <div class="testimonial-card">
+                            <div class="flex items-center mb-6">
+                                <div class="w-14 h-14 rounded-full bg-yellow-400 flex items-center justify-center text-white text-xl font-bold mr-4">
+                                    V
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-bold">Viraj Dobariya</h4>
+                                    <div class="text-yellow-400 text-sm">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-lg italic" style="color: var(--secondary-text);">
+                                "The delivery was insanely fast! The Pav Bhaji arrived piping hot and tasted exactly like street-side Mumbai style. Zesty Bite is my absolute go-to for late-night cravings."
+                            </p>
+                        </div>
+                    </div>
+                    <!-- Slide 2 -->
+                    <div class="testimonial-slide">
+                        <div class="testimonial-card">
+                            <div class="flex items-center mb-6">
+                                <div class="w-14 h-14 rounded-full bg-orange-400 flex items-center justify-center text-white text-xl font-bold mr-4">
+                                    A
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-bold">Aryan Dobariya</h4>
+                                    <div class="text-yellow-400 text-sm">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star-half-alt"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-lg italic" style="color: var(--secondary-text);">
+                                "The quality of food is outstanding. I ordered the Classic Beef Burger and the patty was cooked to perfection. Highly recommend their clean packaging as well!"
+                            </p>
+                        </div>
+                    </div>
+                    <!-- Slide 3 -->
+                    <div class="testimonial-slide">
+                        <div class="testimonial-card">
+                            <div class="flex items-center mb-6">
+                                <div class="w-14 h-14 rounded-full bg-red-400 flex items-center justify-center text-white text-xl font-bold mr-4">
+                                    A
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-bold">Arjun Savaliya</h4>
+                                    <div class="text-yellow-400 text-sm">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-lg italic" style="color: var(--secondary-text);">
+                                "Amazing app layout and UI. The table booking feature works seamlessly. I booked a table for my family anniversary dinner, and the reservation was processed instantly."
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Controls -->
+                <div class="flex justify-center space-x-4 mt-8">
+                    <button id="testi-prev-btn" class="w-12 h-12 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-800 dark:text-slate-200 shadow-md hover:bg-yellow-400 dark:hover:bg-yellow-400 hover:text-black transition-all">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button id="testi-next-btn" class="w-12 h-12 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-800 dark:text-slate-200 shadow-md hover:bg-yellow-400 dark:hover:bg-yellow-400 hover:text-black transition-all">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 6: Promo / Download App Banner -->
+    <section class="section-padding">
+        <div class="max-w-7xl mx-auto">
+            <div class="app-promo-banner scroll-animate p-8 md:p-16 flex flex-col md:flex-row items-center justify-between">
+                <div class="md:w-1/2 mb-10 md:mb-0 space-y-6">
+                    <span class="bg-yellow-400/20 text-yellow-600 dark:text-yellow-400 font-bold px-4 py-1.5 rounded-full text-sm inline-block">
+                        Coming Soon to Mobile!
+                    </span>
+                    <h2 class="text-3xl md:text-5xl font-extrabold leading-tight" style="color: var(--main-text);">
+                        Order Your Favorites Instantly with the Zesty Bite App
+                    </h2>
+                    <p class="text-lg" style="color: var(--secondary-text);">
+                        Download our upcoming mobile application to unlock exclusive coupons, track order deliveries in real-time, and check out with single-tap express payments.
+                    </p>
+                    
+                    <!-- App features checklist -->
+                    <ul class="space-y-3">
+                        <li class="flex items-center text-md" style="color: var(--main-text);">
+                            <i class="fas fa-check-circle text-yellow-500 mr-3 text-lg"></i> Live Order Tracking with GPS
+                        </li>
+                        <li class="flex items-center text-md" style="color: var(--main-text);">
+                            <i class="fas fa-check-circle text-yellow-500 mr-3 text-lg"></i> Early-access Flash Discounts
+                        </li>
+                        <li class="flex items-center text-md" style="color: var(--main-text);">
+                            <i class="fas fa-check-circle text-yellow-500 mr-3 text-lg"></i> Smart Personalized Recommendations
+                        </li>
+                    </ul>
+
+                    <div class="flex flex-wrap gap-4 pt-4">
+                        <a href="#" class="flex items-center bg-black text-white px-6 py-3 rounded-xl hover:opacity-80 transition transform hover:-translate-y-0.5 animate-pulse">
+                            <i class="fab fa-apple text-3xl mr-3"></i>
+                            <div class="text-left">
+                                <p class="text-[10px] uppercase tracking-wider text-gray-400">Download on the</p>
+                                <p class="text-sm font-bold -mt-1">App Store</p>
+                            </div>
+                        </a>
+                        <a href="#" class="flex items-center bg-black text-white px-6 py-3 rounded-xl hover:opacity-80 transition transform hover:-translate-y-0.5 animate-pulse">
+                            <i class="fab fa-google-play text-2xl mr-3"></i>
+                            <div class="text-left">
+                                <p class="text-[10px] uppercase tracking-wider text-gray-400">Get it on</p>
+                                <p class="text-sm font-bold -mt-1">Google Play</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="md:w-1/2 flex justify-center items-center w-full relative">
+                    <!-- Glassmorphism phone mockup -->
+                    <div class="app-mockup bg-white/10 dark:bg-white/5 border border-white/20 dark:border-white/10 rounded-[3rem] p-4 shadow-2xl backdrop-blur-md max-w-[320px] w-full aspect-[9/18] relative overflow-hidden flex flex-col justify-between">
+                        <!-- Speaker / Camera Notch -->
+                        <div class="w-32 h-6 bg-black rounded-full mx-auto mb-4 absolute top-2 left-1/2 -translate-x-1/2 z-30"></div>
+                        
+                        <!-- Mock Screen Content -->
+                        <div class="w-full h-full bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-[2.5rem] p-6 flex flex-col justify-between relative overflow-hidden pt-10">
+                            <!-- Background Circles for UI glow -->
+                            <div class="absolute -top-10 -right-10 w-24 h-24 bg-yellow-400 rounded-full blur-xl opacity-30"></div>
+                            <div class="absolute -bottom-10 -left-10 w-24 h-24 bg-orange-500 rounded-full blur-xl opacity-30"></div>
+                            
+                            <div class="flex justify-between items-center z-10">
+                                <div class="text-xs font-bold uppercase tracking-widest text-slate-800 dark:text-white">Zesty Bite App</div>
+                                <i class="fas fa-bell text-slate-800 dark:text-white"></i>
+                            </div>
+                            
+                            <!-- Large Burger Card -->
+                            <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-white/40 dark:border-slate-800/40 rounded-2xl p-4 my-auto shadow-lg z-10">
+                                <img src="{% static 'img/Burger.avif' %}" alt="Mock Burger" class="w-24 h-24 object-contain mx-auto mb-3 filter drop-shadow-md">
+                                <h4 class="font-bold text-center text-slate-800 dark:text-white">Special Spicy Burger</h4>
+                                <p class="text-center text-xs text-yellow-600 dark:text-yellow-400 font-bold mt-1">₹149 <span class="text-gray-400 line-through font-normal">₹199</span></p>
+                            </div>
+                            
+                            <!-- Track Button -->
+                            <button class="w-full bg-yellow-400 text-black font-bold py-3 rounded-full text-xs shadow-md z-10 hover:bg-yellow-500 transition">
+                                <i class="fas fa-motorcycle mr-2"></i> Track Live Order
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 7: Frequently Asked Questions (FAQ) -->
+    <section class="section-padding" style="background-color: rgba(251, 191, 36, 0.01);">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="section-header scroll-animate">
+                <h2>Frequently Asked Questions</h2>
+                <p>Have questions about delivery, booking, or payments? Find quick answers right here.</p>
+            </div>
+            
+            <div class="space-y-4 mt-12 scroll-animate">
+                <!-- FAQ Item 1 -->
+                <div class="faq-item p-6 cursor-pointer">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-lg font-bold" style="color: var(--main-text);">How long does the delivery take?</h4>
+                        <i class="fas fa-chevron-down faq-chevron" style="color: var(--secondary-text);"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="pt-4 text-md leading-relaxed" style="color: var(--secondary-text);">
+                            Our standard delivery time is 25-35 minutes. If your order is delayed due to unexpected traffic or high order volume, you can track it live or contact customer support directly from the app.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="faq-item p-6 cursor-pointer">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-lg font-bold" style="color: var(--main-text);">How can I book a table at the restaurant?</h4>
+                        <i class="fas fa-chevron-down faq-chevron" style="color: var(--secondary-text);"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="pt-4 text-md leading-relaxed" style="color: var(--secondary-text);">
+                            Simply log in to your account, click on "Book Table" in the menu, select your preferred date, time, and number of guests, and confirm your booking. You'll receive an OTP or confirmation email instantly.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="faq-item p-6 cursor-pointer">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-lg font-bold" style="color: var(--main-text);">Is there a minimum order amount for delivery?</h4>
+                        <i class="fas fa-chevron-down faq-chevron" style="color: var(--secondary-text);"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="pt-4 text-md leading-relaxed" style="color: var(--secondary-text);">
+                            No, we do not enforce any minimum order values. You can order as little or as much as you like! However, free delivery applies to orders above ₹200.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FAQ Item 4 -->
+                <div class="faq-item p-6 cursor-pointer">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-lg font-bold" style="color: var(--main-text);">What payment options are available?</h4>
+                        <i class="fas fa-chevron-down faq-chevron" style="color: var(--secondary-text);"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="pt-4 text-md leading-relaxed" style="color: var(--secondary-text);">
+                            We support a wide range of secure payment options including Credit/Debit Cards, UPI (GPay, PhonePe, Paytm), Netbanking, and Cash on Delivery (COD).
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>const STATIC_IMG_PATH = "{% get_static_prefix %}img/";</script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- Theme Switcher Logic ---
+        function setupThemeSwitcher() {
+            const themeSwitcher = document.querySelector('.theme-switcher');
+            if (!themeSwitcher) return;
+            const themeIcon = themeSwitcher.querySelector('i');
+            const setTheme = (theme) => {
+                document.body.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+                if (themeIcon) { themeIcon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun'; }
+            };
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(savedTheme);
+            themeSwitcher.addEventListener('click', () => {
+                const currentTheme = document.body.getAttribute('data-theme') || 'light';
+                setTheme(currentTheme === 'light' ? 'dark' : 'light');
+            });
+        }
+
+        // --- Hero Section Image Slider (NEW) ---
+        function setupHeroSlider() {
+            const slides = document.querySelectorAll('.hero-slide-image');
+            const labelEl = document.getElementById('hero-food-label');
+            if (slides.length <= 1) return; // Don't run if there's only one or zero images
+
+            let currentIndex = 0;
+
+            setInterval(() => {
+                // Fade out the current slide
+                slides[currentIndex].classList.remove('active');
+
+                // Move to the next slide
+                currentIndex = (currentIndex + 1) % slides.length;
+
+                // Fade in the new slide
+                slides[currentIndex].classList.add('active');
+
+                // Update the food label text with fade animation
+                if (labelEl && slides[currentIndex].dataset.name) {
+                    labelEl.style.opacity = '0';
+                    setTimeout(() => {
+                        labelEl.textContent = slides[currentIndex].dataset.name;
+                        labelEl.style.opacity = '1';
+                    }, 300);
+                }
+            }, 2500); // Change image every 2.5 seconds
+        }
+
+        // --- Food Showcase Carousel Logic ---
+        function setupNewCarousel() {
+            const carouselContainer = document.getElementById('new-carousel-container');
+            if (!carouselContainer) return;
+            
+            const rawFoodData = [
+                {% if food_items %}
+                    {% for item in food_items %}
+                        {
+                            name: "{{ item.food_name|escapejs }}",
+                            price: "₹{{ item.price|escapejs }}",
+                            description: "{{ item.description|escapejs }}",
+                            imageUrl: "{{ item.food_image.url|escapejs }}"
+                        },
+                    {% endfor %}
+                {% else %}
+                    // Fallback static data if no database food items
+                    { name: 'Burger', price: '₹25', description: 'A classic beef burger with fresh lettuce, tomato, cheese, and our secret sauce.', imageUrl: STATIC_IMG_PATH + 'Burger.avif' },
+                    { name: 'Samosa', price: '₹10', description: 'A fried pastry with a savory filling, such as spiced potatoes, onions, and peas.', imageUrl: STATIC_IMG_PATH + 'Samosa.avif' },
+                    { name: 'Rolls', price: '₹25', description: 'A savory wrap filled with spiced meat or vegetables.', imageUrl: STATIC_IMG_PATH + 'Rolls.avif' },
+                    { name: 'Cake', price: '₹15', description: 'Rich and decadent chocolate cake with multiple layers of fudge frosting.', imageUrl: STATIC_IMG_PATH + 'Cake.avif' },
+                    { name: 'Chinese', price: '₹40', description: 'A delicious bowl of stir-fried noodles with chicken, fresh vegetables, and a savory sauce.', imageUrl: STATIC_IMG_PATH + 'Chinese.avif' }
+                {% endif %}
+            ];
+
+            const numSlots = 7; // Configure to 7 slots in the circle
+            const foodData = [];
+            if (rawFoodData.length > 0) {
+                while (foodData.length < numSlots) {
+                    rawFoodData.forEach(item => {
+                        foodData.push(item);
+                    });
+                }
+                if (rawFoodData.length > numSlots) {
+                    foodData.length = 0; // reset and copy all raw data
+                    rawFoodData.forEach(item => foodData.push(item));
+                }
+            }
+
+            const totalItems = foodData.length;
+            const priceEl = document.getElementById('details-price');
+            const titleEl = document.getElementById('details-title');
+            const descriptionEl = document.getElementById('details-description');
+            const mainImageEl = document.getElementById('new-main-image');
+            const mainLabelEl = document.getElementById('new-main-label');
+            const thumbnailsContainer = document.getElementById('new-thumbnails-container');
+            const nextBtn = document.getElementById('new-next-btn');
+            const prevBtn = document.getElementById('new-prev-btn');
+
+            const slotAngles = [];
+            for (let i = 0; i < numSlots; i++) {
+                slotAngles.push(-Math.PI / 2 + i * (2 * Math.PI / numSlots));
+            }
+
+            // Build the slots dynamically once
+            function buildThumbnails() {
+                thumbnailsContainer.innerHTML = '';
+                const containerSize = carouselContainer.offsetWidth;
+                // Reduce radius and size slightly on mobile for 7 items to fit beautifully
+                const radius = containerSize * (containerSize < 400 ? 0.40 : 0.42);
+                const thumbnailSize = containerSize * (containerSize < 400 ? 0.11 : 0.13);
+                
+                for (let i = 0; i < numSlots; i++) {
+                    const angle = slotAngles[i];
+                    const x = radius * Math.cos(angle) + containerSize / 2;
+                    const y = radius * Math.sin(angle) + containerSize / 2;
+                    
+                    const thumbnail = document.createElement('div');
+                    thumbnail.className = 'absolute thumbnail-item -translate-x-1/2 -translate-y-1/2';
+                    thumbnail.style.left = `${x}px`;
+                    thumbnail.style.top = `${y}px`;
+                    thumbnail.dataset.slotIndex = i;
+                    
+                    thumbnail.innerHTML = `
+                        <div class="thumb-wrapper flex flex-col items-center">
+                            <div class="img-container rounded-full bg-white shadow-lg flex items-center justify-center p-1 border-2 border-transparent" style="width: ${thumbnailSize}px; height: ${thumbnailSize}px;">
+                                <img src="" alt="" class="w-full h-full object-contain">
+                            </div>
+                            <span class="mt-1 px-1.5 py-0.5 rounded-full text-[8px] sm:text-xs font-bold block text-center bg-white/95 dark:bg-slate-800/95 text-slate-800 dark:text-slate-100 shadow-sm border border-slate-200/50 dark:border-slate-700/50 max-w-[60px] sm:max-w-[75px] truncate"></span>
+                        </div>
+                    `;
+                    
+                    thumbnailsContainer.appendChild(thumbnail);
+                    
+                    thumbnail.addEventListener('click', () => {
+                        if (i === 0) return;
+                        pauseAutoSpin();
+                        
+                        // Set target angle to align clicked slot to Slot 0 (Top)
+                        const angleDiff = i * (2 * Math.PI / numSlots);
+                        targetAngle -= angleDiff; 
+                        
+                        // Force alignment to grid
+                        targetAngle = Math.round(targetAngle / (2 * Math.PI / numSlots)) * (2 * Math.PI / numSlots);
+                    });
+                }
+            }
+
+            // Continuous rotation variables
+            let currentAngle = 0;
+            let targetAngle = 0;
+            let isAutoSpinning = true;
+            let autoSpinSpeed = 0.0050; // 30 seconds per full round rotation speed
+            let animationFrameId = null;
+            let resumeTimeoutId = null;
+            let lastActiveIndex = -1;
+
+            function updateSlotContent(baseIndex, topSlotIndex) {
+                const slots = thumbnailsContainer.querySelectorAll('.thumbnail-item');
+                slots.forEach((slot, i) => {
+                    // Calculate index offset relative to the top slot physically at the 12 o'clock position
+                    const offset = (i - topSlotIndex + numSlots) % numSlots;
+                    const dbIndex = (baseIndex + offset) % totalItems;
+                    const item = foodData[dbIndex];
+                    
+                    const img = slot.querySelector('img');
+                    const span = slot.querySelector('span');
+                    if (img && img.src !== item.imageUrl) {
+                        img.src = item.imageUrl;
+                        img.alt = item.name;
+                    }
+                    if (span) {
+                        span.textContent = item.name;
+                    }
+                });
+            }
+
+            function updateActiveDetails(activeIndex) {
+                const activeItem = foodData[activeIndex];
+                priceEl.textContent = activeItem.price;
+                titleEl.textContent = activeItem.name;
+                descriptionEl.textContent = activeItem.description;
+                
+                if (mainImageEl.src !== activeItem.imageUrl) {
+                    mainImageEl.style.opacity = '0';
+                    mainImageEl.style.transform = 'scale(0.9)';
+                    setTimeout(() => {
+                        mainImageEl.src = activeItem.imageUrl;
+                        mainImageEl.style.opacity = '1';
+                        mainImageEl.style.transform = 'scale(1)';
+                    }, 200);
+                }
+                mainLabelEl.textContent = activeItem.name;
+            }
+
+            function triggerSparkleBurst() {
+                const container = document.getElementById('new-carousel-container');
+                if (!container) return;
+                
+                const centerX = container.offsetWidth / 2;
+                const centerY = container.offsetHeight / 2;
+                
+                for (let i = 0; i < 18; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'sparkle-particle';
+                    particle.style.left = `${centerX}px`;
+                    particle.style.top = `${centerY}px`;
+                    
+                    const angle = Math.random() * 2 * Math.PI;
+                    const distance = 80 + Math.random() * 90; // shoot 80px to 170px
+                    const dx = `${Math.cos(angle) * distance}px`;
+                    const dy = `${Math.sin(angle) * distance}px`;
+                    
+                    particle.style.setProperty('--dx', dx);
+                    particle.style.setProperty('--dy', dy);
+                    
+                    const size = 3 + Math.random() * 4;
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    
+                    container.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 800);
+                }
+            }
+
+            let lastTime = performance.now();
+
+            function animateLoop(now) {
+                const currentTime = now || performance.now();
+                const deltaTime = currentTime - lastTime;
+                lastTime = currentTime;
+                
+                // Normalize by 16.67ms (60fps baseline). Cap factor at 3.0 to prevent jump lag.
+                const timeFactor = Math.min(deltaTime / 16.67, 3.0);
+
+                if (isAutoSpinning) {
+                    // Continuous sweeping rotation (clockwise, left-to-right) directly updates currentAngle to prevent speed lags
+                    currentAngle += autoSpinSpeed * timeFactor;
+                    targetAngle = currentAngle;
+                } else {
+                    // Interpolate current angle toward target angle for smooth easing during manual user actions
+                    currentAngle += (targetAngle - currentAngle) * 0.05 * timeFactor;
+                }
+                
+                // Apply rotation to container
+                thumbnailsContainer.style.transform = `rotate(${currentAngle}rad)`;
+                
+                // Calculate which item is currently closest to the 12 o'clock position (Slot 0)
+                const rawOffset = -currentAngle / (2 * Math.PI / numSlots);
+                const activeOffset = Math.round(rawOffset);
+                let activeIndex = activeOffset % totalItems;
+                if (activeIndex < 0) activeIndex += totalItems;
+                
+                // Track which slot index is physically at the top position
+                let topSlotIndex = -Math.round(rawOffset) % numSlots;
+                if (topSlotIndex < 0) topSlotIndex += numSlots;
+                
+                // Update content of the slots dynamically based on the current activeIndex and physical top slot
+                updateSlotContent(activeIndex, topSlotIndex);
+                
+                // If the closest item changes, update the details panel, main showcase image, and trigger particles burst
+                if (activeIndex !== lastActiveIndex) {
+                    // Do not burst on initial load (when lastActiveIndex is -1)
+                    if (lastActiveIndex !== -1) {
+                        triggerSparkleBurst();
+                    }
+                    lastActiveIndex = activeIndex;
+                    updateActiveDetails(activeIndex);
+                }
+
+                // Update scale and highlight border for the slot currently at the top
+                const slots = thumbnailsContainer.querySelectorAll('.thumbnail-item');
+                slots.forEach((slot, i) => {
+                    const wrapper = slot.querySelector('.thumb-wrapper');
+                    const imgContainer = slot.querySelector('.img-container');
+                    
+                    // Counter-rotate wrapper to keep it perfectly upright
+                    wrapper.style.transform = `rotate(${-currentAngle}rad)`;
+                    
+                    // Highlight the slot physically located at the top (topSlotIndex)
+                    const isActive = (i === topSlotIndex);
+                    
+                    if (isActive) {
+                        imgContainer.classList.add('border-yellow-400', 'shadow-xl', 'scale-110', 'active-glow');
+                        imgContainer.classList.remove('border-transparent');
+                    } else {
+                        imgContainer.classList.remove('border-yellow-400', 'shadow-xl', 'scale-110', 'active-glow');
+                        imgContainer.classList.add('border-transparent');
+                    }
+                });
+                
+                animationFrameId = requestAnimationFrame(animateLoop);
+            }
+
+            function pauseAutoSpin() {
+                isAutoSpinning = false;
+                clearTimeout(resumeTimeoutId);
+                resumeTimeoutId = setTimeout(() => {
+                    isAutoSpinning = true;
+                }, 5000); // Resume continuous rotation after 5s of inactivity
+            }
+
+            function rotateSteps(steps) {
+                pauseAutoSpin();
+                // Shift targetAngle to align next/prev slot to top
+                targetAngle -= steps * (2 * Math.PI / 5);
+                // Snap target angle to grid to align perfectly
+                targetAngle = Math.round(targetAngle / (2 * Math.PI / 5)) * (2 * Math.PI / 5);
+            }
+
+            function resizeHandler() {
+                buildThumbnails();
+            }
+            
+            // Turn off CSS transition properties since we anim-loop with JS
+            thumbnailsContainer.style.transition = 'none';
+            
+            buildThumbnails();
+            animateLoop();
+            
+            nextBtn.addEventListener('click', () => { rotateSteps(1); }); // Rotates counter-clockwise to next item
+            prevBtn.addEventListener('click', () => { rotateSteps(-1); }); // Rotates clockwise to prev item
+            
+            // Redirect clicked main image to the menu page
+            const mainImageWrapper = document.getElementById('new-main-image-wrapper');
+            if (mainImageWrapper) {
+                mainImageWrapper.addEventListener('click', () => {
+                    window.location.href = "{% url 'menu_page' %}";
+                });
+            }
+
+            // Scroll-driven rotation (rotate circle dynamically as user scrolls)
+            let lastScrollY = window.scrollY;
+            window.addEventListener('scroll', () => {
+                const currentScrollY = window.scrollY;
+                const delta = currentScrollY - lastScrollY;
+                lastScrollY = currentScrollY;
+                
+                // Add scroll delta directly to currentAngle and targetAngle so it rotates continuously without pausing
+                currentAngle += delta * 0.0015;
+                targetAngle = currentAngle;
+            }, { passive: true });
+
+            // Drag and Touch swipe rotation logic on the carousel container itself
+            let isDragging = false;
+            let isDragActive = false; // Prevents drag triggers on vertical page scrolling
+            let startX = 0;
+            let startY = 0;
+            let startAngle = 0;
+            
+            function handleDragStart(e) {
+                isDragging = true;
+                isDragActive = false;
+                startX = e.pageX || e.touches[0].pageX;
+                startY = e.pageY || e.touches[0].pageY;
+                startAngle = targetAngle;
+            }
+            
+            function handleDragMove(e) {
+                if (!isDragging) return;
+                const x = e.pageX || e.touches[0].pageX;
+                const y = e.pageY || e.touches[0].pageY;
+                
+                const deltaX = x - startX;
+                const deltaY = y - startY;
+                
+                // Directional Lock: Activate dragging only if movement is primarily horizontal
+                if (!isDragActive) {
+                    if (Math.abs(deltaX) > 8 && Math.abs(deltaX) > Math.abs(deltaY)) {
+                        isDragActive = true;
+                        pauseAutoSpin(); // Pause auto-spin ONLY when horizontal dragging actively starts
+                    }
+                }
+                
+                if (isDragActive) {
+                    const walk = deltaX * 0.012; // swipe sensitivity
+                    targetAngle = startAngle + walk;
+                    currentAngle = targetAngle; // Instant feedback
+                }
+            }
+            
+            function handleDragEnd() {
+                isDragging = false;
+                isDragActive = false;
+                
+                // Snap to nearest slot angle
+                targetAngle = Math.round(targetAngle / (2 * Math.PI / numSlots)) * (2 * Math.PI / numSlots);
+            }
+            
+            // Mouse events
+            carouselContainer.addEventListener('mousedown', handleDragStart);
+            window.addEventListener('mousemove', handleDragMove);
+            window.addEventListener('mouseup', handleDragEnd);
+            
+            // Touch events
+            carouselContainer.addEventListener('touchstart', handleDragStart, { passive: true });
+            window.addEventListener('touchmove', handleDragMove, { passive: true });
+            window.addEventListener('touchend', handleDragEnd);
+
+            window.addEventListener('resize', resizeHandler);
+        }
+
+        function setupScrollAnimation() {
+            const animatedElements = document.querySelectorAll('.scroll-animate');
+            if (animatedElements.length === 0) return;
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); } });
+            }, { threshold: 0.1 });
+            animatedElements.forEach(el => { observer.observe(el); });
+        }
+
+
+        // --- Testimonial Slider Logic ---
+        function setupTestimonials() {
+            const track = document.getElementById('testimonial-track');
+            const slides = document.querySelectorAll('.testimonial-slide');
+            const prevBtn = document.getElementById('testi-prev-btn');
+            const nextBtn = document.getElementById('testi-next-btn');
+            if (!track || slides.length === 0 || !prevBtn || !nextBtn) return;
+
+            let currentIndex = 0;
+            const totalSlides = slides.length;
+            let autoSlideInterval;
+
+            function updateSlider() {
+                track.style.transform = `translateX(-${currentIndex * 100}%)`;
+            }
+
+            function nextSlide() {
+                currentIndex = (currentIndex + 1) % totalSlides;
+                updateSlider();
+            }
+
+            function prevSlide() {
+                currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+                updateSlider();
+            }
+
+            nextBtn.addEventListener('click', () => {
+                nextSlide();
+                resetAutoSlide();
+            });
+
+            prevBtn.addEventListener('click', () => {
+                prevSlide();
+                resetAutoSlide();
+            });
+
+            function startAutoSlide() {
+                autoSlideInterval = setInterval(nextSlide, 5000);
+            }
+
+            function resetAutoSlide() {
+                clearInterval(autoSlideInterval);
+                startAutoSlide();
+            }
+
+            startAutoSlide();
+        }
+
+        // --- FAQ Accordion Logic ---
+        function setupFAQ() {
+            const faqItems = document.querySelectorAll('.faq-item');
+            faqItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    const isActive = item.classList.contains('active');
+                    
+                    // Close all FAQs
+                    faqItems.forEach(i => i.classList.remove('active'));
+                    
+                    // Toggle current FAQ
+                    if (!isActive) {
+                        item.classList.add('active');
+                    }
+                });
+            });
+        }
+
+        // Initialize all scripts
+        setupThemeSwitcher();
+        setupHeroSlider(); // <-- Initialize the new hero slideshow
+        setupNewCarousel();
+        setupScrollAnimation();
+        setupTestimonials();
+        setupFAQ();
+    });
+    </script>
+
+    {% include 'footer.html' %}
+</body>
+</html>

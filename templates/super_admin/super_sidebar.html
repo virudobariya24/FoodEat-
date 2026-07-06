@@ -1,0 +1,652 @@
+{% load static %}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script>
+  if (!window.tailwind) {
+    document.write('<script src="{% static "js/3.4.js" %}"><\/script>');
+  }
+</script>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+
+  .super-sidebar-surface {
+    background: linear-gradient(180deg, #090d16 0%, #0e1424 100%);
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.25);
+    isolation: isolate;
+  }
+
+  .super-sidebar-surface::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(circle at 100% 0%, rgba(249, 115, 22, 0.08) 0%, transparent 50%),
+      radial-gradient(circle at 0% 100%, rgba(6, 182, 212, 0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  .super-menu-link {
+    position: relative;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    border-left: 3px solid transparent;
+  }
+
+  .super-menu-link i {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s ease;
+  }
+
+  .super-menu-link:hover {
+    background: rgba(249, 115, 22, 0.06);
+    color: #fb923c !important;
+    border-left-color: rgba(249, 115, 22, 0.4);
+    padding-left: 1rem;
+  }
+
+  .super-menu-link:hover i {
+    transform: scale(1.15) translateX(2px);
+    color: #fb923c !important;
+  }
+
+  .super-menu-link.is-active {
+    color: #ffffff !important;
+    background: linear-gradient(90deg, rgba(249, 115, 22, 0.12) 0%, rgba(249, 115, 22, 0.01) 100%);
+    border-left-color: #f97316;
+  }
+
+  .super-menu-link.is-active i {
+    color: #f97316 !important;
+    text-shadow: 0 0 12px rgba(249, 115, 22, 0.35);
+  }
+
+  .super-menu-link.is-active::after {
+    content: "";
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 9999px;
+    background-color: #f97316;
+    box-shadow: 0 0 8px #f97316, 0 0 16px #f97316;
+  }
+
+  .main-content {
+    margin-left: 270px;
+    padding-top: 85px;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @keyframes logoGlow {
+    0%, 100% {
+      box-shadow: 0 0 12px rgba(249, 115, 22, 0.2), 0 0 24px rgba(249, 115, 22, 0.1);
+      border-color: rgba(249, 115, 22, 0.3);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(249, 115, 22, 0.5), 0 0 35px rgba(249, 115, 22, 0.2);
+      border-color: rgba(249, 115, 22, 0.6);
+    }
+  }
+
+  .logo-glow-box {
+    animation: logoGlow 4s infinite ease-in-out;
+    border: 1px solid rgba(249, 115, 22, 0.3);
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  }
+
+  .sidebar-section-title {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.3);
+    font-weight: 700;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    padding-left: 0.75rem;
+  }
+
+  @media (max-width: 1024px) {
+    .main-content {
+      margin-left: 0;
+      padding-top: 80px;
+    }
+
+    #superSidebar.is-open {
+      transform: translateX(0);
+    }
+  }
+
+  .super-sidebar-nav {
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+  }
+
+  .super-sidebar-nav::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+</style>
+
+<!-- Mobile Menu Toggle Button -->
+<button
+  type="button"
+  id="superSidebarOpen"
+  class="fixed left-4 top-3.5 z-[70] inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-lg shadow-orange-500/20 lg:hidden hover:scale-105 active:scale-95 transition-all duration-200"
+  aria-label="Open super admin menu"
+>
+  <i class="fa-solid fa-bars-staggered text-lg"></i>
+</button>
+
+<!-- Mobile Sidebar Backdrop Overlay -->
+<div
+  id="superSidebarOverlay"
+  class="fixed inset-0 z-[55] hidden bg-slate-950/40 opacity-0 backdrop-blur-sm transition-opacity duration-300 lg:hidden"
+></div>
+
+<!-- Sidebar Drawer -->
+<aside
+  id="superSidebar"
+  class="super-sidebar-surface fixed left-0 top-0 z-[60] flex h-screen w-[270px] -translate-x-full flex-col overflow-hidden text-slate-100 transition-transform duration-300 lg:translate-x-0"
+>
+  <!-- Brand / Header -->
+  <div class="flex h-20 shrink-0 items-center gap-3 border-b border-white/10 px-6">
+    <div class="logo-glow-box flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white">
+      <i class="fa-solid fa-utensils text-lg"></i>
+    </div>
+    <div class="min-w-0">
+      <h3 class="truncate text-base font-extrabold leading-tight tracking-tight text-white">Foodeat</h3>
+      <p class="truncate text-[10px] font-bold uppercase tracking-wider text-orange-400">Super Administrator</p>
+    </div>
+    <button
+      type="button"
+      id="superSidebarClose"
+      class="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 text-slate-400 transition hover:bg-white/5 hover:text-white lg:hidden"
+      aria-label="Close super admin menu"
+    >
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <!-- Navigation Menu -->
+  <nav class="flex-1 super-sidebar-nav px-4 py-6">
+    {% if super_user %}
+      <!-- Section: Core -->
+      <div class="sidebar-section-title">Core Actions</div>
+      <ul class="space-y-1.5">
+        <li>
+          <a href="/super_dashboard/" class="super-menu-link flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-400 {% if request.path == '/super_dashboard/' %}is-active{% endif %}">
+            <i class="fa-solid fa-chart-pie w-5 text-center text-base"></i>
+            <span>Dashboard</span>
+          </a>
+        </li>
+        <li>
+          <a href="/show_orders/" class="super-menu-link flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-400 {% if request.path == '/show_orders/' %}is-active{% endif %}">
+            <i class="fa-solid fa-receipt w-5 text-center text-base"></i>
+            <span>Orders Log</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Section: Platform Management -->
+      <div class="sidebar-section-title">Management</div>
+      <ul class="space-y-1.5">
+        <li>
+          <a href="/show_owners/" class="super-menu-link flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-400 {% if request.path == '/show_owners/' %}is-active{% endif %}">
+            <i class="fa-solid fa-shop w-5 text-center text-base"></i>
+            <span>Restaurants</span>
+          </a>
+        </li>
+        <li>
+          <a href="/show_users/" class="super-menu-link flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-400 {% if request.path == '/show_users/' %}is-active{% endif %}">
+            <i class="fa-solid fa-users-gear w-5 text-center text-base"></i>
+            <span>Users Directory</span>
+          </a>
+        </li>
+        <li>
+          <a href="/show_food/" class="super-menu-link flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-400 {% if request.path == '/show_food/' %}is-active{% endif %}">
+            <i class="fa-solid fa-bowl-food w-5 text-center text-base"></i>
+            <span>Food Catalog</span>
+          </a>
+        </li>
+        <li>
+          <a href="/show_booking/" class="super-menu-link flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-400 {% if request.path == '/show_booking/' %}is-active{% endif %}">
+            <i class="fa-solid fa-calendar-check w-5 text-center text-base"></i>
+            <span>Table Bookings</span>
+          </a>
+        </li>
+        <li>
+          <a href="/super_admin/delivery_boys/" class="super-menu-link flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-400 {% if request.path == '/super_admin/delivery_boys/' %}is-active{% endif %}">
+            <i class="fa-solid fa-motorcycle w-5 text-center text-base"></i>
+            <span>Delivery Partners</span>
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'super_delivery_tasks' %}" class="super-menu-link flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-400 {% if request.path == '/super_admin/delivery_tasks/' %}is-active{% endif %}">
+            <i class="fa-solid fa-list-check w-5 text-center text-base"></i>
+            <span>Rider Milestone Tasks</span>
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'super_platform_settings' %}" class="super-menu-link flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-400 {% if request.path == '/super_admin/platform_settings/' %}is-active{% endif %}">
+            <i class="fa-solid fa-sliders w-5 text-center text-base"></i>
+            <span>Platform Charges</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Section: Communications -->
+      <div class="sidebar-section-title">Inquiries</div>
+      <ul class="space-y-1.5">
+        <li>
+          <a href="/admin_contact_list/" class="super-menu-link flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-400 {% if request.path == '/admin_contact_list/' %}is-active{% endif %}">
+            <i class="fa-solid fa-envelope-open-text w-5 text-center text-base"></i>
+            <span>Contact Messages</span>
+          </a>
+        </li>
+      </ul>
+    {% else %}
+      <div class="sidebar-section-title">Authentication</div>
+      <ul class="space-y-1.5">
+        <li>
+          <a href="/super_register/" class="super-menu-link flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-400 {% if request.path == '/super_register/' %}is-active{% endif %}">
+            <i class="fa-solid fa-user-plus w-5 text-center text-base"></i>
+            <span>Register</span>
+          </a>
+        </li>
+        <li>
+          <a href="/super_login/" class="super-menu-link flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-400 {% if request.path == '/super_login/' %}is-active{% endif %}">
+            <i class="fa-solid fa-right-to-bracket w-5 text-center text-base"></i>
+            <span>Login</span>
+          </a>
+        </li>
+      </ul>
+    {% endif %}
+  </nav>
+
+
+  <!-- Sidebar Footer / Profile Card Removed -->
+</aside>
+
+<!-- Top Premium Header Bar -->
+{% if super_user %}
+<header class="super-header-glass fixed left-0 top-0 z-50 flex h-16 w-full items-center justify-between px-6 md:px-8 lg:left-[270px] lg:w-[calc(100%-270px)] transition-all duration-300">
+  <!-- Left Side: Nav Info -->
+  <div class="flex items-center gap-3 pl-12 lg:pl-0 min-w-0 flex-1">
+    <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/10 text-orange-600 shrink-0">
+      <i class="fa-solid fa-shield-halved text-sm"></i>
+    </span>
+    <span class="text-sm font-extrabold tracking-tight text-slate-800 md:text-lg truncate">{{ page_title|default:"Super Admin Overview" }}</span>
+  </div>
+
+  <!-- Right Side: User Dropdown & Notifications -->
+  <div class="flex items-center gap-4 shrink-0">
+    <!-- Notification Dropdown -->
+    <div class="sm:relative" id="superNotificationMenu">
+      <button type="button" id="superNotificationToggle" class="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-505 hover:bg-slate-50 hover:text-slate-700 transition focus:outline-none">
+        <i class="fa-regular fa-bell text-base"></i>
+        <span id="superNotificationBadge" class="hidden absolute right-2.5 top-2.5 h-2.5 w-2.5 rounded-full bg-orange-500 ring-2 ring-white animate-pulse"></span>
+      </button>
+      
+      <!-- Dropdown Items -->
+      <div id="superNotificationDropdown" class="hidden absolute right-4 left-4 sm:left-auto sm:right-0 mt-2 w-auto sm:w-80 origin-top-right overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl ring-1 ring-black/5 focus:outline-none z-50">
+        <!-- Header -->
+        <div class="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+          <span class="text-xs font-extrabold text-slate-800">Notifications</span>
+          <span id="superNotificationCount" class="px-2 py-0.5 text-[10px] font-bold text-orange-600 bg-orange-50 rounded-full">0 New</span>
+        </div>
+        
+        <!-- List container -->
+        <div id="superNotificationList" class="max-h-64 overflow-y-auto divide-y divide-slate-100">
+          <div class="p-4 text-center text-xs text-slate-400 font-semibold py-8">
+            <i class="fa-regular fa-bell-slash text-lg mb-1 block text-slate-300"></i> No new notifications
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Menu Dropdown -->
+    <div class="relative" id="superProfileMenu">
+      <button type="button" id="superProfileToggle" class="flex items-center gap-2.5 rounded-xl border border-slate-200/80 bg-white p-1.5 pr-3 shadow-sm hover:bg-slate-50 transition">
+        <span class="h-8 w-8 overflow-hidden rounded-lg border border-orange-500/40 bg-slate-100">
+          {% if super_user.profile_img %}
+            <img src="{{ super_user.profile_img.url }}" alt="Profile" class="h-full w-full object-cover">
+          {% else %}
+            <img src="{% static 'images/default-profile.png' %}" alt="Default Profile" class="h-full w-full object-cover">
+          {% endif %}
+        </span>
+        <span class="hidden text-left sm:block">
+          <span class="block text-xs font-extrabold text-slate-800 leading-none">{{ super_user.full_name }}</span>
+        </span>
+        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+      </button>
+
+      <!-- Dropdown Items -->
+      <div id="superProfileDropdown" class="hidden absolute right-0 mt-2 w-48 origin-top-right overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-lg shadow-slate-900/5 ring-1 ring-black/5 focus:outline-none z-50">
+        <a href="/super_profile/" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-orange-50 hover:text-orange-600 transition">
+          <i class="fa-solid fa-user-gear text-slate-400 w-4 text-center"></i>My Profile
+        </a>
+        <div class="my-1 border-t border-slate-100"></div>
+        <a href="/super_logout/" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50 transition">
+          <i class="fa-solid fa-power-off text-rose-500 w-4 text-center"></i>Logout
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
+{% endif %}
+
+<!-- Javascript Event Handlers for Sidebar and Header Profile -->
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const sidebar = document.getElementById("superSidebar");
+    const openBtn = document.getElementById("superSidebarOpen");
+    const closeBtn = document.getElementById("superSidebarClose");
+    const overlay = document.getElementById("superSidebarOverlay");
+    const profileToggle = document.getElementById("superProfileToggle");
+    const profileDropdown = document.getElementById("superProfileDropdown");
+
+    function openSidebar() {
+      if (!sidebar || !overlay) return;
+      sidebar.classList.add("is-open");
+      overlay.classList.remove("hidden");
+      // Trigger browser reflow for smooth opacity transition
+      void overlay.offsetWidth;
+      overlay.classList.add("opacity-100");
+      if (openBtn) openBtn.classList.add("hidden");
+    }
+
+    function closeSidebar() {
+      if (!sidebar || !overlay) return;
+      sidebar.classList.remove("is-open");
+      overlay.classList.remove("opacity-100");
+      if (openBtn) openBtn.classList.remove("hidden");
+      setTimeout(() => {
+        if (!sidebar.classList.contains("is-open")) {
+          overlay.classList.add("hidden");
+        }
+      }, 300);
+    }
+
+    if (openBtn) openBtn.addEventListener("click", openSidebar);
+    if (closeBtn) closeBtn.addEventListener("click", closeSidebar);
+    if (overlay) overlay.addEventListener("click", closeSidebar);
+
+    if (profileToggle && profileDropdown) {
+      profileToggle.addEventListener("click", function(event) {
+        event.stopPropagation();
+        profileDropdown.classList.toggle("hidden");
+        if (superNotificationDropdown) {
+          superNotificationDropdown.classList.add("hidden");
+        }
+      });
+
+      document.addEventListener("click", function(event) {
+        if (!profileDropdown.contains(event.target) && !profileToggle.contains(event.target)) {
+          profileDropdown.classList.add("hidden");
+        }
+      });
+    }
+
+    // Sidebar footer profile dropdown
+    const sidebarProfileToggle = document.getElementById("sidebarProfileToggle");
+    const sidebarProfileDropdown = document.getElementById("sidebarProfileDropdown");
+    if (sidebarProfileToggle && sidebarProfileDropdown) {
+      sidebarProfileToggle.addEventListener("click", function(event) {
+        event.stopPropagation();
+        sidebarProfileDropdown.classList.toggle("hidden");
+      });
+      document.addEventListener("click", function(event) {
+        if (!sidebarProfileDropdown.contains(event.target) && !sidebarProfileToggle.contains(event.target)) {
+          sidebarProfileDropdown.classList.add("hidden");
+        }
+      });
+    }
+
+    // Notifications Dropdown toggle and loader
+    const superNotificationToggle = document.getElementById("superNotificationToggle");
+    const superNotificationDropdown = document.getElementById("superNotificationDropdown");
+    const superNotificationBadge = document.getElementById("superNotificationBadge");
+    const superNotificationCount = document.getElementById("superNotificationCount");
+    const superNotificationList = document.getElementById("superNotificationList");
+    let currentlyDisplayedIds = [];
+    let loadedNotificationIds = new Set();
+    const soundFile = "{% static 'audio/notification.mp3' %}";
+    let globalAudio = null;
+
+    const unlockAudio = () => {
+        if (globalAudio) return;
+        try {
+            globalAudio = new Audio(soundFile);
+            globalAudio.volume = 0; // mute
+            globalAudio.play().then(() => {
+                globalAudio.pause();
+                globalAudio.volume = 1;
+                console.log("Super Admin Audio context unlocked!");
+                document.removeEventListener('click', unlockAudio);
+                document.removeEventListener('touchstart', unlockAudio);
+            }).catch(err => {
+                console.log("Audio unlock failed, retrying on next click:", err);
+                globalAudio = null;
+            });
+        } catch (e) {
+            console.log("Audio unlock exception:", e);
+        }
+    };
+    document.addEventListener('click', unlockAudio);
+    document.addEventListener('touchstart', unlockAudio);
+
+    function playAlarmSound() {
+        try {
+            const playSoundWithLoop = (audioObj) => {
+                audioObj.currentTime = 0;
+                audioObj.volume = 1;
+                let playCount = 0;
+                audioObj.onended = function() {
+                    playCount++;
+                    if (playCount < 3) {
+                        audioObj.currentTime = 0;
+                        audioObj.play().catch(e => console.log("Loop play failed:", e));
+                    }
+                };
+                audioObj.play().catch(err => {
+                    console.log("Audio play failed, retrying on gesture:", err);
+                    const playOnNextClick = () => {
+                        audioObj.play().then(() => {
+                            document.removeEventListener('click', playOnNextClick);
+                        }).catch(e => console.log("Fallback play failed:", e));
+                    };
+                    document.addEventListener('click', playOnNextClick);
+                });
+            };
+
+            if (globalAudio) {
+                playSoundWithLoop(globalAudio);
+            } else {
+                const audioFallback = new Audio(soundFile);
+                playSoundWithLoop(audioFallback);
+            }
+        } catch (e) {
+            console.error("Audio playback error:", e);
+        }
+    }
+
+    function getClearedIds() {
+      try {
+        return JSON.parse(localStorage.getItem('super_cleared_notifications') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function clearIds(ids) {
+      const currentCleared = getClearedIds();
+      const updatedCleared = Array.from(new Set([...currentCleared, ...ids]));
+      localStorage.setItem('super_cleared_notifications', JSON.stringify(updatedCleared));
+    }
+
+    function onDropdownClose() {
+      if (currentlyDisplayedIds.length > 0) {
+        clearIds(currentlyDisplayedIds);
+        loadNotifications();
+      }
+    }
+
+    if (superNotificationToggle && superNotificationDropdown) {
+      superNotificationToggle.addEventListener("click", function(event) {
+        event.stopPropagation();
+        const willBeHidden = !superNotificationDropdown.classList.contains("hidden");
+        superNotificationDropdown.classList.toggle("hidden");
+        if (profileDropdown) profileDropdown.classList.add("hidden");
+        
+        if (willBeHidden) {
+          onDropdownClose();
+        } else {
+          if (superNotificationBadge) superNotificationBadge.classList.add("hidden");
+        }
+      });
+      document.addEventListener("click", function(event) {
+        if (!superNotificationDropdown.contains(event.target) && !superNotificationToggle.contains(event.target)) {
+          const wasOpen = !superNotificationDropdown.classList.contains("hidden");
+          superNotificationDropdown.classList.add("hidden");
+          if (wasOpen) {
+            onDropdownClose();
+          }
+        }
+      });
+    }
+
+    // Load notifications from API
+    async function loadNotifications() {
+      try {
+        const response = await fetch('/super_admin/notifications/');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.status === 'success') {
+            const clearedList = getClearedIds();
+            const activeNotifications = data.notifications.filter(n => !clearedList.includes(n.id));
+
+            if (activeNotifications.length > 0) {
+              let hasNewUnseen = false;
+              activeNotifications.forEach(n => {
+                if (!loadedNotificationIds.has(n.id)) {
+                  loadedNotificationIds.add(n.id);
+                  hasNewUnseen = true;
+                }
+              });
+
+              if (hasNewUnseen) {
+                playAlarmSound();
+              }
+
+              currentlyDisplayedIds = activeNotifications.map(n => n.id);
+
+              if (superNotificationBadge) {
+                const isDropdownOpen = !superNotificationDropdown.classList.contains("hidden");
+                if (isDropdownOpen) {
+                  superNotificationBadge.classList.add("hidden");
+                } else {
+                  superNotificationBadge.classList.remove("hidden");
+                }
+              }
+
+              if (superNotificationCount) {
+                superNotificationCount.textContent = `${activeNotifications.length} New`;
+              }
+              
+              if (superNotificationList) {
+                superNotificationList.innerHTML = '';
+                activeNotifications.forEach(n => {
+                  let iconHtml = '';
+                  if (n.type === 'owner') {
+                    iconHtml = '<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange-100 text-orange-600"><i class="fa-solid fa-store text-xs"></i></span>';
+                  } else if (n.type === 'contact') {
+                    iconHtml = '<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600"><i class="fa-solid fa-envelope text-xs"></i></span>';
+                  } else {
+                    iconHtml = '<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-rose-100 text-rose-600"><i class="fa-solid fa-triangle-exclamation text-xs"></i></span>';
+                  }
+                  
+                  const row = document.createElement('a');
+                  row.href = n.link;
+                  row.className = "flex items-start gap-3 p-3.5 hover:bg-slate-50 transition text-left";
+                  row.addEventListener("click", () => {
+                    clearIds([n.id]);
+                  });
+                  row.innerHTML = `
+                    ${iconHtml}
+                    <div class="min-w-0 flex-1">
+                      <p class="text-xs font-bold text-slate-800">${n.title}</p>
+                      <p class="text-[11px] text-slate-555 font-semibold mt-0.5">${n.message}</p>
+                      <span class="text-[9px] text-slate-400 font-semibold block mt-1"><i class="fa-regular fa-clock mr-0.5"></i>${n.created_at}</span>
+                    </div>
+                  `;
+                  superNotificationList.appendChild(row);
+                });
+              }
+            } else {
+              currentlyDisplayedIds = [];
+              if (superNotificationBadge) superNotificationBadge.classList.add("hidden");
+              if (superNotificationCount) superNotificationCount.textContent = '0 New';
+              if (superNotificationList) {
+                superNotificationList.innerHTML = `
+                  <div class="p-4 text-center text-xs text-slate-400 font-semibold py-8">
+                    <i class="fa-regular fa-bell-slash text-lg mb-1 block text-slate-300"></i> No new notifications
+                  </div>
+                `;
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      }
+    }
+
+    loadNotifications();
+    setInterval(loadNotifications, 5000);
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+            loadNotifications();
+        }
+    });
+  });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+{% if messages %}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    {% for message in messages %}
+      let icon = 'info';
+      {% if message.tags == 'success' %}
+        icon = 'success';
+      {% elif message.tags == 'error' or message.tags == 'danger' %}
+        icon = 'error';
+      {% elif message.tags == 'warning' %}
+        icon = 'warning';
+      {% endif %}
+
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        showCloseButton: true,
+        timer: 4000,
+        timerProgressBar: true,
+        icon: icon,
+        title: "{{ message|escapejs }}"
+      });
+    {% endfor %}
+  });
+</script>
+{% endif %}

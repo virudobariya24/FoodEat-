@@ -1,0 +1,484 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Restaurant - GJ3 Admin</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#ff6f00', // Orange matching theme
+                            600: '#ea580c',
+                            700: '#c2410c',
+                        },
+                        navy: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Premium field styling to override default widget rendering */
+        input:not([type="radio"]):not([type="checkbox"]),
+        select,
+        textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            color: #334155;
+            background-color: #f8fafc;
+            transition: all 0.2s ease-in-out;
+        }
+        input:not([type="radio"]):not([type="checkbox"]):focus,
+        select:focus,
+        textarea:focus {
+            border-color: #ff6f00;
+            background-color: #ffffff;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(255, 111, 0, 0.15);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex">
+    {% include 'admin_owner/sidebar.html' %}
+
+    <div class="w-full md:w-[calc(100%-70px)] lg:w-[calc(100%-260px)] md:ml-[70px] lg:ml-[260px] min-h-screen flex flex-col transition-all duration-300">
+        <!-- Top Header -->
+        <header class="bg-white border-b border-slate-200 h-20 px-6 md:px-8 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+            <!-- Left Side: Page Title -->
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">Add Restaurant</h1>
+                <p class="text-xs md:text-sm text-slate-500 hidden sm:block">Register a new restaurant branch or location.</p>
+            </div>
+
+            <!-- Right Side: User Profile Dropdown -->
+            <div class="relative" id="adminProfileDropdownContainer">
+                <button id="adminProfileBtn" class="flex items-center gap-3 p-1.5 pr-3 hover:bg-slate-100 rounded-full transition-all duration-200 focus:outline-none">
+                    <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-brand-500 shadow-sm flex-shrink-0">
+                        {% if admin_user.profile_image %}
+                            <img src="{{ admin_user.profile_image.url }}" alt="Admin Profile" class="w-full h-full object-cover">
+                        {% else %}
+                            <img src="{% static 'images/default-profile.png' %}" alt="Default Profile" class="w-full h-full object-cover">
+                        {% endif %}
+                    </div>
+                    <div class="text-left hidden sm:block">
+                        <p class="text-sm font-semibold text-slate-800 leading-tight">{{ admin_user.full_name }}</p>
+                        <p class="text-xs text-slate-400 font-medium leading-none mt-0.5">{{ admin_user.restaurant_name|default:"No Restaurant" }}</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 hidden sm:block transition-transform duration-200" id="dropdownArrow"></i>
+                </button>
+
+                <!-- Dropdown Menu -->
+                <div id="adminDropdownMenu" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-slate-100 py-2 z-50 transform origin-top-right transition-all duration-200">
+                    <div class="px-4 py-2 border-b border-slate-50 md:hidden">
+                        <p class="text-sm font-semibold text-slate-800">{{ admin_user.full_name }}</p>
+                        <p class="text-xs text-slate-400 font-medium">{{ admin_user.restaurant_name|default:"No Restaurant" }}</p>
+                    </div>
+                    <a href="{% url 'admin_profile' %}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 hover:text-brand-600 transition-colors">
+                        <i class="fa-solid fa-user text-slate-400 w-5"></i>
+                        <span>My Profile</span>
+                    </a>
+                    <hr class="my-1 border-slate-100">
+                    <a href="/admin_logout/" class="flex items-center gap-3 px-4 py-2.5 text-sm text-rose-600 hover:bg-rose-50 transition-colors">
+                        <i class="fa-solid fa-right-from-bracket w-5"></i>
+                        <span>Log Out</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow p-6 md:p-8 max-w-4xl w-full mx-auto">
+            <div class="bg-white border border-slate-200 shadow-sm rounded-2xl overflow-hidden">
+                <div class="bg-gradient-to-r from-brand-500 to-orange-600 p-6 text-white flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center text-2xl">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg md:text-xl font-bold">Register Restaurant</h2>
+                        <p class="text-xs text-brand-100">Fill in the details below to publish your restaurant on GJ3.</p>
+                    </div>
+                </div>
+
+                <form method="post" enctype="multipart/form-data" class="p-6 md:p-8 space-y-6" novalidate>
+                    {% csrf_token %}
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Name -->
+                        <div class="flex flex-col">
+                            <label class="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                <i class="fas fa-utensils text-brand-500"></i> {{ form.name.label }}
+                            </label>
+                            {{ form.name }}
+                            {% for error in form.name.errors %}
+                                <div class="text-rose-500 text-xs font-medium mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Email -->
+                        <div class="flex flex-col">
+                            <label class="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                <i class="fas fa-envelope text-brand-500"></i> {{ form.email.label }}
+                            </label>
+                            {{ form.email }}
+                            {% for error in form.email.errors %}
+                                <div class="text-rose-500 text-xs font-medium mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Address -->
+                        <div class="flex flex-col md:col-span-2">
+                            <div class="flex justify-between items-center mb-2">
+                                <label class="text-sm font-semibold text-slate-700 flex items-center gap-2 m-0">
+                                    <i class="fas fa-map-marker-alt text-brand-500"></i> {{ form.address.label }}
+                                </label>
+                                <button type="button" id="openMapBtn" class="text-xs font-bold text-brand-500 hover:text-brand-600 flex items-center gap-1.5 focus:outline-none">
+                                    <i class="fas fa-map-location-dot"></i> Select on Map
+                                </button>
+                            </div>
+                            {{ form.address }}
+                            {% for error in form.address.errors %}
+                                <div class="text-rose-500 text-xs font-medium mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Latitude -->
+                        <div class="flex flex-col">
+                            <label class="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                <i class="fas fa-location-crosshairs text-brand-500"></i> Latitude
+                            </label>
+                            {{ form.latitude }}
+                            {% for error in form.latitude.errors %}
+                                <div class="text-rose-500 text-xs font-medium mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Longitude -->
+                        <div class="flex flex-col">
+                            <label class="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                <i class="fas fa-location-crosshairs text-brand-500"></i> Longitude
+                            </label>
+                            {{ form.longitude }}
+                            {% for error in form.longitude.errors %}
+                                <div class="text-rose-500 text-xs font-medium mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Seating Capacity -->
+                        <div class="flex flex-col">
+                            <label class="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                <i class="fas fa-chair text-brand-500"></i> {{ form.seating_capacity.label }}
+                            </label>
+                            {{ form.seating_capacity }}
+                            {% for error in form.seating_capacity.errors %}
+                                <div class="text-rose-500 text-xs font-medium mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Image -->
+                        <div class="flex flex-col">
+                            <label class="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                <i class="fas fa-image text-brand-500"></i> {{ form.image.label }}
+                            </label>
+                            {{ form.image }}
+                            {% for error in form.image.errors %}
+                                <div class="text-rose-500 text-xs font-medium mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Menu File -->
+                        <div class="flex flex-col">
+                            <label class="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                <i class="fas fa-file-alt text-brand-500"></i> {{ form.menu.label }}
+                            </label>
+                            {{ form.menu }}
+                            {% for error in form.menu.errors %}
+                                <div class="text-rose-500 text-xs font-medium mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Opening Time -->
+                        <div class="flex flex-col">
+                            <label class="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                <i class="fas fa-clock text-brand-500"></i> {{ form.opening_time.label }}
+                            </label>
+                            {{ form.opening_time }}
+                            {% for error in form.opening_time.errors %}
+                                <div class="text-rose-500 text-xs font-medium mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Closing Time -->
+                        <div class="flex flex-col">
+                            <label class="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
+                                <i class="fas fa-clock text-brand-500"></i> {{ form.closing_time.label }}
+                            </label>
+                            {{ form.closing_time }}
+                            {% for error in form.closing_time.errors %}
+                                <div class="text-rose-500 text-xs font-medium mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="pt-6 border-t border-slate-100 flex justify-end">
+                        <button type="submit" class="w-full sm:w-auto px-8 py-3 bg-brand-500 hover:bg-brand-600 text-white rounded-xl font-bold shadow-md shadow-brand-500/20 hover:shadow-lg hover:shadow-brand-500/30 transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2">
+                            <i class="fas fa-plus"></i> Add Restaurant
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Leaflet CSS and JS (For Keyless Map Selection) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <!-- Map Modal -->
+    <div id="mapModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <div>
+                    <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fas fa-map-location-dot text-brand-500"></i> Select Restaurant Location
+                    </h3>
+                    <p class="text-xs text-slate-400 font-semibold mt-0.5">Click or drag the marker on the map to pinpoint location.</p>
+                </div>
+                <button type="button" id="closeMapBtn" class="text-slate-400 hover:text-slate-650 p-2 hover:bg-slate-100 rounded-xl transition-all">
+                    <i class="fas fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <!-- Map Search & Content -->
+            <div class="p-6 flex flex-col gap-4 flex-1 min-h-0">
+                <!-- Search bar -->
+                <div class="relative">
+                    <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                    <input type="text" id="mapSearchInput" placeholder="Search address, city, area..." 
+                           class="w-full pl-9 pr-24 py-2 text-xs border border-slate-200 rounded-xl font-semibold focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all">
+                    <button type="button" id="mapSearchBtn" 
+                            class="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1 bg-brand-500 hover:bg-brand-600 text-white rounded-lg text-[10px] font-bold shadow transition-all">
+                        Search
+                    </button>
+                </div>
+                
+                <!-- Map Container -->
+                <div id="leafletMap" class="w-full h-80 rounded-2xl border border-slate-200 shadow-inner z-10"></div>
+                
+                <!-- Selected Location Address Detail -->
+                <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-start gap-2">
+                    <i class="fas fa-location-dot text-brand-500 text-xs mt-0.5"></i>
+                    <div class="text-xs font-semibold text-slate-600" id="selectedAddressText">No location selected yet.</div>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+                <button type="button" id="cancelMapSelection" class="px-5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all">
+                    Cancel
+                </button>
+                <button type="button" id="confirmMapSelection" class="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white rounded-xl text-xs font-bold shadow-md shadow-brand-500/25 transition-all">
+                    Confirm Location
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Map Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mapModal = document.getElementById('mapModal');
+            const openMapBtn = document.getElementById('openMapBtn');
+            const closeMapBtn = document.getElementById('closeMapBtn');
+            const cancelMapSelection = document.getElementById('cancelMapSelection');
+            const confirmMapSelection = document.getElementById('confirmMapSelection');
+            
+            const addressField = document.getElementById('id_address');
+            const latitudeField = document.getElementById('id_latitude');
+            const longitudeField = document.getElementById('id_longitude');
+            
+            const mapSearchInput = document.getElementById('mapSearchInput');
+            const mapSearchBtn = document.getElementById('mapSearchBtn');
+            const selectedAddressText = document.getElementById('selectedAddressText');
+            
+            let map;
+            let marker;
+            let currentLatLng = { lat: 23.0225, lng: 72.5714 }; // Default to Ahmedabad
+            let geocodedAddress = "";
+
+            function initMap() {
+                if (map) return;
+                
+                map = L.map('leafletMap').setView([currentLatLng.lat, currentLatLng.lng], 13);
+                
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                }).addTo(map);
+                
+                marker = L.marker([currentLatLng.lat, currentLatLng.lng], {
+                    draggable: true
+                }).addTo(map);
+                
+                marker.on('dragend', function(event) {
+                    const position = marker.getLatLng();
+                    updateLocation(position.lat, position.lng);
+                });
+                
+                map.on('click', function(event) {
+                    const position = event.latlng;
+                    marker.setLatLng(position);
+                    updateLocation(position.lat, position.lng);
+                });
+            }
+
+            function updateLocation(lat, lng) {
+                currentLatLng = { lat, lng };
+                selectedAddressText.textContent = "Geocoding location coordinates...";
+                
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.display_name) {
+                            geocodedAddress = data.display_name;
+                            selectedAddressText.textContent = geocodedAddress;
+                        } else {
+                            geocodedAddress = `Location at: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                            selectedAddressText.textContent = geocodedAddress;
+                        }
+                    })
+                    .catch(() => {
+                        geocodedAddress = `Location at: ${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+                        selectedAddressText.textContent = geocodedAddress;
+                    });
+            }
+
+            function searchPlace() {
+                const query = mapSearchInput.value;
+                if (!query) return;
+                
+                selectedAddressText.textContent = "Searching for place...";
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`)
+                    .then(response => response.json())
+                    .then(results => {
+                        if (results && results.length > 0) {
+                            const result = results[0];
+                            const lat = parseFloat(result.lat);
+                            const lon = parseFloat(result.lon);
+                            
+                            map.setView([lat, lon], 15);
+                            marker.setLatLng([lat, lon]);
+                            updateLocation(lat, lon);
+                        } else {
+                            selectedAddressText.textContent = "No results found. Try search details.";
+                        }
+                    })
+                    .catch(() => {
+                        selectedAddressText.textContent = "Error executing place query.";
+                    });
+            }
+
+            mapSearchBtn.addEventListener('click', searchPlace);
+            mapSearchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    searchPlace();
+                }
+            });
+
+            openMapBtn.addEventListener('click', function() {
+                mapModal.classList.remove('hidden');
+                mapModal.classList.add('flex');
+                
+                const existingLat = parseFloat(latitudeField.value);
+                const existingLng = parseFloat(longitudeField.value);
+                if (!isNaN(existingLat) && !isNaN(existingLng)) {
+                    currentLatLng = { lat: existingLat, lng: existingLng };
+                }
+                
+                setTimeout(() => {
+                    initMap();
+                    map.invalidateSize();
+                    map.setView([currentLatLng.lat, currentLatLng.lng], 13);
+                    marker.setLatLng([currentLatLng.lat, currentLatLng.lng]);
+                    updateLocation(currentLatLng.lat, currentLatLng.lng);
+                }, 100);
+            });
+
+            function closeModal() {
+                mapModal.classList.add('hidden');
+                mapModal.classList.remove('flex');
+            }
+
+            closeMapBtn.addEventListener('click', closeModal);
+            cancelMapSelection.addEventListener('click', closeModal);
+            
+            confirmMapSelection.addEventListener('click', function() {
+                latitudeField.value = currentLatLng.lat.toFixed(6);
+                longitudeField.value = currentLatLng.lng.toFixed(6);
+                if (geocodedAddress) {
+                    addressField.value = geocodedAddress;
+                }
+                closeModal();
+            });
+        });
+    </script>
+
+    <!-- Dropdown Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileBtn = document.getElementById('adminProfileBtn');
+            const dropdownMenu = document.getElementById('adminDropdownMenu');
+            const dropdownArrow = document.getElementById('dropdownArrow');
+
+            if (profileBtn && dropdownMenu) {
+                profileBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    dropdownMenu.classList.toggle('hidden');
+                    if (dropdownArrow) {
+                        dropdownArrow.classList.toggle('rotate-180');
+                    }
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!profileBtn.contains(e.target) && !dropdownMenu.contains(e.target)) {
+                        dropdownMenu.classList.add('hidden');
+                        if (dropdownArrow) {
+                            dropdownArrow.classList.remove('rotate-180');
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

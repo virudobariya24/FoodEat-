@@ -1,0 +1,640 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Owner Profile - GJ3 Admin</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    :root {
+      --brand: #ff6f00;
+      --brand-dark: #ea580c;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --soft: #f8fafc;
+      --surface: #ffffff;
+      --shadow: 0 22px 55px rgba(15, 23, 42, 0.10);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at top right, rgba(255, 111, 0, 0.12), transparent 28rem),
+        linear-gradient(180deg, #fff7ed 0%, #f8fafc 45%, #eef2f7 100%);
+      color: var(--ink);
+      font-family: "Plus Jakarta Sans", Arial, sans-serif;
+    }
+
+    .main-content {
+      min-height: 100vh;
+      padding: 28px;
+      transition: margin 0.3s ease, width 0.3s ease;
+    }
+
+    .edit-shell {
+      width: min(1100px, 100%);
+      margin: 0 auto;
+    }
+
+    .page-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .page-title {
+      margin: 0;
+      color: var(--ink);
+      font-size: clamp(1.55rem, 3vw, 2.35rem);
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .page-subtitle {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 44px;
+      padding: 0 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.82);
+      color: #334155;
+      font-size: 0.9rem;
+      font-weight: 800;
+      text-decoration: none;
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+      transition: transform 180ms ease, border-color 180ms ease, color 180ms ease;
+    }
+
+    .back-link:hover {
+      border-color: rgba(255, 111, 0, 0.38);
+      color: var(--brand-dark);
+      transform: translateY(-1px);
+    }
+
+    .profile-card {
+      overflow: hidden;
+      border: 1px solid rgba(226, 232, 240, 0.95);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: var(--shadow);
+    }
+
+    .profile-banner {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 18px;
+      align-items: center;
+      padding: 26px;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 52%, #ff6f00 100%);
+      color: #fff;
+    }
+
+    .avatar-wrap {
+      position: relative;
+      width: 112px;
+      height: 112px;
+      flex: 0 0 auto;
+    }
+
+    .avatar-wrap img {
+      width: 100%;
+      height: 100%;
+      border: 4px solid rgba(255, 255, 255, 0.85);
+      border-radius: 24px;
+      object-fit: cover;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.30);
+    }
+
+    .avatar-badge {
+      position: absolute;
+      right: -8px;
+      bottom: -8px;
+      display: inline-flex;
+      width: 38px;
+      height: 38px;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid #fff;
+      border-radius: 12px;
+      background: var(--brand);
+      color: #fff;
+    }
+
+    .banner-title {
+      margin: 0;
+      font-size: clamp(1.35rem, 3vw, 2rem);
+      font-weight: 800;
+    }
+
+    .banner-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .meta-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 100%;
+      padding: 8px 11px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.11);
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .meta-pill span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .edit-form {
+      padding: 28px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .field {
+      min-width: 0;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    .field label {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 8px;
+      color: #334155;
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .field label i {
+      width: 18px;
+      color: var(--brand);
+      text-align: center;
+    }
+
+    .field input,
+    .field textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--soft);
+      color: #1e293b;
+      font: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+
+    .field input {
+      height: 48px;
+      padding: 0 14px;
+    }
+
+    .field textarea {
+      min-height: 112px;
+      resize: vertical;
+      padding: 13px 14px;
+      line-height: 1.55;
+    }
+
+    .field input:focus,
+    .field textarea:focus {
+      border-color: var(--brand);
+      background: #fff;
+      box-shadow: 0 0 0 4px rgba(255, 111, 0, 0.14);
+    }
+
+    .password-control {
+      position: relative;
+    }
+
+    .password-control input {
+      padding-right: 48px;
+    }
+
+    .icon-btn {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      display: inline-flex;
+      width: 34px;
+      height: 34px;
+      align-items: center;
+      justify-content: center;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: #64748b;
+      cursor: pointer;
+      transform: translateY(-50%);
+      transition: background 180ms ease, color 180ms ease;
+    }
+
+    .icon-btn:hover {
+      background: #fff7ed;
+      color: var(--brand-dark);
+    }
+
+    .hint {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.5;
+    }
+
+    .upload-panel {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 15px;
+      align-items: center;
+      padding: 15px;
+      border: 1px dashed #fdba74;
+      border-radius: 18px;
+      background: #fff7ed;
+    }
+
+    .upload-preview {
+      width: 74px;
+      height: 74px;
+      border: 3px solid #fff;
+      border-radius: 18px;
+      object-fit: cover;
+      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.12);
+    }
+
+    .file-input {
+      display: none;
+    }
+
+    .file-trigger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 42px;
+      padding: 0 14px;
+      border-radius: 12px;
+      background: var(--brand);
+      color: #fff;
+      font-size: 0.86rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background 180ms ease, transform 180ms ease;
+    }
+
+    .file-trigger:hover {
+      background: var(--brand-dark);
+      transform: translateY(-1px);
+    }
+
+    .file-name {
+      margin-top: 8px;
+      color: #9a3412;
+      font-size: 0.82rem;
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 26px;
+      padding-top: 22px;
+      border-top: 1px solid var(--line);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 48px;
+      padding: 0 20px;
+      border-radius: 14px;
+      font: inherit;
+      font-size: 0.92rem;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+
+    .btn-secondary {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: #334155;
+    }
+
+    .btn-primary {
+      border: 0;
+      background: var(--brand);
+      color: #fff;
+      box-shadow: 0 14px 28px rgba(255, 111, 0, 0.22);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:hover {
+      background: var(--brand-dark);
+      box-shadow: 0 18px 34px rgba(255, 111, 0, 0.28);
+    }
+
+    @media (min-width: 1024px) {
+      .main-content {
+        margin-left: 260px;
+        width: calc(100% - 260px);
+      }
+    }
+
+    @media (min-width: 768px) and (max-width: 1023px) {
+      .main-content {
+        margin-left: 70px;
+        width: calc(100% - 70px);
+      }
+    }
+
+    @media (max-width: 767px) {
+      .main-content {
+        width: 100%;
+        padding: 84px 14px 20px;
+      }
+
+      .page-head,
+      .profile-banner,
+      .upload-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .page-head {
+        align-items: stretch;
+      }
+
+      .back-link {
+        width: 100%;
+      }
+
+      .profile-banner {
+        text-align: center;
+      }
+
+      .avatar-wrap {
+        margin: 0 auto;
+      }
+
+      .banner-meta {
+        justify-content: center;
+      }
+
+      .edit-form {
+        padding: 18px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-actions {
+        flex-direction: column-reverse;
+      }
+
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  {% include 'admin_owner/sidebar.html' %}
+
+  <main class="main-content">
+    <div class="edit-shell">
+      <div class="page-head">
+        <div>
+          <h1 class="page-title">Edit Profile</h1>
+          <p class="page-subtitle">Update the owner details you entered during registration.</p>
+        </div>
+        <a href="{% url 'admin_profile' %}" class="back-link">
+          <i class="fa-solid fa-arrow-left"></i>
+          Back to Profile
+        </a>
+      </div>
+
+      <section class="profile-card">
+        <div class="profile-banner">
+          <div class="avatar-wrap">
+            {% if admin_user.profile_image %}
+              <img src="{{ admin_user.profile_image.url }}" alt="Owner profile" id="avatarPreview">
+            {% else %}
+              <img src="{% static 'images/default-profile.png' %}" alt="Owner profile" id="avatarPreview">
+            {% endif %}
+            <span class="avatar-badge"><i class="fa-solid fa-camera"></i></span>
+          </div>
+          <div>
+            <h2 class="banner-title">{{ admin_user.full_name }}</h2>
+            <div class="banner-meta">
+              <span class="meta-pill"><i class="fa-solid fa-store"></i><span>{{ admin_user.restaurant_name }}</span></span>
+              <span class="meta-pill"><i class="fa-solid fa-envelope"></i><span>{{ admin_user.email }}</span></span>
+            </div>
+          </div>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" class="edit-form" id="profileForm">
+          {% csrf_token %}
+
+          <div class="form-grid">
+            <div class="field">
+              <label for="full_name"><i class="fa-solid fa-user"></i> Full Name</label>
+              <input type="text" name="full_name" id="full_name" value="{{ admin_user.full_name }}" required>
+            </div>
+
+            <div class="field">
+              <label for="email"><i class="fa-solid fa-envelope"></i> Email</label>
+              <input type="email" name="email" id="email" value="{{ admin_user.email }}" required>
+            </div>
+
+            <div class="field">
+              <label for="restaurant_name"><i class="fa-solid fa-store"></i> Restaurant Name</label>
+              <input type="text" name="restaurant_name" id="restaurant_name" value="{{ admin_user.restaurant_name }}" required>
+            </div>
+
+            <div class="field">
+              <label for="password"><i class="fa-solid fa-lock"></i> Password</label>
+              <div class="password-control">
+                <input type="password" name="password" id="password" value="{{ admin_user.password }}" required>
+                <button type="button" class="icon-btn" id="togglePassword" aria-label="Show password">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+              </div>
+              <p class="hint">Leave the current password or type a new one.</p>
+            </div>
+
+
+
+            <div class="field full">
+              <label for="profile_image"><i class="fa-solid fa-image"></i> Profile Image</label>
+              <div class="upload-panel">
+                {% if admin_user.profile_image %}
+                  <img src="{{ admin_user.profile_image.url }}" alt="Profile preview" class="upload-preview" id="uploadPreview">
+                {% else %}
+                  <img src="{% static 'images/default-profile.png' %}" alt="Profile preview" class="upload-preview" id="uploadPreview">
+                {% endif %}
+                <div>
+                  <label for="profile_image" class="file-trigger">
+                    <i class="fa-solid fa-upload"></i>
+                    Choose Image
+                  </label>
+                  <input type="file" name="profile_image" id="profile_image" class="file-input" accept="image/*">
+                  <div class="file-name" id="fileName">No new image selected</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="field full">
+              <label for="aadhar_card_img"><i class="fa-solid fa-address-card"></i> Aadhar Card Image</label>
+              <div class="upload-panel">
+                {% if admin_user.aadhar_card_img %}
+                  <img src="{{ admin_user.aadhar_card_img.url }}" alt="Aadhar preview" class="upload-preview" id="aadharPreview" style="max-height: 80px; width: auto; object-fit: contain;">
+                {% else %}
+                  <img src="{% static 'images/default-profile.png' %}" alt="Aadhar preview" class="upload-preview" id="aadharPreview" style="max-height: 80px; width: auto; object-fit: contain;">
+                {% endif %}
+                <div>
+                  <label for="aadhar_card_img" class="file-trigger">
+                    <i class="fa-solid fa-upload"></i>
+                    Choose Aadhar Image
+                  </label>
+                  <input type="file" name="aadhar_card_img" id="aadhar_card_img" class="file-input" accept="image/*">
+                  <div class="file-name" id="aadharFileName">No new Aadhar selected</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <a href="{% url 'admin_profile' %}" class="btn btn-secondary">
+              <i class="fa-solid fa-xmark"></i>
+              Cancel
+            </a>
+            <button type="submit" class="btn btn-primary">
+              <i class="fa-solid fa-floppy-disk"></i>
+              Save Changes
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const fileInput = document.getElementById('profile_image');
+      const fileName = document.getElementById('fileName');
+      const uploadPreview = document.getElementById('uploadPreview');
+      const avatarPreview = document.getElementById('avatarPreview');
+      const passwordInput = document.getElementById('password');
+      const togglePassword = document.getElementById('togglePassword');
+      const profileForm = document.getElementById('profileForm');
+
+      if (fileInput) {
+        fileInput.addEventListener('change', function() {
+          const file = this.files && this.files[0];
+          fileName.textContent = file ? file.name : 'No new image selected';
+
+          if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+              uploadPreview.src = event.target.result;
+              avatarPreview.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+
+      const aadharInput = document.getElementById('aadhar_card_img');
+      const aadharFileName = document.getElementById('aadharFileName');
+      const aadharPreview = document.getElementById('aadharPreview');
+
+      if (aadharInput) {
+        aadharInput.addEventListener('change', function() {
+          const file = this.files && this.files[0];
+          aadharFileName.textContent = file ? file.name : 'No new Aadhar selected';
+
+          if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+              aadharPreview.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
+
+      if (togglePassword && passwordInput) {
+        togglePassword.addEventListener('click', function() {
+          const isPassword = passwordInput.type === 'password';
+          passwordInput.type = isPassword ? 'text' : 'password';
+          this.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+          this.innerHTML = isPassword ? '<i class="fa-solid fa-eye-slash"></i>' : '<i class="fa-solid fa-eye"></i>';
+        });
+      }
+
+      if (profileForm) {
+        profileForm.addEventListener('submit', function(event) {
+          const requiredFields = Array.from(profileForm.querySelectorAll('[required]'));
+          const emptyField = requiredFields.find(function(field) {
+            return !field.value.trim();
+          });
+
+          if (emptyField) {
+            event.preventDefault();
+            emptyField.focus();
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

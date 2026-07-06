@@ -1,0 +1,85 @@
+{% extends 'delivery/base.html' %}
+{% load static %}
+
+{% block title %}Bank Details - Delivery Partner - Foodeat{% endblock %}
+
+{% block header_title %}Bank Details{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto bg-white border border-neutral-200 rounded-3xl shadow-sm overflow-hidden text-neutral-900">
+    
+    <!-- Header -->
+    <div class="px-6 py-5 border-b border-neutral-200 flex items-center justify-between">
+        <div>
+            <h2 class="text-lg font-extrabold text-neutral-800">Bank Transfer Details</h2>
+            <p class="text-[11px] text-neutral-500 mt-0.5">Configure bank account details for weekly ride payouts</p>
+        </div>
+        <i class="fa-solid fa-building-columns text-2xl text-black"></i>
+    </div>
+
+    <!-- Body -->
+    <div class="p-6 md:p-8">
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <!-- Bank Name -->
+                <div>
+                    <label class="block text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-2">Bank Name</label>
+                    <div class="relative flex items-center">
+                        <i class="fa-solid fa-building absolute left-3.5 text-neutral-450 text-xs"></i>
+                        <input type="text" name="bank_name" required value="{{ bank.bank_name }}" 
+                               class="w-full h-11 pl-9 pr-4 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 focus:border-black focus:outline-none rounded-xl text-neutral-800 outline-none focus:bg-white">
+                    </div>
+                </div>
+
+                <!-- Account Holder -->
+                <div>
+                    <label class="block text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-2">Account Holder Name</label>
+                    <div class="relative flex items-center">
+                        <i class="fa-solid fa-user absolute left-3.5 text-neutral-450 text-xs"></i>
+                        <input type="text" name="acc_holder" required value="{{ bank.acc_holder }}" 
+                               class="w-full h-11 pl-9 pr-4 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 focus:border-black focus:outline-none rounded-xl text-neutral-800 outline-none focus:bg-white">
+                    </div>
+                </div>
+
+                <!-- Account Number -->
+                <div>
+                    <label class="block text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-2">Account Number</label>
+                    <div class="relative flex items-center">
+                        <i class="fa-solid fa-hashtag absolute left-3.5 text-neutral-450 text-xs"></i>
+                        <input type="text" name="acc_number" required value="{{ bank.acc_number }}" 
+                               class="w-full h-11 pl-9 pr-4 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 focus:border-black focus:outline-none rounded-xl text-neutral-800 outline-none focus:bg-white">
+                    </div>
+                </div>
+
+                <!-- IFSC Code -->
+                <div>
+                    <label class="block text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-2">IFSC Code</label>
+                    <div class="relative flex items-center">
+                        <i class="fa-solid fa-code absolute left-3.5 text-neutral-450 text-xs"></i>
+                        <input type="text" name="ifsc_code" required value="{{ bank.ifsc_code }}" 
+                               class="w-full h-11 pl-9 pr-4 text-xs sm:text-sm bg-neutral-50 border border-neutral-200 focus:border-black focus:outline-none rounded-xl text-neutral-800 outline-none focus:bg-white">
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 bg-neutral-50 border border-neutral-200 rounded-2xl flex items-start gap-3">
+                <i class="fa-solid fa-circle-info text-neutral-900 mt-0.5 text-sm"></i>
+                <div class="text-xs text-neutral-500 leading-relaxed">
+                    <p class="font-bold text-neutral-800 mb-0.5">Payout Settings Information</p>
+                    Earnings are credited directly to this bank account every Monday. Payout configurations are processed automatically.
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="pt-4 border-t border-neutral-200 flex justify-end">
+                <button type="submit" class="w-full sm:w-auto px-6 py-2.5 bg-black hover:bg-neutral-900 text-white font-extrabold text-xs rounded-xl transition-all shadow active:scale-95">
+                    Save Details
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

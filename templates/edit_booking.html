@@ -1,0 +1,47 @@
+{% load static %}{% load tz %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Booking</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="{% static 'js/3.4.js' %}"></script>
+</head>
+<body class="bg-light">
+
+{% include 'header.html'%}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Edit Booking</h2>
+
+    <form method="POST" class="p-4 bg-white shadow rounded">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            <label class="form-label"><i class="fas fa-user text-primary mr-2"></i> Customer Name</label>
+            <input type="text" name="customer_name" value="{{ booking.customer_name }}" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label"><i class="fas fa-phone text-primary mr-2"></i> Contact Number</label>
+            <input type="text" name="contact_number" value="{{ booking.contact_number }}" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label"><i class="fas fa-users text-primary mr-2"></i> Members</label>
+            <input type="number" name="members" value="{{ booking.members }}" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label"><i class="fas fa-clock text-primary mr-2"></i> Booking Time</label>
+            {% timezone "Asia/Kolkata" %}
+            <input type="datetime-local" name="booking_time" 
+                   value="{{ booking.booking_time|date:'Y-m-d\TH:i' }}" class="form-control" required>
+            {% endtimezone %}
+        </div>
+
+        <button type="submit" class="btn btn-success w-100">Update Booking</button>
+    </form>
+</div>
+
+</body>
+</html>

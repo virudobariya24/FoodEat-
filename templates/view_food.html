@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Food Items - GJ3 Admin</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #f39c12;
+            --active-color: #e74c3c;
+            --success-color: #2ecc71;
+            --main-bg: #f4f7f9;
+            --card-bg: #ffffff;
+            --text-dark: #34495e;
+            --text-muted: #869ab8;
+            --text-color-light: #ecf0f1;
+            --border-color: #dee2e6;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--main-bg);
+            color: var(--text-dark);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 250px;
+            background-color: var(--primary-color);
+            color: var(--text-color-light);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1001;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar.collapsed {
+            width: 80px;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            white-space: nowrap;
+        }
+        
+        .sidebar-header i.logo-icon {
+            color: var(--secondary-color);
+            margin-right: 10px;
+            min-width: 30px;
+        }
+
+        .sidebar.collapsed .sidebar-header {
+            justify-content: center;
+        }
+        .sidebar.collapsed .sidebar-header i.logo-icon {
+            margin-right: 0;
+        }
+        .sidebar.collapsed .sidebar-header span {
+            display: none;
+        }
+        
+        #sidebar-toggle {
+            background: none; border: none; color: var(--text-color-light); font-size: 1.2rem; cursor: pointer; margin-left: auto;
+        }
+        .sidebar.collapsed #sidebar-toggle { margin: 0; }
+
+        .sidebar-nav {
+            flex-grow: 1;
+            margin-top: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar-nav ul { list-style: none; padding: 0; margin: 0; }
+
+        .sidebar-nav li a {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            text-decoration: none;
+            color: var(--text-color-light);
+            font-weight: 500;
+            transition: background-color 0.3s, color 0.3s;
+            border-left: 5px solid transparent;
+            white-space: nowrap;
+        }
+
+        .sidebar-nav li a i {
+            margin-right: 15px;
+            font-size: 1.2rem;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .sidebar.collapsed .sidebar-nav li a span { display: none; }
+        .sidebar-nav li a:hover { background-color: rgba(255, 255, 255, 0.1); }
+        .sidebar-nav li.active > a {
+            background-color: var(--secondary-color);
+            color: var(--primary-color);
+            border-left-color: var(--active-color);
+            font-weight: 600;
+        }
+        
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-footer a {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: var(--text-color-light);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .sidebar.collapsed .sidebar-footer a {
+            justify-content: center;
+        }
+        
+        .sidebar.collapsed .sidebar-footer a span {
+            display: none;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            margin-left: 250px;
+            flex-grow: 1;
+            padding: 40px;
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            justify-content: center; /* Center table horizontally */
+        }
+
+        .main-content.expanded {
+            margin-left: 80px;
+        }
+
+        /* Food List Styles */
+        .food-table-wrapper {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            overflow-x: auto;
+            animation: fadeIn 0.5s ease-in-out;
+            padding: 20px;
+        }
+
+        .food-table {
+            width: auto;
+            min-width: 80%;
+            border-collapse: collapse;
+            text-align: left;
+            white-space: nowrap;
+        }
+        .food-table th, .food-table td { padding: 15px 20px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
+        .food-table th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .food-table tbody tr:hover { background-color: #f9fafb; }
+        .food-table img {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+        }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #fff;
+        }
+        .bg-success { background-color: var(--success-color); }
+        .bg-danger { background-color: var(--active-color); }
+
+        .action-buttons a {
+            font-size: 1.1rem;
+            text-decoration: none;
+            margin-right: 15px;
+            color: var(--text-muted);
+            transition: color 0.3s ease;
+        }
+        .action-buttons .edit-btn:hover { color: var(--secondary-color); }
+        .action-buttons .delete-btn:hover { color: var(--active-color); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .food-table thead { display: none; }
+            .food-table tr { display: block; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 10px; }
+            .food-table td { display: block; width: 100%; text-align: right; position: relative; padding: 10px 20px; padding-left: 50%; border-bottom: 1px solid var(--border-color); }
+            .food-table tr td:last-child { border-bottom: none; }
+            .food-table td::before {
+                content: attr(data-label);
+                position: absolute;
+                left: 20px;
+                width: 45%;
+                padding-right: 10px;
+                text-align: left;
+                font-weight: 600;
+                color: var(--text-dark);
+            }
+        }
+        @media (max-width: 768px) {
+            .main-content { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    
+    
+        
+     {% include 'adminheader.html' %}
+    <main class="main-content" id="main-content">
+        <div class="food-table-wrapper">
+            <table class="food-table">
+               <thead>
+    <tr>
+        <th>Restaurant</th> <!-- New -->
+        <th>Image</th>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Price</th>
+        <th>Category</th>
+        <th>Veg</th>
+        <th>Spicy</th>
+        <th>Availability</th>
+        <th>Actions</th>
+    </tr>
+</thead>
+
+               <tbody>
+    {% for item in food_items %}
+    <tr>
+        <td data-label="Restaurant">{{ item.restaurant_name }}</td> <!-- New -->
+        <td data-label="Image">
+            {% if item.food_image %}
+                <img src="{{ item.food_image.url }}" alt="{{ item.food_name }}">
+            {% else %}
+                <img src="https://via.placeholder.com/60" alt="No Image">
+            {% endif %}
+        </td>
+        <td data-label="Name">{{ item.food_name }}</td>
+        <td data-label="Description">{{ item.description }}</td>
+        <td data-label="Price">${{ item.price }}</td>
+        <td data-label="Category">{{ item.category }}</td>
+        <td data-label="Veg">{% if item.is_veg %}Yes{% else %}No{% endif %}</td>
+        <td data-label="Spicy">{% if item.is_spicy %}Yes{% else %}No{% endif %}</td>
+        <td data-label="Availability">
+            <span class="badge {% if item.is_available %}bg-success{% else %}bg-danger{% endif %}">
+                {% if item.is_available %}Available{% else %}Not Available{% endif %}
+            </span>
+        </td>
+        
+        
+    </tr>
+    {% endfor %}
+</tbody>
+
+            </table>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('main-content');
+            const toggleButton = document.getElementById('sidebar-toggle');
+
+            if (toggleButton && sidebar && mainContent) {
+                toggleButton.addEventListener('click', function() {
+                    sidebar.classList.toggle('collapsed');
+                    mainContent.classList.toggle('expanded');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

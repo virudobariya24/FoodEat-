@@ -1,0 +1,167 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foodeat Wallet - Manage Credits</title>
+    
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- Razorpay Checkout SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <!-- Tailwind Play CDN -->
+    <script src="{% static 'js/3.4.js' %}"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fff3f0',
+                            100: '#ffe4dd',
+                            500: '#FF4D30',
+                            600: '#e53b1e',
+                            700: '#c22d14',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .wallet-card {
+            background-color: var(--card-bg) !important;
+            border: 1px solid var(--border-color) !important;
+            box-shadow: 0 20px 40px var(--shadow-color) !important;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .text-main {
+            color: var(--main-text) !important;
+        }
+        .text-secondary-custom {
+            color: var(--secondary-text) !important;
+        }
+        .bg-custom-bg {
+            background-color: var(--body-bg) !important;
+        }
+        .border-custom {
+            border-color: var(--border-color) !important;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen bg-custom-bg text-main transition-colors duration-300">
+    {% include 'header.html' %}
+
+    <!-- Wallet Dashboard Container -->
+    <main class="flex-grow flex items-center justify-center px-4 py-16 mt-8">
+        <div class="max-w-md w-full wallet-card rounded-3xl overflow-hidden bg-white p-6 md:p-8 space-y-6">
+            
+            <!-- Header Title -->
+            <div class="text-center space-y-1">
+                <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center text-2xl mx-auto shadow-sm">
+                    <i class="fa-solid fa-wallet"></i>
+                </div>
+                <h2 class="text-2xl font-black text-slate-800 mt-3">Foodeat Wallet</h2>
+                <p class="text-xs text-secondary-custom font-semibold">Your digital credits for quick payments & refunds.</p>
+            </div>
+
+            <!-- Card: Available Balance -->
+            <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 text-white relative overflow-hidden shadow-lg shadow-emerald-500/15">
+                <div class="absolute right-0 top-0 w-36 h-36 bg-white opacity-[0.05] rounded-full blur-xl -mr-12 -mt-12"></div>
+                <span class="text-xs font-bold uppercase tracking-widest text-emerald-100">Available Balance</span>
+                <h3 class="text-4xl font-extrabold mt-1 tracking-tight">₹{{ user_wallet_balance|floatformat:2 }}</h3>
+                <div class="flex items-center gap-2 mt-4 text-[10px] bg-emerald-700/30 w-fit px-3 py-1 rounded-full border border-emerald-400/20">
+                    <i class="fa-solid fa-shield-halved"></i> Secured by Foodeat Pay
+                </div>
+            </div>
+
+            <!-- Form: Add Money Option -->
+            <div class="space-y-4 pt-2">
+                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Add Balance to Wallet</h4>
+                
+                <form id="depositForm" method="POST" class="space-y-4">
+                    {% csrf_token %}
+                    
+                    <!-- Input Amount -->
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-extrabold text-sm">₹</span>
+                        <input type="number" name="amount" id="depositAmount" required min="10" max="10000" placeholder="Enter amount (Min ₹10)"
+                               class="w-full h-12 pl-8 pr-4 text-sm bg-slate-50 border border-slate-200 rounded-xl text-slate-800 font-bold placeholder-slate-400 focus:bg-white focus:border-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-500/10 transition-all border-custom" />
+                    </div>
+
+                    <!-- Preset Quick Add Buttons -->
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" onclick="setPreset(100)" class="h-10 text-xs font-bold border border-slate-200 hover:border-emerald-500 hover:text-emerald-600 rounded-xl transition-all hover:bg-emerald-50/20 active:scale-95 border-custom text-slate-600">
+                            + ₹100
+                        </button>
+                        <button type="button" onclick="setPreset(200)" class="h-10 text-xs font-bold border border-slate-200 hover:border-emerald-500 hover:text-emerald-600 rounded-xl transition-all hover:bg-emerald-50/20 active:scale-95 border-custom text-slate-600">
+                            + ₹200
+                        </button>
+                        <button type="button" onclick="setPreset(500)" class="h-10 text-xs font-bold border border-slate-200 hover:border-emerald-500 hover:text-emerald-600 rounded-xl transition-all hover:bg-emerald-50/20 active:scale-95 border-custom text-slate-600">
+                            + ₹500
+                        </button>
+                    </div>
+
+                    <!-- Add Money submit button -->
+                    <button type="submit" class="w-full h-12 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-extrabold rounded-xl text-sm transition-all shadow-md shadow-emerald-500/10 active:scale-98">
+                        Add Balance
+                    </button>
+                </form>
+            </div>
+
+            <!-- Help Support Link -->
+            <div class="text-center pt-2">
+                <a href="/contactus/" class="text-xs text-slate-400 hover:text-emerald-600 transition-all font-semibold">
+                    Having trouble? Contact support
+                </a>
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- Preset script -->
+    <script>
+        function setPreset(val) {
+            document.getElementById('depositAmount').value = val;
+        }
+
+        {% if trigger_payment %}
+        // Automatically open Razorpay modal to complete deposit transaction
+        var options = {
+            "key": "{{ razorpay_key_id }}",
+            "amount": "{{ deposit_amount_paise }}",
+            "currency": "INR",
+            "name": "Foodeat Wallet Deposit",
+            "description": "Deposit ₹{{ deposit_amount }} into your wallet",
+            "order_id": "{{ razorpay_order_id }}",
+            "handler": function (response){
+                // Success: Redirect back to update wallet balance in database
+                window.location.href = `/wallet/add/callback/?payment_id=${response.razorpay_payment_id}&amount={{ deposit_amount }}`;
+            },
+            "prefill": {
+                "name": "{{ request.user.first_name|default:'' }} {{ request.user.last_name|default:'' }}",
+                "email": "{{ request.user.email|default:'' }}"
+            },
+            "theme": {
+                "color": "#10B981"
+            }
+        };
+        var rzp = new Razorpay(options);
+        document.addEventListener("DOMContentLoaded", function() {
+            rzp.open();
+        });
+        {% endif %}
+    </script>
+</body>
+</html>

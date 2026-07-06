@@ -1,0 +1,414 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registered Users - Super Admin</title>
+
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="{% static 'js/3.4.js' %}"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        brand: { 50:'#fff7ed', 100:'#ffedd5', 500:'#ff6f00', 600:'#ea580c', 700:'#c2410c' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen">
+
+    <!-- Sidebar & Header -->
+    {% include 'super_admin/super_sidebar.html' %}
+
+    <!-- Main Content Wrapper -->
+    <div class="main-content min-h-screen flex flex-col transition-colors duration-200">
+        <main class="p-4 md:p-8 lg:p-10 max-w-[1400px] w-full mx-auto space-y-6">
+            
+            <!-- Page Header -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200/60 shadow-sm">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-black text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-users text-brand-500"></i> Registered Users
+                    </h2>
+                    <p class="text-xs text-slate-400 font-semibold mt-1">Manage and view details of all registered customers on the platform.</p>
+                </div>
+            </div>
+
+            <!-- Responsive Table / Card List -->
+            <div class="bg-white border border-slate-200/60 shadow-sm rounded-2xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-full md:min-w-[900px] block md:table">
+                        <thead class="hidden md:table-header-group">
+                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-400 text-xs font-bold uppercase tracking-wider">
+                                <th class="py-4 px-6 w-20">ID</th>
+                                <th class="py-4 px-4 w-24">Profile</th>
+                                <th class="py-4 px-6">Name</th>
+                                <th class="py-4 px-6">Email</th>
+                                <th class="py-4 px-6">Phone</th>
+                                <th class="py-4 px-6">Gender</th>
+                                <th class="py-4 px-6">City</th>
+                                <th class="py-4 px-6">Wallet</th>
+                                <th class="py-4 px-6 text-center w-32">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTbody" class="divide-y divide-slate-100 text-sm block md:table-row-group">
+                            {% for user in owners %}
+                            <tr class="hover:bg-slate-50/40 transition-colors block md:table-row p-4 md:p-0 space-y-2 md:space-y-0 relative border-b md:border-b-0 border-slate-100">
+                                <!-- ID -->
+                                <td class="py-2 md:py-5 px-0 md:px-6 font-bold text-slate-400 flex md:table-cell justify-between items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="ID">
+                                    #{{ user.id }}
+                                </td>
+                                
+                                <!-- Profile -->
+                                <td class="py-2 md:py-5 px-0 md:px-4 flex md:table-cell justify-between items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="Profile">
+                                    {% if user.profile_image %}
+                                        <div class="w-10 h-10 rounded-full overflow-hidden border border-slate-200 bg-slate-100">
+                                            <img src="{{ user.profile_image.url }}" class="w-full h-full object-cover" alt="Profile">
+                                        </div>
+                                    {% else %}
+                                        <div class="w-10 h-10 rounded-full border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center text-slate-400">
+                                            <i class="fa-solid fa-user text-xs"></i>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                
+                                <!-- Name -->
+                                <td class="py-2 md:py-5 px-0 md:px-6 font-bold text-slate-800 flex md:table-cell justify-between items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="Name">
+                                    {{ user.first_name }} {{ user.last_name }}
+                                </td>
+                                
+                                <!-- Email -->
+                                <td class="py-2 md:py-5 px-0 md:px-6 text-slate-500 flex md:table-cell justify-between items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="Email">
+                                    {{ user.email }}
+                                </td>
+                                
+                                <!-- Phone -->
+                                <td class="py-2 md:py-5 px-0 md:px-6 text-slate-600 font-medium flex md:table-cell justify-between items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="Phone">
+                                    {{ user.phone }}
+                                </td>
+                                
+                                <!-- Gender -->
+                                <td class="py-2 md:py-5 px-0 md:px-6 flex md:table-cell justify-between items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="Gender">
+                                    {% if user.gender == 'M' %}
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">Male</span>
+                                    {% elif user.gender == 'F' %}
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-pink-50 text-pink-700 border border-pink-200">Female</span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-slate-50 text-slate-700 border border-slate-200">Other</span>
+                                    {% endif %}
+                                </td>
+                                
+                                <!-- City -->
+                                <td class="py-2 md:py-5 px-0 md:px-6 text-slate-500 flex md:table-cell justify-between items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="City">
+                                    {{ user.city|default:"—" }}
+                                </td>
+
+                                <!-- Wallet -->
+                                <td class="py-2 md:py-5 px-0 md:px-6 font-bold text-slate-700 flex md:table-cell justify-between items-center before:content-[attr(data-label)] before:font-bold before:text-xs before:text-brand-500 before:uppercase md:before:content-none" data-label="Wallet">
+                                    ₹{{ user.wallet_balance|floatformat:2 }}
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="py-2 md:py-5 px-0 md:px-6 flex md:table-cell justify-center items-center gap-2" data-label="Actions">
+                                    <button type="button" onclick="openEmailModal('{{ user.id }}', '{{ user.email }}', '{{ user.first_name }} {{ user.last_name }}')" class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-600 hover:bg-orange-200 transition-colors" title="Send Email">
+                                        <i class="fa-solid fa-paper-plane text-[11px]"></i>
+                                    </button>
+                                    <button type="button" onclick="openWalletModal('{{ user.id }}', '{{ user.first_name }} {{ user.last_name }}', '{{ user.wallet_balance }}')" class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 hover:bg-emerald-200 transition-colors" title="Manage Wallet">
+                                        <i class="fa-solid fa-wallet text-[11px]"></i>
+                                    </button>
+                                    <button type="button" onclick="toggleUserBlock('{{ user.id }}', this)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border {% if user.is_blocked %}bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100{% else %}bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100{% endif %} transition-colors" title="{% if user.is_blocked %}Blocked - Click to Unblock{% else %}Active - Click to Block{% endif %}">
+                                        {% if user.is_blocked %}
+                                            <i class="fa-solid fa-user-lock text-[11px]"></i>
+                                        {% else %}
+                                            <i class="fa-solid fa-user-check text-[11px]"></i>
+                                        {% endif %}
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr class="block md:table-row">
+                                <td colspan="9" class="py-10 text-center text-slate-400 font-medium block md:table-cell">
+                                    <i class="fa-solid fa-circle-info text-lg mr-1 text-slate-300"></i> No registered users found.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination footer block -->
+                <div class="bg-slate-50/50 border-t border-slate-100 px-6 py-4 flex items-center justify-between flex-wrap gap-4">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider" id="slideIndicator">Showing 1 to 4 of 4 entries</span>
+                    <div class="flex items-center gap-2">
+                        <button id="prevBtn" class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 bg-white hover:border-brand-400 hover:text-brand-600 transition-colors shadow-sm disabled:opacity-50 disabled:pointer-events-none">
+                            <i class="fa-solid fa-chevron-left mr-1"></i> Prev
+                        </button>
+                        <button id="nextBtn" class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-600 bg-white hover:border-brand-400 hover:text-brand-600 transition-colors shadow-sm disabled:opacity-50 disabled:pointer-events-none">
+                            Next <i class="fa-solid fa-chevron-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Script logic for Pagination -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const rowsPerPage = 5;
+            let currentPage = 0;
+
+            const tbody = document.getElementById("usersTbody");
+            const allRows = Array.from(tbody.querySelectorAll("tr:not(.no-data)"));
+            if (allRows.length === 0) return;
+
+            const totalPages = Math.ceil(allRows.length / rowsPerPage);
+            const prevBtn = document.getElementById("prevBtn");
+            const nextBtn = document.getElementById("nextBtn");
+            const indicator = document.getElementById("slideIndicator");
+
+            function showPage(page) {
+                tbody.innerHTML = '';
+                const start = page * rowsPerPage;
+                const end = Math.min(start + rowsPerPage, allRows.length);
+                
+                allRows.slice(start, end).forEach(row => tbody.appendChild(row));
+                
+                indicator.textContent = `Showing ${start + 1} to ${end} of ${allRows.length} entries`;
+                
+                prevBtn.disabled = (page === 0);
+                nextBtn.disabled = (page === totalPages - 1);
+            }
+
+            prevBtn.addEventListener("click", () => {
+                if (currentPage > 0) {
+                    currentPage--;
+                    showPage(currentPage);
+                }
+            });
+
+            nextBtn.addEventListener("click", () => {
+                if (currentPage < totalPages - 1) {
+                    currentPage++;
+                    showPage(currentPage);
+                }
+            });
+
+            showPage(currentPage);
+        });
+    </script>
+
+    <!-- Email Modal -->
+    <div id="emailModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white rounded-2xl w-full max-w-lg shadow-xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="emailModalContent">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-600">
+                        <i class="fa-solid fa-envelope text-xs"></i>
+                    </span>
+                    <h3 class="text-sm font-bold text-slate-800" id="emailModalTitle">Send Message</h3>
+                </div>
+                <button type="button" onclick="closeEmailModal()" class="text-slate-400 hover:text-slate-600 transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Body / Form -->
+            <form id="emailForm" method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Recipient</label>
+                    <input type="text" id="recipientDisplay" readonly class="w-full px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold bg-slate-50 text-slate-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Subject</label>
+                    <input type="text" name="subject" required placeholder="Enter message subject..." class="w-full px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Message</label>
+                    <textarea name="message" required rows="5" placeholder="Write your message here..." class="w-full px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Attachment (Optional)</label>
+                    <input type="file" name="attachment" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100">
+                </div>
+                
+                <!-- Modal Footer Actions -->
+                <div class="flex items-center justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeEmailModal()" class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50 transition shadow-sm">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:scale-102 active:scale-98 transition shadow-lg shadow-orange-500/20">Send Email</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function openEmailModal(userId, email, name) {
+            const modal = document.getElementById('emailModal');
+            const content = document.getElementById('emailModalContent');
+            const form = document.getElementById('emailForm');
+            const display = document.getElementById('recipientDisplay');
+            
+            form.action = `/super_admin/users/send_email/${userId}/`;
+            display.value = `${name} (${email})`;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            // Trigger reflow for animation
+            void modal.offsetWidth;
+            
+            modal.classList.add('opacity-100');
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }
+
+        function closeEmailModal() {
+            const modal = document.getElementById('emailModal');
+            const content = document.getElementById('emailModalContent');
+            
+            modal.classList.remove('opacity-100');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        async function toggleUserBlock(userId, btn) {
+            try {
+                const response = await fetch(`/super_admin/users/toggle_block/${userId}/?ajax=true`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        if (data.is_blocked) {
+                            btn.className = 'inline-flex h-8 w-8 items-center justify-center rounded-lg border bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100 transition-colors';
+                            btn.title = 'Blocked - Click to Unblock';
+                            btn.innerHTML = '<i class="fa-solid fa-user-lock text-[11px]"></i>';
+                        } else {
+                            btn.className = 'inline-flex h-8 w-8 items-center justify-center rounded-lg border bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100 transition-colors';
+                            btn.title = 'Active - Click to Block';
+                            btn.innerHTML = '<i class="fa-solid fa-user-check text-[11px]"></i>';
+                        }
+                        
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 3000,
+                            timerProgressBar: true,
+                            icon: 'success',
+                            title: data.message
+                        });
+                    }
+                } else if (response.status === 403) {
+                    window.location.href = '/super_login/';
+                }
+            } catch (error) {
+                console.error('Error toggling user block:', error);
+            }
+        }
+
+        function openWalletModal(userId, name, balance) {
+            const modal = document.getElementById('walletModal');
+            const content = document.getElementById('walletModalContent');
+            const form = document.getElementById('walletForm');
+            const display = document.getElementById('walletUserDisplay');
+            const balanceDisplay = document.getElementById('walletBalanceDisplay');
+            
+            form.action = `/super_admin/users/manage_wallet/${userId}/`;
+            display.value = name;
+            balanceDisplay.textContent = `₹${parseFloat(balance).toFixed(2)}`;
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            void modal.offsetWidth;
+            
+            modal.classList.add('opacity-100');
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }
+
+        function closeWalletModal() {
+            const modal = document.getElementById('walletModal');
+            const content = document.getElementById('walletModalContent');
+            
+            modal.classList.remove('opacity-100');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }, 300);
+        }
+    </script>
+
+    <!-- Wallet Modal -->
+    <div id="walletModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="walletModalContent">
+            <!-- Modal Header -->
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+                        <i class="fa-solid fa-wallet text-xs"></i>
+                    </span>
+                    <h3 class="text-sm font-bold text-slate-800" id="walletModalTitle">Manage Wallet</h3>
+                </div>
+                <button type="button" onclick="closeWalletModal()" class="text-slate-400 hover:text-slate-600 transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Body / Form -->
+            <form id="walletForm" method="POST" class="p-6 space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">User</label>
+                    <input type="text" id="walletUserDisplay" readonly class="w-full px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold bg-slate-50 text-slate-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Current Balance</label>
+                    <div class="text-lg font-black text-slate-800" id="walletBalanceDisplay">₹0.00</div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Action</label>
+                    <select name="action" id="walletAction" class="w-full px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-brand-500 transition-all">
+                        <option value="add">Add Money (+)</option>
+                        <option value="subtract">Deduct Money (-)</option>
+                        <option value="set">Set Balance (=)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Amount (₹)</label>
+                    <input type="number" step="0.01" name="amount" required min="0.01" placeholder="Enter amount..." class="w-full px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all">
+                </div>
+                
+                <!-- Modal Footer Actions -->
+                <div class="flex items-center justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeWalletModal()" class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50 transition shadow-sm">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:scale-102 active:scale-98 transition shadow-lg shadow-emerald-500/20">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

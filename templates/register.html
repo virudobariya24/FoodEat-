@@ -1,0 +1,548 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - Foodeat</title>
+
+  <!-- Font Awesome + Custom CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'css/css2.css' %}">
+  <script src="{% static 'js/3.4.js' %}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+    .auth-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 15px;
+    }
+    .auth-content {
+      background: #fff;
+      width: 100%;
+      max-width: 560px;
+      padding: 25px 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    /* ---------- Steps Indicator ---------- */
+    .steps {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 25px;
+      padding: 0;
+      list-style: none;
+      position: relative;
+    }
+    .steps li {
+      flex: 1;
+      text-align: center;
+      font-weight: 600;
+      color: #999;
+      position: relative;
+      z-index: 1;
+      transition: 0.3s;
+    }
+    .steps li i {
+      display: block;
+      font-size: 1.2rem;
+      margin-bottom: 5px;
+    }
+    .steps li::before {
+      content: attr(data-step);
+      display: inline-block;
+      width: 32px;
+      height: 32px;
+      line-height: 32px;
+      border-radius: 50%;
+      background: #ccc;
+      color: #fff;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      position: relative;
+      z-index: 2;
+      transition: 0.3s;
+    }
+    .steps li::after {
+      content: '';
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      width: 100%;
+      height: 3px;
+      background: #ccc;
+      z-index: -1;
+      transition: 0.3s;
+    }
+    .steps li:last-child::after { display: none; }
+    .steps li.active,
+    .steps li.completed { color: #111; }
+    .steps li.active::before,
+    .steps li.completed::before { background: #f8b602; }
+    .steps li.completed::after { background: #f8b602; }
+
+    /* ---------- Form & Input ---------- */
+    /* Animated input focus underline style */
+    .input-group:focus-within + .underline-indicator .focus-line {
+        width: 100%;
+    }
+    
+    /* Shimmer effect for submit button */
+    .shimmer-btn {
+        position: relative;
+        overflow: hidden;
+    }
+    .shimmer-btn::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -60%;
+        width: 30%;
+        height: 200%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: rotate(30deg);
+        transition: all 0.5s ease;
+    }
+    .shimmer-btn:hover::after {
+        left: 130%;
+        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .form-field { margin-bottom: 15px; }
+    .form-field label { font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; display: block; }
+    .input-group {
+      position: relative;
+      width: 100%;
+    }
+    .input-group .input-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #777;
+      font-size: 1rem;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .input-group input, 
+    .input-group select {
+      width: 100%;
+      padding: 12px 12px 12px 38px !important;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    .error-msg {
+      color: red;
+      font-size: 0.85rem;
+      margin-top: 3px;
+      display: none;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      background: #f8b602;
+      color: #111;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: 0.3s;
+    }
+    .submit-btn:hover { background: #f89302; }
+
+    .step { display: none; }
+    .step.active { display: block; }
+
+    .file-upload-wrapper {
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      text-align: center;
+      padding: 15px;
+      cursor: pointer;
+      position: relative;
+    }
+    .file-upload-wrapper input[type="file"] {
+      position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    @media(max-width:600px){
+      .form-grid { grid-template-columns: 1fr; }
+    }
+    .preview { margin-top: 10px; text-align: center; }
+    .preview img {
+      width: 90px; height: 90px;
+      border-radius: 50%; object-fit: cover;
+      border: 2px solid #f8b602;
+    }
+
+    /* ---------- Manual Dark Mode Support ---------- */
+    body[data-theme="dark"] {
+      background-color: #121212;
+      color: #fff;
+    }
+    body[data-theme="dark"] .auth-content {
+      background-color: #1C1C1C;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+      border: 1px solid #333;
+    }
+    body[data-theme="dark"] .steps li.active,
+    body[data-theme="dark"] .steps li.completed {
+      color: #fff;
+    }
+    body[data-theme="dark"] .steps li {
+      color: #888;
+    }
+    body[data-theme="dark"] .form-field label {
+      color: #ccc;
+    }
+    body[data-theme="dark"] .input-group input,
+    body[data-theme="dark"] .input-group select {
+      background-color: #2b2b2b;
+      border-color: #444;
+      color: #fff;
+    }
+    body[data-theme="dark"] .input-group .input-icon {
+      color: #aaa;
+    }
+    body[data-theme="dark"] .file-upload-wrapper {
+      border-color: #444;
+      background-color: #222;
+    }
+    body[data-theme="dark"] .file-upload-prompt p {
+      color: #ccc;
+    }
+    body[data-theme="dark"] .steps li::before {
+      background: #444;
+      color: #bbb;
+    }
+    body[data-theme="dark"] .steps li.active::before,
+    body[data-theme="dark"] .steps li.completed::before {
+      background: #f8b602;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  {% include 'header.html' %}
+
+  <main class="auth-container">
+    <div class="auth-content">
+
+      <!-- Step Indicator -->
+      <ul class="steps">
+        <li id="indicator1" data-step="1" class="active"><i class="fas fa-user"></i>Basic Info</li>
+        <li id="indicator2" data-step="2"><i class="fas fa-lock"></i>Security</li>
+        <li id="indicator3" data-step="3"><i class="fas fa-envelope"></i>Verify</li>
+      </ul>
+
+      <form id="registerForm" method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        <!-- STEP 1: BASIC INFO -->
+        <div id="step1" class="step active">
+          <div class="form-grid">
+            <div class="form-field">
+              <label>First Name</label>
+              <div class="input-group">
+                {{ form.first_name }}
+                <i class="fas fa-user input-icon"></i>
+              </div>
+              <!-- Underline Indicator -->
+              <div class="w-full h-[2px] bg-slate-100 dark:bg-slate-800 rounded overflow-hidden relative mt-1 underline-indicator">
+                <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-[#f8b602] transition-all duration-300 -translate-x-1/2 focus-line"></div>
+              </div>
+              <div class="error-msg">First name is required</div>
+            </div>
+            <div class="form-field">
+              <label>Last Name</label>
+              <div class="input-group">
+                {{ form.last_name }}
+                <i class="fas fa-user input-icon"></i>
+              </div>
+              <!-- Underline Indicator -->
+              <div class="w-full h-[2px] bg-slate-100 dark:bg-slate-800 rounded overflow-hidden relative mt-1 underline-indicator">
+                <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-[#f8b602] transition-all duration-300 -translate-x-1/2 focus-line"></div>
+              </div>
+              <div class="error-msg">Last name is required</div>
+            </div>
+            <div class="form-field">
+              <label>Email</label>
+              <div class="input-group">
+                {{ form.email }}
+                <i class="fas fa-envelope input-icon"></i>
+              </div>
+              <!-- Underline Indicator -->
+              <div class="w-full h-[2px] bg-slate-100 dark:bg-slate-800 rounded overflow-hidden relative mt-1 underline-indicator">
+                <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-[#f8b602] transition-all duration-300 -translate-x-1/2 focus-line"></div>
+              </div>
+              <div class="error-msg">Valid email is required</div>
+            </div>
+            <div class="form-field">
+              <label>Phone</label>
+              <div class="input-group">
+                {{ form.phone }}
+                <i class="fas fa-phone input-icon"></i>
+              </div>
+              <!-- Underline Indicator -->
+              <div class="w-full h-[2px] bg-slate-100 dark:bg-slate-800 rounded overflow-hidden relative mt-1 underline-indicator">
+                <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-[#f8b602] transition-all duration-300 -translate-x-1/2 focus-line"></div>
+              </div>
+              <div class="error-msg">Phone number is required</div>
+            </div>
+            <div class="form-field">
+              <label>Gender</label>
+              <div class="input-group">
+                {{ form.gender }}
+                <i class="fas fa-venus-mars input-icon"></i>
+              </div>
+              <!-- Underline Indicator -->
+              <div class="w-full h-[2px] bg-slate-100 dark:bg-slate-800 rounded overflow-hidden relative mt-1 underline-indicator">
+                <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-[#f8b602] transition-all duration-300 -translate-x-1/2 focus-line"></div>
+              </div>
+              <div class="error-msg">Please select gender</div>
+            </div>
+            <div class="form-field">
+              <label>City</label>
+              <div class="input-group">
+                {{ form.city }}
+                <i class="fas fa-city input-icon"></i>
+              </div>
+              <!-- Underline Indicator -->
+              <div class="w-full h-[2px] bg-slate-100 dark:bg-slate-800 rounded overflow-hidden relative mt-1 underline-indicator">
+                <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-[#f8b602] transition-all duration-300 -translate-x-1/2 focus-line"></div>
+              </div>
+              <div class="error-msg">City is required</div>
+            </div>
+          </div>
+          <button type="button" class="submit-btn shimmer-btn" onclick="validateStep1()">Next</button>
+        </div>
+
+        <!-- STEP 2: SECURITY -->
+        <div id="step2" class="step">
+          <div class="form-grid">
+            <div class="form-field">
+              <label>Password</label>
+              <div class="input-group">
+                {{ form.password }}
+                <i class="fas fa-lock input-icon"></i>
+              </div>
+              <!-- Underline Indicator -->
+              <div class="w-full h-[2px] bg-slate-100 dark:bg-slate-800 rounded overflow-hidden relative mt-1 underline-indicator">
+                <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-[#f8b602] transition-all duration-300 -translate-x-1/2 focus-line"></div>
+              </div>
+              <div class="error-msg">Password is required</div>
+            </div>
+            <div class="form-field">
+              <label>Confirm Password</label>
+              <div class="input-group">
+                {{ form.confirm_password }}
+                <i class="fas fa-key input-icon"></i>
+              </div>
+              <!-- Underline Indicator -->
+              <div class="w-full h-[2px] bg-slate-100 dark:bg-slate-800 rounded overflow-hidden relative mt-1 underline-indicator">
+                <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-[#f8b602] transition-all duration-300 -translate-x-1/2 focus-line"></div>
+              </div>
+              <div class="error-msg">Confirm password is required</div>
+            </div>
+          </div>
+          <div class="form-field">
+            <label>Profile Image</label>
+            <label class="file-upload-wrapper">
+              {{ form.profile_image }}
+              <div class="file-upload-prompt">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Click to upload profile image</p>
+              </div>
+            </label>
+            <div id="imagePreview" class="preview"></div>
+          </div>
+          <button type="button" class="submit-btn shimmer-btn" onclick="prevStep(1)">Back</button>
+          <button type="button" class="submit-btn shimmer-btn" onclick="sendOtp()">Send OTP</button>
+        </div>
+
+        <!-- STEP 3: VERIFY -->
+        <div id="step3" class="step">
+          <p><i class="fas fa-envelope-open-text"></i> An OTP has been sent to your email. Enter it below:</p>
+          <div class="form-field">
+            <label for="otp">Enter OTP</label>
+            <div class="input-group">
+              <input type="text" name="otp" maxlength="6" required placeholder="------">
+              <i class="fas fa-shield-alt input-icon"></i>
+            </div>
+            <!-- Underline Indicator -->
+            <div class="w-full h-[2px] bg-slate-100 dark:bg-slate-800 rounded overflow-hidden relative mt-1 underline-indicator">
+              <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-[#f8b602] transition-all duration-300 -translate-x-1/2 focus-line"></div>
+            </div>
+          </div>
+          <button type="button" class="submit-btn shimmer-btn" onclick="prevStep(2)">Back</button>
+          <button type="submit" name="create_user" class="submit-btn shimmer-btn">Verify & Create Account</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    function updateIndicator(step){
+      let indicators = document.querySelectorAll(".steps li");
+      indicators.forEach((s, index) => {
+        s.classList.remove("active", "completed");
+        if(index + 1 < step){ s.classList.add("completed"); }
+        if(index + 1 === step){ s.classList.add("active"); }
+      });
+    }
+
+    function nextStep(step){
+      document.querySelectorAll(".step").forEach(s => s.classList.remove("active"));
+      document.getElementById("step"+step).classList.add("active");
+      updateIndicator(step);
+    }
+    function prevStep(step){
+      document.querySelectorAll(".step").forEach(s => s.classList.remove("active"));
+      document.getElementById("step"+step).classList.add("active");
+      updateIndicator(step);
+    }
+
+    function validateStep1(){
+      let valid = true;
+      let step1 = document.getElementById("step1");
+      let inputs = step1.querySelectorAll("input, select");
+      inputs.forEach(input => {
+        let formField = input.closest(".form-field");
+        if (formField) {
+          let errorMsg = formField.querySelector(".error-msg");
+          if(errorMsg){
+            if(input.value.trim() === "" || (input.type === "email" && !validateEmail(input.value))){
+              errorMsg.style.display = "block"; valid = false;
+            } else { errorMsg.style.display = "none"; }
+          }
+        }
+      });
+      if(valid){ nextStep(2); }
+    }
+
+    function validateStep2(){
+      let valid = true;
+      let step2 = document.getElementById("step2");
+      let password = step2.querySelector("input[name='password']");
+      let confirm = step2.querySelector("input[name='confirm_password']");
+      let image = step2.querySelector("input[type='file']");
+
+      let pwdField = password.closest(".form-field");
+      if (pwdField) {
+        let errorMsg = pwdField.querySelector(".error-msg");
+        if (password.value.trim() === ""){
+          errorMsg.style.display = "block";
+          valid = false;
+        } else { errorMsg.style.display = "none"; }
+      }
+
+      let confField = confirm.closest(".form-field");
+      if (confField) {
+        let errorMsg = confField.querySelector(".error-msg");
+        if (confirm.value.trim() === "" || confirm.value !== password.value){
+          errorMsg.innerText = "Passwords must match";
+          errorMsg.style.display = "block";
+          valid = false;
+        } else { errorMsg.style.display = "none"; }
+      }
+
+      if(image.files.length === 0){
+        Swal.fire({
+          icon: 'warning',
+          title: 'Profile Image Required',
+          text: 'Please select and upload a profile image.',
+          confirmButtonColor: '#f8b602'
+        });
+        valid = false;
+      }
+      return valid;
+    }
+
+    function sendOtp(){
+      if (!validateStep2()) return;
+      
+      // Show sending loader
+      Swal.fire({
+        title: 'Sending OTP...',
+        text: 'Please wait while we send the verification code to your email.',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+
+      let formData = new FormData(document.getElementById("registerForm"));
+      fetch("{% url 'send_otp' %}", {
+        method: "POST",
+        body: formData,
+        headers: { "X-CSRFToken": "{{ csrf_token }}" }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if(data.success){
+          Swal.fire({
+            icon: 'success',
+            title: 'OTP Sent!',
+            text: 'An OTP code has been sent to your email successfully.',
+            confirmButtonColor: '#f8b602'
+          }).then(() => {
+            nextStep(3);
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Failed to Send OTP',
+            text: data.message || 'There was an error sending the OTP.',
+            confirmButtonColor: '#f8b602'
+          });
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Network error or invalid server response.',
+          confirmButtonColor: '#f8b602'
+        });
+      });
+    }
+
+    function validateEmail(email){
+      let re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+
+    document.addEventListener("change", function(e){
+      if(e.target && e.target.type === "file"){
+        let file = e.target.files[0];
+        if(file){
+          let reader = new FileReader();
+          reader.onload = function(ev){
+            document.getElementById("imagePreview").innerHTML =
+              "<img src='"+ev.target.result+"' alt='Preview'>";
+          }
+          reader.readAsDataURL(file);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

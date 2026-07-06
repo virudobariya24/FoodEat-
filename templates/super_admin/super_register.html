@@ -1,0 +1,323 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Registration - Foodeat</title>
+
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="{% static 'js/3.4.js' %}"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+                    colors: {
+                        brand: { 50:'#fff7ed', 100:'#ffedd5', 500:'#ff6f00', 600:'#ea580c', 700:'#c2410c' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Style django-generated inputs and selects */
+        .django-input-field input, .django-input-field select {
+            width: 100%;
+            height: 2.75rem;
+            padding-left: 2.75rem;
+            padding-right: 1rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .django-input-field input:focus, .django-input-field select:focus {
+            border-color: #ff6f00;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 4px rgba(255, 111, 0, 0.1);
+        }
+        .django-input-field input[type="password"], .django-input-field input.password-visible {
+            padding-right: 2.75rem;
+        }
+        /* Animated input focus underline style */
+        .django-input-field:focus-within + .underline-indicator .focus-line {
+            width: 100%;
+        }
+        
+        /* Shimmer effect for submit button */
+        .shimmer-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        .shimmer-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 30%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.25);
+            transform: rotate(30deg);
+            transition: all 0.5s ease;
+        }
+        .shimmer-btn:hover::after {
+            left: 130%;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans min-h-screen flex items-center justify-center p-4 py-12 md:py-16">
+    <div class="w-full max-w-2xl bg-white rounded-3xl border border-slate-100 shadow-xl overflow-hidden p-8 md:p-10 flex flex-col gap-6 relative">
+        <div class="absolute -right-10 -top-10 w-36 h-36 rounded-full bg-brand-50/60 blur-xl"></div>
+        <div class="absolute -left-10 -bottom-10 w-36 h-36 rounded-full bg-brand-50/60 blur-xl"></div>
+
+        <div class="relative z-10 flex flex-col items-center text-center gap-2">
+            <div class="w-12 h-12 rounded-2xl bg-brand-500 text-white flex items-center justify-center shadow-lg shadow-brand-500/25">
+                <i class="fa-solid fa-user-plus text-xl"></i>
+            </div>
+            <h2 class="text-2xl font-extrabold text-slate-800 mt-2">Super Admin Registration</h2>
+            <p class="text-xs text-slate-400 font-semibold uppercase tracking-wider">Create a platform management account</p>
+        </div>
+
+        {% if messages %}
+            <div class="relative z-10 space-y-2">
+                {% for message in messages %}
+                    <div class="p-3 text-xs rounded-xl font-semibold border {% if message.tags == 'error' %}bg-rose-50 text-rose-600 border-rose-100{% else %}bg-emerald-50 text-emerald-600 border-emerald-100{% endif %} flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid {% if message.tags == 'error' %}fa-circle-xmark{% else %}fa-circle-check{% endif %} text-sm"></i>
+                            <span>{{ message }}</span>
+                        </div>
+                        <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 transition focus:outline-none">
+                            <i class="fa-solid fa-xmark text-sm"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data" class="relative z-10 flex flex-col gap-5" novalidate>
+            {% csrf_token %}
+
+            <!-- Row 1: Full Name & Email -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label for="{{ form.full_name.id_for_label }}" class="text-xs font-bold text-slate-400 uppercase tracking-wide">Full Name</label>
+                    <div class="relative flex items-center django-input-field">
+                        <span class="absolute left-4 text-brand-500 text-sm pointer-events-none">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        {{ form.full_name }}
+                    </div>
+                    <!-- Underline Indicator -->
+                    <div class="w-full h-[2px] bg-slate-100 dark:bg-slate-800 rounded overflow-hidden relative -mt-0.5 underline-indicator">
+                        <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-brand-500 transition-all duration-300 -translate-x-1/2 focus-line"></div>
+                    </div>
+                    {% if form.full_name.errors %}
+                        <ul class="text-rose-500 text-[11px] font-semibold list-none pl-0 mt-0.5">
+                            {% for error in form.full_name.errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                    <label for="{{ form.email.id_for_label }}" class="text-xs font-bold text-slate-400 uppercase tracking-wide">Email Address</label>
+                    <div class="relative flex items-center django-input-field">
+                        <span class="absolute left-4 text-brand-500 text-sm pointer-events-none">
+                            <i class="fa-solid fa-envelope"></i>
+                        </span>
+                        {{ form.email }}
+                    </div>
+                    <!-- Underline Indicator -->
+                    <div class="w-full h-[2px] bg-slate-100 dark:bg-slate-800 rounded overflow-hidden relative -mt-0.5 underline-indicator">
+                        <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-brand-500 transition-all duration-300 -translate-x-1/2 focus-line"></div>
+                    </div>
+                    {% if form.email.errors %}
+                        <ul class="text-rose-500 text-[11px] font-semibold list-none pl-0 mt-0.5">
+                            {% for error in form.email.errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Row 2: Phone & Role -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label for="{{ form.phone.id_for_label }}" class="text-xs font-bold text-slate-400 uppercase tracking-wide">Phone Number</label>
+                    <div class="relative flex items-center django-input-field">
+                        <span class="absolute left-4 text-brand-500 text-sm pointer-events-none">
+                            <i class="fa-solid fa-phone"></i>
+                        </span>
+                        {{ form.phone }}
+                    </div>
+                    <!-- Underline Indicator -->
+                    <div class="w-full h-[2px] bg-slate-100 dark:bg-slate-800 rounded overflow-hidden relative -mt-0.5 underline-indicator">
+                        <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-brand-500 transition-all duration-300 -translate-x-1/2 focus-line"></div>
+                    </div>
+                    {% if form.phone.errors %}
+                        <ul class="text-rose-500 text-[11px] font-semibold list-none pl-0 mt-0.5">
+                            {% for error in form.phone.errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                    <label for="{{ form.role.id_for_label }}" class="text-xs font-bold text-slate-400 uppercase tracking-wide">System Role</label>
+                    <div class="relative flex items-center django-input-field">
+                        <span class="absolute left-4 text-brand-500 text-sm pointer-events-none">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </span>
+                        {{ form.role }}
+                    </div>
+                    <!-- Underline Indicator -->
+                    <div class="w-full h-[2px] bg-slate-100 dark:bg-slate-800 rounded overflow-hidden relative -mt-0.5 underline-indicator">
+                        <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-brand-500 transition-all duration-300 -translate-x-1/2 focus-line"></div>
+                    </div>
+                    {% if form.role.errors %}
+                        <ul class="text-rose-500 text-[11px] font-semibold list-none pl-0 mt-0.5">
+                            {% for error in form.role.errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Row 3: Password & Confirm Password -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label for="{{ form.password.id_for_label }}" class="text-xs font-bold text-slate-400 uppercase tracking-wide">Password</label>
+                    <div class="relative flex items-center django-input-field">
+                        <span class="absolute left-4 text-brand-500 text-sm pointer-events-none">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        {{ form.password }}
+                        <button type="button" onclick="togglePasswordVisibility('{{ form.password.id_for_label }}', this)" class="absolute right-4 text-slate-400 hover:text-brand-500 text-sm focus:outline-none">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                    <!-- Underline Indicator -->
+                    <div class="w-full h-[2px] bg-slate-100 dark:bg-slate-800 rounded overflow-hidden relative -mt-0.5 underline-indicator">
+                        <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-brand-500 transition-all duration-300 -translate-x-1/2 focus-line"></div>
+                    </div>
+                    {% if form.password.errors %}
+                        <ul class="text-rose-500 text-[11px] font-semibold list-none pl-0 mt-0.5">
+                            {% for error in form.password.errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                    <label for="{{ form.confirm_password.id_for_label }}" class="text-xs font-bold text-slate-400 uppercase tracking-wide">Confirm Password</label>
+                    <div class="relative flex items-center django-input-field">
+                        <span class="absolute left-4 text-brand-500 text-sm pointer-events-none">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        {{ form.confirm_password }}
+                        <button type="button" onclick="togglePasswordVisibility('{{ form.confirm_password.id_for_label }}', this)" class="absolute right-4 text-slate-400 hover:text-brand-500 text-sm focus:outline-none">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                    <!-- Underline Indicator -->
+                    <div class="w-full h-[2px] bg-slate-100 dark:bg-slate-800 rounded overflow-hidden relative -mt-0.5 underline-indicator">
+                        <div class="absolute left-1/2 top-0 bottom-0 w-0 bg-brand-500 transition-all duration-300 -translate-x-1/2 focus-line"></div>
+                    </div>
+                    {% if form.confirm_password.errors %}
+                        <ul class="text-rose-500 text-[11px] font-semibold list-none pl-0 mt-0.5">
+                            {% for error in form.confirm_password.errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Row 4: Profile Image Upload Frame -->
+            <div class="flex flex-col gap-1.5">
+                <label for="{{ form.profile_img.id_for_label }}" class="text-xs font-bold text-slate-400 uppercase tracking-wide">Profile Image</label>
+                <div class="relative flex flex-col items-center justify-center border-2 border-dashed border-slate-200 rounded-2xl p-6 bg-slate-50 hover:bg-slate-100/50 transition-all cursor-pointer text-center group" onclick="document.getElementById('{{ form.profile_img.id_for_label }}').click()">
+                    <i class="fa-solid fa-cloud-arrow-up text-3xl text-brand-500 mb-2 transition-transform group-hover:-translate-y-1"></i>
+                    <span id="file-name" class="text-xs font-bold text-slate-600">Choose an image file</span>
+                    <span class="text-[10px] text-slate-400 mt-1">PNG, JPG, JPEG up to 5MB</span>
+                    
+                    {{ form.profile_img }}
+                </div>
+                
+                <!-- Circular Image Preview Frame -->
+                <div class="flex justify-center mt-2">
+                    <div class="w-20 h-20 rounded-full overflow-hidden border-2 border-brand-500 bg-slate-100 shadow-inner hidden" id="preview-container">
+                        <img id="preview" src="#" alt="Preview" class="w-full h-full object-cover">
+                    </div>
+                </div>
+
+                {% if form.profile_img.errors %}
+                    <ul class="text-rose-500 text-[11px] font-semibold list-none pl-0 mt-0.5">
+                        {% for error in form.profile_img.errors %}<li>{{ error }}</li>{% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="w-full mt-4 h-12 bg-gradient-to-r from-brand-500 to-brand-600 hover:opacity-95 text-white font-bold text-sm rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-500/25 shimmer-btn">
+                Register Account
+            </button>
+        </form>
+
+        <p class="relative z-10 text-center text-xs text-slate-400 font-medium">
+            Already have an account? 
+            <a href="{% url 'super_login' %}" class="text-brand-500 hover:text-brand-600 font-bold ml-0.5 hover:underline">Login here</a>
+        </p>
+    </div>
+
+    <script>
+        const input = document.getElementById("{{ form.profile_img.id_for_label }}");
+        const previewContainer = document.getElementById("preview-container");
+        const preview = document.getElementById("preview");
+        const fileName = document.getElementById("file-name");
+        
+        if (input) {
+            // Hide the default file input styling
+            input.className = "hidden";
+
+            input.addEventListener("change", function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    fileName.textContent = file.name;
+                    if (!file.type.startsWith("image/")) {
+                        alert("Please upload a valid image file");
+                        input.value = "";
+                        fileName.textContent = "Choose an image file";
+                        preview.src = "#";
+                        previewContainer.classList.add("hidden");
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        preview.src = e.target.result;
+                        previewContainer.classList.remove("hidden");
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    fileName.textContent = "Choose an image file";
+                    preview.src = "#";
+                    previewContainer.classList.add("hidden");
+                }
+            });
+        }
+
+        function togglePasswordVisibility(fieldId, btn) {
+            const input = document.getElementById(fieldId);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                input.classList.add('password-visible');
+                icon.className = 'fa-solid fa-eye-slash';
+            } else {
+                input.type = 'password';
+                input.classList.remove('password-visible');
+                icon.className = 'fa-solid fa-eye';
+            }
+        }
+    </script>
+</body>
+</html>

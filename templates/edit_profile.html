@@ -1,0 +1,255 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - Foodeat</title>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind Play CDN -->
+    <script src="{% static 'js/3.4.js' %}"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fff3f0',
+                            100: '#ffe4dd',
+                            500: '#FF4D30',
+                            600: '#e53b1e',
+                            700: '#c22d14',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .profile-card {
+            background-color: var(--card-bg) !important;
+            border: 1px solid var(--border-color) !important;
+            box-shadow: 0 20px 40px var(--shadow-color) !important;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .text-main {
+            color: var(--main-text) !important;
+        }
+        .text-secondary-custom {
+            color: var(--secondary-text) !important;
+        }
+        .bg-custom-bg {
+            background-color: var(--body-bg) !important;
+        }
+        .border-custom {
+            border-color: var(--border-color) !important;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen bg-custom-bg text-main transition-colors duration-300">
+    {% include 'header.html' %}
+
+    <!-- Main Content Container -->
+    <main class="flex-grow flex items-center justify-center px-4 py-16 mt-8">
+        <div class="max-w-md w-full profile-card rounded-3xl p-6 md:p-8">
+            
+            <!-- Heading -->
+            <div class="text-center mb-8">
+                <div class="w-12 h-12 bg-custom-bg border border-custom rounded-2xl flex items-center justify-center mx-auto text-[#FF4D30] mb-3">
+                    <i class="fa-solid fa-user-pen text-xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-main">Edit Profile</h2>
+                <p class="text-xs text-secondary-custom mt-1">Keep your profile information accurate and up to date.</p>
+            </div>
+
+            <!-- Profile Completeness Progress Bar -->
+            <div class="mb-6 bg-custom-bg rounded-2xl p-4 border border-custom">
+                <div class="flex items-center justify-between text-xs font-bold mb-2">
+                    <span class="text-secondary-custom">Profile Completeness</span>
+                    <span id="completeness-percentage" class="text-[#FF4D30]">0%</span>
+                </div>
+                <div class="w-full bg-custom-bg border border-custom h-2.5 rounded-full overflow-hidden">
+                    <div id="completeness-bar" class="h-full bg-gradient-to-r from-[#FF4D30] to-[#D4AF37] transition-all duration-300 w-0"></div>
+                </div>
+                <p id="completeness-tip" class="text-[10px] text-secondary-custom mt-2 text-center"></p>
+            </div>
+
+            <!-- Preview Image Frame -->
+            <div class="flex flex-col items-center justify-center mb-6">
+                <div class="w-24 h-24 rounded-full p-1 bg-custom-bg border border-custom shadow-md overflow-hidden relative group">
+                    {% if user.profile_image %}
+                        <img id="image-preview" src="{{ user.profile_image.url }}" alt="Profile Image" class="w-full h-full object-cover rounded-full">
+                    {% else %}
+                        <img id="image-preview" src="{% static 'img/default-user.png' %}" alt="Profile Image" class="w-full h-full object-cover rounded-full">
+                    {% endif %}
+                </div>
+                <p class="text-[10px] text-secondary-custom mt-2">Avatar Preview</p>
+            </div>
+
+            <!-- Form -->
+            <form method="POST" enctype="multipart/form-data" class="space-y-4">
+                {% csrf_token %}
+
+                <!-- First Name -->
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-secondary-custom tracking-wide uppercase">First Name</label>
+                    <div class="relative flex items-center">
+                        <i class="fa-solid fa-user absolute left-4 text-secondary-custom text-xs"></i>
+                        <input type="text" name="first_name" required value="{{ user.first_name }}" placeholder="Enter first name"
+                               class="w-full h-11 pl-10 pr-4 text-xs bg-custom-bg border border-custom rounded-xl text-main outline-none focus:border-[#FF4D30] transition-all font-semibold">
+                    </div>
+                </div>
+
+                <!-- Last Name -->
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-secondary-custom tracking-wide uppercase">Last Name</label>
+                    <div class="relative flex items-center">
+                        <i class="fa-solid fa-user-tag absolute left-4 text-secondary-custom text-xs"></i>
+                        <input type="text" name="last_name" required value="{{ user.last_name }}" placeholder="Enter last name"
+                               class="w-full h-11 pl-10 pr-4 text-xs bg-custom-bg border border-custom rounded-xl text-main outline-none focus:border-[#FF4D30] transition-all font-semibold">
+                    </div>
+                </div>
+
+                <!-- Phone -->
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-secondary-custom tracking-wide uppercase">Phone Number</label>
+                    <div class="relative flex items-center">
+                        <i class="fa-solid fa-phone absolute left-4 text-secondary-custom text-xs"></i>
+                        <input type="text" name="phone" required value="{{ user.phone }}" placeholder="Enter phone number"
+                               class="w-full h-11 pl-10 pr-4 text-xs bg-custom-bg border border-custom rounded-xl text-main outline-none focus:border-[#FF4D30] transition-all font-semibold">
+                    </div>
+                </div>
+
+                <!-- City -->
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-secondary-custom tracking-wide uppercase">City</label>
+                    <div class="relative flex items-center">
+                        <i class="fa-solid fa-location-dot absolute left-4 text-secondary-custom text-xs"></i>
+                        <input type="text" name="city" value="{{ user.city|default:"" }}" placeholder="Enter city (e.g. Surat)"
+                               class="w-full h-11 pl-10 pr-4 text-xs bg-custom-bg border border-custom rounded-xl text-main outline-none focus:border-[#FF4D30] transition-all font-semibold">
+                    </div>
+                </div>
+
+                <!-- Gender -->
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-secondary-custom tracking-wide uppercase">Gender</label>
+                    <div class="relative flex items-center">
+                        <i class="fa-solid fa-venus-mars absolute left-4 text-secondary-custom text-xs"></i>
+                        <select name="gender" id="gender"
+                                class="w-full h-11 pl-10 pr-4 text-xs bg-custom-bg border border-custom rounded-xl text-main outline-none focus:border-[#FF4D30] transition-all font-semibold appearance-none">
+                            <option value="M" {% if user.gender == 'M' %}selected{% endif %}>Male</option>
+                            <option value="F" {% if user.gender == 'F' %}selected{% endif %}>Female</option>
+                            <option value="O" {% if user.gender == 'O' %}selected{% endif %}>Other</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down absolute right-4 text-secondary-custom text-[10px] pointer-events-none"></i>
+                    </div>
+                </div>
+
+                <!-- Profile Image File -->
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-secondary-custom tracking-wide uppercase">Profile Picture</label>
+                    <div class="relative flex flex-col items-center justify-center border border-dashed border-custom rounded-xl p-4 bg-custom-bg hover:opacity-80 transition-all cursor-pointer text-center" onclick="document.getElementById('profile_image').click()">
+                        <i class="fa-solid fa-cloud-arrow-up text-xl text-[#FF4D30] mb-1.5"></i>
+                        <span id="file-name-label" class="text-[11px] font-semibold text-secondary-custom">Click here to choose file</span>
+                        <input type="file" name="profile_image" id="profile_image" accept="image/*" onchange="previewImage(event)" class="hidden">
+                    </div>
+                </div>
+
+                <!-- Buttons row -->
+                <div class="flex items-center gap-3 pt-4">
+                    <!-- Cancel -->
+                    <a href="{% url 'profile_page' %}" class="flex-1 h-12 rounded-2xl bg-custom-bg hover:opacity-80 border border-custom text-main font-bold text-sm transition-all flex items-center justify-center gap-2">
+                        Cancel
+                    </a>
+
+                    <!-- Save -->
+                    <button type="submit" class="flex-1 h-12 rounded-2xl bg-gradient-to-r from-[#FF4D30] to-[#D4AF37] hover:opacity-90 text-white font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-500/15">
+                        <i class="fa-solid fa-save text-xs"></i> Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    {% include 'footer.html' %}
+
+    <script>
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                const output = document.getElementById('image-preview');
+                if (output) {
+                    output.src = reader.result;
+                }
+            };
+            if (event.target.files && event.target.files[0]) {
+                reader.readAsDataURL(event.target.files[0]);
+                
+                // Update file-name-label text
+                const nameLabel = document.getElementById('file-name-label');
+                if (nameLabel) {
+                    nameLabel.textContent = event.target.files[0].name;
+                }
+                
+                updateCompleteness(); // Trigger completeness update on file load
+            }
+        }
+
+        function updateCompleteness() {
+            let percent = 0;
+            const missing = [];
+
+            const firstName = document.querySelector('input[name="first_name"]').value.trim();
+            const lastName = document.querySelector('input[name="last_name"]').value.trim();
+            const phone = document.querySelector('input[name="phone"]').value.trim();
+            const city = document.querySelector('input[name="city"]').value.trim();
+            
+            const fileInput = document.getElementById('profile_image');
+            const hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
+            const hasExisting = {% if user.profile_image %} true {% else %} false {% endif %};
+            
+            if (firstName) percent += 20; else missing.push("First Name");
+            if (lastName) percent += 20; else missing.push("Last Name");
+            if (phone) percent += 20; else missing.push("Phone");
+            if (city) percent += 20; else missing.push("City");
+            if (hasFile || hasExisting) percent += 20; else missing.push("Profile Picture");
+
+            const bar = document.getElementById('completeness-bar');
+            const text = document.getElementById('completeness-percentage');
+            const tip = document.getElementById('completeness-tip');
+
+            if (bar && text && tip) {
+                bar.style.width = percent + '%';
+                text.textContent = percent + '%';
+                
+                if (percent === 100) {
+                    tip.innerHTML = '<span class="text-emerald-500 font-bold"><i class="fa-solid fa-circle-check"></i> Ready to save! 100% complete.</span>';
+                } else {
+                    tip.innerHTML = `Fill in <strong>${missing[0]}</strong> to boost completeness.`;
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('input', updateCompleteness);
+                input.addEventListener('change', updateCompleteness);
+            });
+            updateCompleteness();
+        });
+    </script>
+</body>
+</html>
