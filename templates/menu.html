@@ -646,7 +646,38 @@
       }
 
       .card-container {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+
+      .menu-card {
+        min-height: auto;
+      }
+
+      .card-image-container {
+        height: 120px;
+      }
+
+      .card-content {
+        padding: 10px;
+      }
+
+      .card-content h3 {
+        font-size: 0.9rem;
+      }
+
+      .food-meta {
+        font-size: 0.7rem;
+        margin-top: 4px;
+      }
+
+      .food-description {
+        font-size: 0.75rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin: 8px 0;
       }
 
       .card-footer {
@@ -721,6 +752,21 @@
 
   <main class="page-container">
 
+    <!-- Menu Page Hero -->
+    <header class="menu-hero">
+      <div>
+        <div class="menu-eyebrow">
+          <i class="fa-solid fa-utensils"></i> Fresh & Delicious
+        </div>
+        <h1 class="menu-title">Our Menu</h1>
+        <p class="menu-subtitle">Explore our wide selection of delicious meals prepared with the freshest ingredients by our expert chefs.</p>
+      </div>
+      <div class="menu-count">
+        <strong id="visible-count">{{ food_items.count }}</strong>
+        <span>Dishes</span>
+      </div>
+    </header>
+
 
 
     {% regroup food_items|dictsort:"category" by category as categories %}
@@ -787,7 +833,13 @@
             data-has-offer="{% if p.active_discount %}true{% else %}false{% endif %}">
 
             <div class="card-image-container">
+              {% if p.food_image %}
               <img src="{{ p.food_image.url }}" alt="{{ p.food_name }}">
+              {% else %}
+              <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #fff7ed; color: #fb923c;">
+                <i class="fa-solid fa-utensils text-5xl opacity-40"></i>
+              </div>
+              {% endif %}
               {% if p.active_discount %}
               <span class="offer-badge"><i class="fa-solid fa-tag"></i>{{ p.active_discount.discount_percentage }}% OFF</span>
               {% endif %}
