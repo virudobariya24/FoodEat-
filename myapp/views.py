@@ -333,18 +333,24 @@ def send_otp(request):
         request.session["otp"] = otp
         request.session["email_for_otp"] = email
 
-        try:
-            send_mail(
-                subject="Your OTP Code",
-                message=f"Your OTP is {otp}",
-                from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[email],
-                fail_silently=False,
-            )
-            return JsonResponse({"success": True, "message": "OTP sent successfully"})
-        except Exception as e:
-            print(f"\n========================================\nUSER REGISTRATION OTP FOR {email}: {otp} (Email failed: {e})\n========================================\n")
-            return JsonResponse({"success": True, "message": "OTP sent successfully (For testing/logs)"})
+        # Print the OTP to console logs immediately so it is visible on Render
+        print(f"\n========================================\nUSER REGISTRATION OTP FOR {email}: {otp}\n========================================\n")
+
+        import threading
+        def send_email_thread():
+            try:
+                send_mail(
+                    subject="Your OTP Code",
+                    message=f"Your OTP is {otp}",
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[email],
+                    fail_silently=False,
+                )
+            except Exception as e:
+                print(f"Async email sending failed for {email}: {e}")
+
+        threading.Thread(target=send_email_thread).start()
+        return JsonResponse({"success": True, "message": "OTP sent successfully"})
     
     return JsonResponse({"success": False, "message": "Invalid request"})
 
@@ -487,18 +493,24 @@ def forgot_password(request):
                 request.session['otp_sent'] = True
                 request.session['otp_verified'] = False               
                 
-                try:
-                    send_mail(
-                        'Your OTP for Foodeat Password Reset',
-                        f'Your OTP is: {otp}',
-                        settings.EMAIL_HOST_USER,
-                        [email],
-                        fail_silently=False,
-                    )
-                    messages.success(request, f"OTP sent to {email}")
-                except Exception as e:
-                    print(f"\n========================================\nFORGOT PASSWORD OTP FOR {email}: {otp} (Email failed: {e})\n========================================\n")
-                    messages.warning(request, f"Could not send email. For testing, your reset OTP code is: {otp}")
+                # Print the OTP to console logs immediately
+                print(f"\n========================================\nFORGOT PASSWORD OTP FOR {email}: {otp}\n========================================\n")
+
+                import threading
+                def send_email_thread():
+                    try:
+                        send_mail(
+                            'Your OTP for Foodeat Password Reset',
+                            f'Your OTP is: {otp}',
+                            settings.EMAIL_HOST_USER,
+                            [email],
+                            fail_silently=False,
+                        )
+                    except Exception as e:
+                        print(f"Async email sending failed for {email}: {e}")
+
+                threading.Thread(target=send_email_thread).start()
+                messages.success(request, "OTP has been generated. If you don't receive it, please check the Render logs.")
                 return redirect('forgot_password')
             except Registration.DoesNotExist:
                 messages.error(request, "Email not registered")
@@ -2041,13 +2053,19 @@ def adminregister(request):
             # Send Email
             subject = 'Verification OTP for Restaurant Registration - Foodeat'
             message = f"Hello {reg_data['full_name']},\n\nYour OTP for verifying your restaurant registration on Foodeat is: {otp}\n\nPlease enter this OTP on the verification page to complete your email verification.\n\nBest regards,\nFoodeat Team"
-            try:
-                send_mail(subject, message, settings.EMAIL_HOST_USER, [email], fail_silently=False)
-                messages.success(request, "An OTP has been sent to your business email. Please enter it below to verify.")
-            except Exception as e:
-                print(f"\n========================================\nRESTAURANT OWNER OTP FOR {email}: {otp} (Email failed: {e})\n========================================\n")
-                messages.warning(request, f"Could not send email. For testing, your verification OTP code is: {otp}")
             
+            # Print the OTP to console logs immediately
+            print(f"\n========================================\nRESTAURANT OWNER OTP FOR {email}: {otp}\n========================================\n")
+
+            import threading
+            def send_email_thread():
+                try:
+                    send_mail(subject, message, settings.EMAIL_HOST_USER, [email], fail_silently=False)
+                except Exception as e:
+                    print(f"Async email sending failed for {email}: {e}")
+
+            threading.Thread(target=send_email_thread).start()
+            messages.success(request, "An OTP has been generated. If you don't receive it, please check the Render logs.")
             return redirect('admin_verify_otp')
     else:
         form = AdminOwnerRegisterForm()
