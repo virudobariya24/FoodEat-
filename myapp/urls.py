@@ -153,4 +153,14 @@ urlpatterns = [
     path('super_admin/delivery_boys/toggle-block/<int:boy_id>/', views.super_toggle_block_boy, name='super_toggle_block_boy'),
     path('super_admin/delivery_boys/delete/<int:boy_id>/', views.super_delete_boy, name='super_delete_boy'),
     path('super_admin/platform_settings/', views.super_platform_settings, name='super_platform_settings'),
+
+    # Restaurant Owner Notifications
+    path('owner/notifications/', views.owner_notifications, name='owner_notifications'),
+    path('owner/notifications/read/<int:notif_id>/', views.owner_mark_notification_read, name='owner_mark_notification_read'),
+    path('owner/notifications/read-all/', views.owner_mark_all_notifications_read, name='owner_mark_all_notifications_read'),
+
+    # Super Admin Notifications
+    path('super_admin/notifications_page/', views.super_notifications_page, name='super_notifications_page'),
+    path('super_admin/notifications/read/<int:notif_id>/', views.super_mark_notification_read, name='super_mark_notification_read'),
+    path('super_admin/notifications/read-all/', views.super_mark_all_notifications_read, name='super_mark_all_notifications_read'),
 ]

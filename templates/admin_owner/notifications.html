@@ -1,0 +1,146 @@
+{% load static %}{% load tz %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notifications - GJ3 Admin Panel</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#fff7ed',
+                            100: '#ffedd5',
+                            500: '#ff6f00', // Orange matching theme
+                            600: '#ea580c',
+                            700: '#c2410c',
+                        },
+                        navy: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex">
+    {% include 'admin_owner/sidebar.html' %}
+
+    <div class="w-full md:w-[calc(100%-70px)] lg:w-[calc(100%-260px)] md:ml-[70px] lg:ml-[260px] min-h-screen flex flex-col transition-all duration-300">
+        <!-- Top Header -->
+        <header class="bg-white border-b border-slate-200 h-20 px-6 md:px-8 flex items-center justify-between sticky top-0 z-40 shadow-sm">
+            <!-- Left Side: Page Title -->
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-slate-800 tracking-tight">Notifications Center</h1>
+                <p class="text-xs md:text-sm text-slate-500 hidden sm:block">View and manage alerts from Foodeat Platform.</p>
+            </div>
+
+            <!-- Right Side: User Profile Dropdown -->
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <button class="flex items-center gap-3 p-1.5 hover:bg-slate-50 rounded-xl transition-all duration-200" id="adminDropdownBtn">
+                        <div class="w-10 h-10 rounded-full overflow-hidden border-2 border-brand-500 shadow-sm flex-shrink-0">
+                            {% if admin_user.profile_image %}
+                                <img src="{{ admin_user.profile_image.url }}" alt="Admin Profile" class="w-full h-full object-cover">
+                            {% else %}
+                                <img src="{% static 'images/default-profile.png' %}" alt="Default Profile" class="w-full h-full object-cover">
+                            {% endif %}
+                        </div>
+                        <div class="text-left hidden sm:block">
+                            <p class="text-sm font-semibold text-slate-800 leading-tight">{{ admin_user.full_name }}</p>
+                            <p class="text-xs text-slate-400 font-medium leading-none mt-0.5">{{ admin_user.restaurant_name|default:"No Restaurant" }}</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow p-6 md:p-8 max-w-7xl w-full mx-auto">
+            
+            {% if messages %}
+                <div class="space-y-3 mb-6">
+                    {% for message in messages %}
+                        <div class="p-4 rounded-xl text-sm {% if message.tags == 'success' %}bg-emerald-50 text-emerald-800 border border-emerald-200{% else %}bg-slate-50 text-slate-800 border border-slate-200{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Notifications Card Container -->
+            <div class="bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-sm space-y-6">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-5">
+                    <div>
+                        <h2 class="text-lg font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
+                            <i class="fa-solid fa-bell text-brand-500"></i> All Notifications
+                        </h2>
+                        <p class="text-xs text-slate-400 font-medium mt-1">Updates and alerts regarding your restaurant orders and bookings.</p>
+                    </div>
+                    {% if notifications %}
+                        <a href="{% url 'owner_mark_all_notifications_read' %}" class="inline-flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold text-brand-500 border border-brand-500 hover:bg-brand-500 hover:text-white rounded-xl transition duration-300 shadow-sm active:scale-95">
+                            <i class="fa-solid fa-check-double"></i> Mark All Read
+                        </a>
+                    {% endif %}
+                </div>
+
+                {% if notifications %}
+                    <div class="space-y-4">
+                        {% for notif in notifications %}
+                            <div class="flex items-start gap-4 p-5 rounded-2xl border transition-all duration-300 {% if notif.is_read %}bg-slate-50/50 border-slate-100{% else %}bg-gradient-to-r from-orange-50/40 to-amber-50/40 border-orange-100 shadow-sm{% endif %}">
+                                <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-base {% if notif.is_read %}bg-slate-200/50 text-slate-500{% else %}bg-brand-500 text-white shadow-sm{% endif %}">
+                                    <i class="fa-solid {% if notif.is_read %}fa-envelope-open{% else %}fa-envelope{% endif %}"></i>
+                                </div>
+                                
+                                <div class="flex-grow min-w-0">
+                                    <div class="flex flex-wrap items-start justify-between gap-2">
+                                        <h4 class="font-extrabold text-sm text-slate-800 {% if not notif.is_read %}text-brand-700{% endif %}">Order/Booking Update</h4>
+                                        <span class="text-[10px] font-bold text-slate-400 whitespace-nowrap">{{ notif.created_at|localtime|date:"d M Y, h:i A" }}</span>
+                                    </div>
+                                    <p class="text-xs text-slate-600 mt-1 leading-relaxed {% if not notif.is_read %}text-slate-800 font-medium{% endif %}">{{ notif.message }}</p>
+                                </div>
+
+                                {% if not notif.is_read %}
+                                    <a href="{% url 'owner_mark_notification_read' notif.id %}" class="flex-shrink-0 w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-brand-500 hover:border-brand-500 flex items-center justify-center transition shadow-sm" title="Mark as read">
+                                        <i class="fa-solid fa-check"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="py-16 text-center space-y-4">
+                        <div class="w-16 h-16 rounded-full bg-slate-50 border border-slate-100 text-slate-300 flex items-center justify-center text-2xl mx-auto shadow-inner">
+                            <i class="fa-solid fa-bell-slash"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-black text-slate-700 text-sm">All caught up!</h4>
+                            <p class="text-xs text-slate-400 font-bold mt-1">No new notifications at the moment.</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+</body>
+</html>

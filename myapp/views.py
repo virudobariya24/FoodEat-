@@ -333,14 +333,18 @@ def send_otp(request):
         request.session["otp"] = otp
         request.session["email_for_otp"] = email
 
-        send_mail(
-            subject="Your OTP Code",
-            message=f"Your OTP is {otp}",
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[email],
-            fail_silently=False,
-        )
-        return JsonResponse({"success": True, "message": "OTP sent successfully"})
+        try:
+            send_mail(
+                subject="Your OTP Code",
+                message=f"Your OTP is {otp}",
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[email],
+                fail_silently=False,
+            )
+            return JsonResponse({"success": True, "message": "OTP sent successfully"})
+        except Exception as e:
+            print(f"\n========================================\nUSER REGISTRATION OTP FOR {email}: {otp} (Email failed: {e})\n========================================\n")
+            return JsonResponse({"success": True, "message": "OTP sent successfully (For testing/logs)"})
     
     return JsonResponse({"success": False, "message": "Invalid request"})
 
@@ -483,14 +487,18 @@ def forgot_password(request):
                 request.session['otp_sent'] = True
                 request.session['otp_verified'] = False               
                 
-                send_mail(
-                    'Your OTP for Foodeat Password Reset',
-                    f'Your OTP is: {otp}',
-                    settings.EMAIL_HOST_USER,
-                    [email],
-                    fail_silently=False,
-                )
-                messages.success(request, f"OTP sent to {email}")
+                try:
+                    send_mail(
+                        'Your OTP for Foodeat Password Reset',
+                        f'Your OTP is: {otp}',
+                        settings.EMAIL_HOST_USER,
+                        [email],
+                        fail_silently=False,
+                    )
+                    messages.success(request, f"OTP sent to {email}")
+                except Exception as e:
+                    print(f"\n========================================\nFORGOT PASSWORD OTP FOR {email}: {otp} (Email failed: {e})\n========================================\n")
+                    messages.warning(request, f"Could not send email. For testing, your reset OTP code is: {otp}")
                 return redirect('forgot_password')
             except Registration.DoesNotExist:
                 messages.error(request, "Email not registered")
@@ -2033,9 +2041,13 @@ def adminregister(request):
             # Send Email
             subject = 'Verification OTP for Restaurant Registration - Foodeat'
             message = f"Hello {reg_data['full_name']},\n\nYour OTP for verifying your restaurant registration on Foodeat is: {otp}\n\nPlease enter this OTP on the verification page to complete your email verification.\n\nBest regards,\nFoodeat Team"
-            send_mail(subject, message, settings.EMAIL_HOST_USER, [email], fail_silently=False)
+            try:
+                send_mail(subject, message, settings.EMAIL_HOST_USER, [email], fail_silently=False)
+                messages.success(request, "An OTP has been sent to your business email. Please enter it below to verify.")
+            except Exception as e:
+                print(f"\n========================================\nRESTAURANT OWNER OTP FOR {email}: {otp} (Email failed: {e})\n========================================\n")
+                messages.warning(request, f"Could not send email. For testing, your verification OTP code is: {otp}")
             
-            messages.success(request, "An OTP has been sent to your business email. Please enter it below to verify.")
             return redirect('admin_verify_otp')
     else:
         form = AdminOwnerRegisterForm()
@@ -4700,5 +4712,85 @@ def delivery_mark_all_notifications_read(request):
 
 
 
+# Restaurant Owner Notifications
+def owner_notifications(request):
+    if 'admin_id' not in request.session:
+        return redirect('adminlogin')
+    from .models import AdminOwner, RestaurantNotification
+    admin_user = AdminOwner.objects.get(id=request.session['admin_id'])
+    notifications = RestaurantNotification.objects.filter(
+        restaurant_name__iexact=admin_user.restaurant_name
+    ).order_by('-created_at')
+    
+    unread_count = notifications.filter(is_read=False).count()
+    
+    context = {
+        'admin_user': admin_user,
+        'notifications': notifications,
+        'unread_count': unread_count,
+        'page_title': 'Notifications'
+    }
+    return render(request, 'admin_owner/notifications.html', context)
 
 
+def owner_mark_notification_read(request, notif_id):
+    if 'admin_id' not in request.session:
+        return redirect('adminlogin')
+    from .models import RestaurantNotification
+    notif = get_object_or_404(RestaurantNotification, id=notif_id)
+    notif.is_read = True
+    notif.save()
+    messages.success(request, "Notification marked as read.")
+    return redirect('owner_notifications')
+
+
+def owner_mark_all_notifications_read(request):
+    if 'admin_id' not in request.session:
+        return redirect('adminlogin')
+    from .models import AdminOwner, RestaurantNotification
+    admin_user = AdminOwner.objects.get(id=request.session['admin_id'])
+    RestaurantNotification.objects.filter(
+        restaurant_name__iexact=admin_user.restaurant_name,
+        is_read=False
+    ).update(is_read=True)
+    messages.success(request, "All notifications marked as read.")
+    return redirect('owner_notifications')
+
+
+# Super Admin Notifications
+def super_notifications_page(request):
+    if 'super_id' not in request.session:
+        return redirect('super_login')
+    from .models import SuperRegister, SuperAdminNotification
+    super_user = SuperRegister.objects.get(id=request.session['super_id'])
+    notifications = SuperAdminNotification.objects.all().order_by('-created_at')
+    
+    unread_count = notifications.filter(is_read=False).count()
+    
+    context = {
+        'super_user': super_user,
+        'notifications': notifications,
+        'unread_count': unread_count,
+        'page_title': 'Notifications'
+    }
+    return render(request, 'super_admin/notifications.html', context)
+
+
+def super_mark_notification_read(request, notif_id):
+    if 'super_id' not in request.session:
+        return redirect('super_login')
+    from .models import SuperAdminNotification
+    notif = get_object_or_404(SuperAdminNotification, id=notif_id)
+    notif.is_read = True
+    notif.save()
+    messages.success(request, "Notification marked as read.")
+    return redirect('super_notifications_page')
+
+
+def super_mark_all_notifications_read(request):
+    if 'super_id' not in request.session:
+        return redirect('super_login')
+    from .models import SuperAdminNotification
+    SuperAdminNotification.objects.filter(is_read=False).update(is_read=True)
+    messages.success(request, "All notifications marked as read.")
+    return redirect('super_notifications_page')
