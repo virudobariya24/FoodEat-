@@ -339,6 +339,9 @@ def send_otp(request):
         import threading
         def send_email_thread():
             try:
+                import os
+                api_key = os.environ.get('BREVO_API_KEY')
+                print(f"DEBUG: BREVO_API_KEY status: {'Loaded (len=' + str(len(api_key)) + ')' if api_key else 'NOT LOADED'}", flush=True)
                 send_mail(
                     subject="Your OTP Code",
                     message=f"Your OTP is {otp}",
@@ -346,8 +349,9 @@ def send_otp(request):
                     recipient_list=[email],
                     fail_silently=False,
                 )
+                print(f"Async email sending completed successfully for {email}", flush=True)
             except Exception as e:
-                print(f"Async email sending failed for {email}: {e}")
+                print(f"Async email sending failed for {email}: {e}", flush=True)
 
         threading.Thread(target=send_email_thread).start()
         return JsonResponse({"success": True, "message": "OTP sent successfully"})
@@ -499,6 +503,9 @@ def forgot_password(request):
                 import threading
                 def send_email_thread():
                     try:
+                        import os
+                        api_key = os.environ.get('BREVO_API_KEY')
+                        print(f"DEBUG: BREVO_API_KEY status: {'Loaded (len=' + str(len(api_key)) + ')' if api_key else 'NOT LOADED'}", flush=True)
                         send_mail(
                             'Your OTP for Foodeat Password Reset',
                             f'Your OTP is: {otp}',
@@ -506,8 +513,9 @@ def forgot_password(request):
                             [email],
                             fail_silently=False,
                         )
+                        print(f"Async email sending completed successfully for {email}", flush=True)
                     except Exception as e:
-                        print(f"Async email sending failed for {email}: {e}")
+                        print(f"Async email sending failed for {email}: {e}", flush=True)
 
                 threading.Thread(target=send_email_thread).start()
                 messages.success(request, "OTP has been generated. If you don't receive it, please check the Render logs.")
@@ -2060,9 +2068,13 @@ def adminregister(request):
             import threading
             def send_email_thread():
                 try:
+                    import os
+                    api_key = os.environ.get('BREVO_API_KEY')
+                    print(f"DEBUG: BREVO_API_KEY status: {'Loaded (len=' + str(len(api_key)) + ')' if api_key else 'NOT LOADED'}", flush=True)
                     send_mail(subject, message, settings.EMAIL_HOST_USER, [email], fail_silently=False)
+                    print(f"Async email sending completed successfully for {email}", flush=True)
                 except Exception as e:
-                    print(f"Async email sending failed for {email}: {e}")
+                    print(f"Async email sending failed for {email}: {e}", flush=True)
 
             threading.Thread(target=send_email_thread).start()
             messages.success(request, "An OTP has been generated. If you don't receive it, please check the Render logs.")
