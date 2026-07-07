@@ -339,9 +339,12 @@
           <div class="form-grid">
             <div class="form-field">
               <label>Password</label>
-              <div class="input-group">
+              <div class="input-group" style="position: relative;">
                 {{ form.password }}
                 <i class="fas fa-lock input-icon"></i>
+                <button type="button" class="toggle-password" data-target="id_password" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #869ab8; cursor: pointer; outline: none; padding: 0; z-index: 10; display: flex; align-items: center;">
+                  <i class="fas fa-eye password-eye-icon"></i>
+                </button>
               </div>
               <!-- Underline Indicator -->
               <div class="w-full h-[2px] bg-slate-100 dark:bg-slate-800 rounded overflow-hidden relative mt-1 underline-indicator">
@@ -351,9 +354,12 @@
             </div>
             <div class="form-field">
               <label>Confirm Password</label>
-              <div class="input-group">
+              <div class="input-group" style="position: relative;">
                 {{ form.confirm_password }}
                 <i class="fas fa-key input-icon"></i>
+                <button type="button" class="toggle-password" data-target="id_confirm_password" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #869ab8; cursor: pointer; outline: none; padding: 0; z-index: 10; display: flex; align-items: center;">
+                  <i class="fas fa-eye password-eye-icon"></i>
+                </button>
               </div>
               <!-- Underline Indicator -->
               <div class="w-full h-[2px] bg-slate-100 dark:bg-slate-800 rounded overflow-hidden relative mt-1 underline-indicator">
@@ -542,6 +548,25 @@
           reader.readAsDataURL(file);
         }
       }
+    });
+
+    document.querySelectorAll('.toggle-password').forEach(button => {
+        const targetId = button.getAttribute('data-target');
+        const passwordInput = document.getElementById(targetId);
+        if (passwordInput) {
+            passwordInput.style.paddingRight = '45px';
+        }
+        button.addEventListener('click', function() {
+            if (passwordInput) {
+                const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInput.setAttribute('type', type);
+                const eyeIcon = this.querySelector('.password-eye-icon');
+                if (eyeIcon) {
+                    eyeIcon.classList.toggle('fa-eye');
+                    eyeIcon.classList.toggle('fa-eye-slash');
+                }
+            }
+        });
     });
   </script>
 </body>
