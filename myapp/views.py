@@ -311,49 +311,55 @@ def my_booking(request):
 
 
 def send_otp(request):
-    if request.method == "POST":
-        email = request.POST.get("email")
-        if not email:
-            return JsonResponse({"success": False, "message": "Email is required"})
+    import traceback
+    try:
+        if request.method == "POST":
+            email = request.POST.get("email")
+            if not email:
+                return JsonResponse({"success": False, "message": "Email is required"})
 
-        request.session["registration_data"] = request.POST.dict()
+            request.session["registration_data"] = request.POST.dict()
+            
+            if "profile_image" in request.FILES:
+                uploaded_file = request.FILES["profile_image"]
+                temp_dir = os.path.join(settings.MEDIA_ROOT, "temp")
+                os.makedirs(temp_dir, exist_ok=True)
+                temp_filename = f"{now().strftime('%Y%m%d%H%M%S')}_{uploaded_file.name}"
+                temp_path = os.path.join(temp_dir, temp_filename)
+                with open(temp_path, "wb+") as dest:
+                    for chunk in uploaded_file.chunks():
+                        dest.write(chunk)
+                request.session["temp_profile_image"] = temp_path
+
+            otp = str(random.randint(100000, 999999))
+            request.session["otp"] = otp
+            request.session["email_for_otp"] = email
+
+            # Print the OTP to console logs immediately so it is visible on Render
+            print(f"\n========================================\nUSER REGISTRATION OTP FOR {email}: {otp}\n========================================\n", flush=True)
+
+            try:
+                import os
+                api_key = os.environ.get('BREVO_API_KEY')
+                print(f"DEBUG: BREVO_API_KEY status: {'Loaded (len=' + str(len(api_key)) + ')' if api_key else 'NOT LOADED'}", flush=True)
+                send_mail(
+                    subject="Your OTP Code",
+                    message=f"Your OTP is {otp}",
+                    from_email=settings.EMAIL_HOST_USER,
+                    recipient_list=[email],
+                    fail_silently=False,
+                )
+                print(f"Email sending completed successfully for {email}", flush=True)
+            except Exception as e:
+                print(f"Email sending failed for {email}: {e}", flush=True)
+
+            return JsonResponse({"success": True, "message": "OTP sent successfully"})
         
-        if "profile_image" in request.FILES:
-            uploaded_file = request.FILES["profile_image"]
-            temp_dir = os.path.join(settings.MEDIA_ROOT, "temp")
-            os.makedirs(temp_dir, exist_ok=True)
-            temp_filename = f"{now().strftime('%Y%m%d%H%M%S')}_{uploaded_file.name}"
-            temp_path = os.path.join(temp_dir, temp_filename)
-            with open(temp_path, "wb+") as dest:
-                for chunk in uploaded_file.chunks():
-                    dest.write(chunk)
-            request.session["temp_profile_image"] = temp_path
-
-        otp = str(random.randint(100000, 999999))
-        request.session["otp"] = otp
-        request.session["email_for_otp"] = email
-
-        # Print the OTP to console logs immediately so it is visible on Render
-        print(f"\n========================================\nUSER REGISTRATION OTP FOR {email}: {otp}\n========================================\n")
-
-        try:
-            import os
-            api_key = os.environ.get('BREVO_API_KEY')
-            print(f"DEBUG: BREVO_API_KEY status: {'Loaded (len=' + str(len(api_key)) + ')' if api_key else 'NOT LOADED'}", flush=True)
-            send_mail(
-                subject="Your OTP Code",
-                message=f"Your OTP is {otp}",
-                from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[email],
-                fail_silently=False,
-            )
-            print(f"Email sending completed successfully for {email}", flush=True)
-        except Exception as e:
-            print(f"Email sending failed for {email}: {e}", flush=True)
-
-        return JsonResponse({"success": True, "message": "OTP sent successfully"})
-    
-    return JsonResponse({"success": False, "message": "Invalid request"})
+        return JsonResponse({"success": False, "message": "Invalid request"})
+    except Exception as outer_e:
+        print(f"FATAL ERROR IN send_otp: {outer_e}", flush=True)
+        traceback.print_exc()
+        return JsonResponse({"success": False, "message": f"Server error: {str(outer_e)}"})
 
 
 def register_page(request):
