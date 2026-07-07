@@ -7,5 +7,3 @@ pillow
 razorpay
 django-otp
 reportlab
-django-anymail[brevo]
-
