@@ -339,7 +339,6 @@ def send_otp(request):
             print(f"\n========================================\nUSER REGISTRATION OTP FOR {email}: {otp}\n========================================\n", flush=True)
 
             try:
-                import os
                 api_key = os.environ.get('BREVO_API_KEY')
                 print(f"DEBUG: BREVO_API_KEY status: {'Loaded (len=' + str(len(api_key)) + ')' if api_key else 'NOT LOADED'}", flush=True)
                 send_mail(
@@ -504,7 +503,6 @@ def forgot_password(request):
                 print(f"\n========================================\nFORGOT PASSWORD OTP FOR {email}: {otp}\n========================================\n")
 
                 try:
-                    import os
                     api_key = os.environ.get('BREVO_API_KEY')
                     print(f"DEBUG: BREVO_API_KEY status: {'Loaded (len=' + str(len(api_key)) + ')' if api_key else 'NOT LOADED'}", flush=True)
                     send_mail(
@@ -2065,7 +2063,6 @@ def adminregister(request):
             print(f"\n========================================\nRESTAURANT OWNER OTP FOR {email}: {otp}\n========================================\n")
 
             try:
-                import os
                 api_key = os.environ.get('BREVO_API_KEY')
                 print(f"DEBUG: BREVO_API_KEY status: {'Loaded (len=' + str(len(api_key)) + ')' if api_key else 'NOT LOADED'}", flush=True)
                 send_mail(subject, message, settings.EMAIL_HOST_USER, [email], fail_silently=False)
