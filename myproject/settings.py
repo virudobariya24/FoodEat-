@@ -11,7 +11,7 @@ SECRET_KEY = 'django-insecure-your-secret-key-here'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.222.240.213','127.0.0.1' ,'localhost']
+ALLOWED_HOSTS = ['10.222.240.213','127.0.0.1' ,'localhost', 'foodeat-ebox.onrender.com']
 
 
 # Installed apps
