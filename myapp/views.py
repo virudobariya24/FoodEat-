@@ -4050,6 +4050,12 @@ def delivery_verify_otp(request):
             boy.is_email_verified = True
             boy.otp = None
             boy.save()
+            
+            # If the delivery boy has not been approved by the super admin yet, redirect to login with a warning
+            if not boy.is_verified:
+                messages.success(request, "Your email has been verified successfully! Your account is now pending approval by the Super Admin. You will be able to log in once approved.")
+                return redirect('delivery_login')
+                
             request.session['delivery_boy_id'] = boy.id
             messages.success(request, f"Welcome, {boy.name}! Your email has been verified.")
             return redirect('delivery_dashboard')
@@ -4069,6 +4075,19 @@ def delivery_login(request):
         if boy:
             from django.contrib.auth.hashers import check_password
             if check_password(password, boy.password):
+                if not boy.is_email_verified:
+                    request.session['delivery_verify_email'] = boy.email
+                    messages.error(request, "Please verify your email first.")
+                    return redirect('delivery_verify_otp')
+                    
+                if not boy.is_verified:
+                    messages.error(request, "Your account is pending approval by the Super Admin. You will be able to log in once approved.")
+                    return render(request, 'delivery/login.html')
+                    
+                if boy.is_blocked:
+                    messages.error(request, "Your account has been blocked by the Super Admin.")
+                    return render(request, 'delivery/login.html')
+
                 # Log in directly using credentials
                 request.session['delivery_boy_id'] = boy.id
                 messages.success(request, f"Welcome back, {boy.name}!")
@@ -4088,17 +4107,19 @@ def delivery_dashboard(request):
 
     boy = get_object_or_404(DeliveryBoy, id=boy_id)
     if boy.is_blocked:
-        if boy.status != 'Off-duty':
-            boy.status = 'Off-duty'
-            boy.save()
+        messages.error(request, "Your account has been blocked by the Super Admin.")
+        if 'delivery_boy_id' in request.session:
+            del request.session['delivery_boy_id']
+        return redirect('delivery_login')
 
     if not boy.is_email_verified:
         return redirect('delivery_verify_otp')
 
     if not boy.is_verified:
-        if boy.status != 'Off-duty':
-            boy.status = 'Off-duty'
-            boy.save()
+        messages.error(request, "Your account is pending approval by the Super Admin.")
+        if 'delivery_boy_id' in request.session:
+            del request.session['delivery_boy_id']
+        return redirect('delivery_login')
 
     active_order = Order.objects.filter(delivery_boy=boy, status__in=['paid', 'Packed', 'Shipped']).first()
     active_order_items = []
