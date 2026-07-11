@@ -9,6 +9,8 @@ def admin_user(request):
         try:
             user = AdminOwner.objects.get(pk=admin_id)
             owner_restaurant = AddResto.objects.filter(name__iexact=user.restaurant_name).first()
+            if not owner_restaurant:
+                owner_restaurant = AddResto.objects.filter(email__iexact=user.email).first()
         except AdminOwner.DoesNotExist:
             pass
     return {'admin_user': user, 'owner_restaurant': owner_restaurant}

@@ -283,7 +283,7 @@
           {% if admin_user.is_accepting_orders %}Open{% else %}Closed{% endif %}
         </span>
         <label class="relative inline-flex cursor-pointer items-center" title="Booking / Orders">
-          <input type="checkbox" name="is_accepting_orders" class="peer sr-only" onchange="this.form.submit()" {% if admin_user.is_accepting_orders %}checked{% endif %} {% if not owner_restaurant %}disabled{% endif %}>
+          <input type="checkbox" name="is_accepting_orders" value="on" class="peer sr-only" onchange="this.form.submit()" {% if admin_user.is_accepting_orders %}checked{% endif %} {% if not owner_restaurant %}disabled{% endif %}>
           <span class="h-6 w-11 rounded-full bg-rose-400/70 transition-colors peer-checked:bg-emerald-500"></span>
           <span class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5"></span>
         </label>

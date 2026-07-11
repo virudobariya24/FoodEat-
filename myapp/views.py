@@ -2648,6 +2648,11 @@ def toggle_resto_status(request, id):
         restaurant = get_object_or_404(AddResto, id=id)
         restaurant.is_accepting_orders = not restaurant.is_accepting_orders
         restaurant.save()
+        
+        # Sync with AdminOwner
+        admin_owner.is_accepting_orders = restaurant.is_accepting_orders
+        admin_owner.save()
+        
         status = "Open" if restaurant.is_accepting_orders else "Closed"
         messages.success(request, f"{restaurant.name} is now {status}.")
 
@@ -2835,7 +2840,6 @@ def owner_bookings(request):
 
 def toggle_restaurant_accepting_orders(request):
     owner_id = request.session.get('admin_id')
-    restaurant_name = request.session.get('restaurant_name')
 
     if not owner_id:
         messages.error(request, "Please log in first")
@@ -2847,6 +2851,7 @@ def toggle_restaurant_accepting_orders(request):
 
     try:
         admin_owner = AdminOwner.objects.get(id=owner_id)
+        restaurant_name = admin_owner.restaurant_name
         if admin_owner.is_blocked:
             AddResto.objects.filter(name__iexact=restaurant_name).update(is_accepting_orders=False)
             admin_owner.is_accepting_orders = False
@@ -2854,17 +2859,21 @@ def toggle_restaurant_accepting_orders(request):
             messages.error(request, "Your restaurant owner account is BLOCKED by the Super Admin. You cannot turn bookings/orders ON.")
             return redirect(next_url)
     except AdminOwner.DoesNotExist:
-        pass
+        messages.error(request, "Invalid admin session. Please log in again.")
+        return redirect('adminlogin')
 
     if request.method != 'POST':
         return redirect(next_url)
 
     restaurants = AddResto.objects.filter(name__iexact=restaurant_name)
     if not restaurants.exists():
+        restaurants = AddResto.objects.filter(email__iexact=admin_owner.email)
+
+    if not restaurants.exists():
         messages.error(request, "Restaurant not found.")
         return redirect(next_url)
 
-    is_accepting = request.POST.get('is_accepting_orders') == 'on'
+    is_accepting = 'is_accepting_orders' in request.POST
     
     admin_owner.is_accepting_orders = is_accepting
     admin_owner.save()
