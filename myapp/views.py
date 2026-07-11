@@ -3939,92 +3939,96 @@ def super_notifications(request):
 
 def delivery_register(request):
     if request.method == 'POST':
-        name = request.POST.get('name', '').strip()
-        image = request.FILES.get('image')
-        license_number = request.POST.get('license_number', '').strip()
-        type_of_bike = request.POST.get('type_of_bike', '').strip()
-        bike_number = request.POST.get('bike_number', '').strip()
-        email = request.POST.get('email', '').strip()
-        phone_number = request.POST.get('phone_number', '').strip()
-        aadhar_card_image = request.FILES.get('aadhar_card_image')
-        password = request.POST.get('password', '').strip()
-        confirm_password = request.POST.get('confirm_password', '').strip()
-
-        if not (name and image and license_number and type_of_bike and bike_number and email and phone_number and aadhar_card_image and password and confirm_password):
-            messages.error(request, "All fields (including profile picture, driving license, vehicle plate, and Aadhaar card photo) are required.")
-            return render(request, 'delivery/register.html')
-
-        import re
-
-        # 1. Password validation
-        if len(password) < 6:
-            messages.error(request, "Password must be at least 6 characters long.")
-            return render(request, 'delivery/register.html')
-
-        if password != confirm_password:
-            messages.error(request, "Passwords do not match.")
-            return render(request, 'delivery/register.html')
-
-        # 2. Email format validation
-        if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
-            messages.error(request, "Please enter a valid email address.")
-            return render(request, 'delivery/register.html')
-
-        # 3. Mobile validation (exactly 10 digits)
-        if not re.match(r'^\d{10}$', phone_number):
-            messages.error(request, "Mobile number must be a valid 10-digit number.")
-            return render(request, 'delivery/register.html')
-
-        # 4. Vehicle/Bike Number validation (Standard RTO format)
-        clean_bike_num = bike_number.replace(" ", "").replace("-", "").upper()
-        if not re.match(r'^[A-Z]{2}\d{2}[A-Z]{1,2}\d{4}$', clean_bike_num):
-            messages.error(request, "Invalid Vehicle Number. It should match RTO format (e.g. GJ05AB1234 or GJ-05-AB-1234).")
-            return render(request, 'delivery/register.html')
-
-        # 5. Driving License Number validation (Standard DL format)
-        clean_license = license_number.replace(" ", "").replace("-", "").upper()
-        if not re.match(r'^[A-Z]{2}\d{2}\d{4}\d{7}$', clean_license):
-            messages.error(request, "Invalid Driving License. It should match RTO format (e.g. GJ0520120123456 or GJ-05-2012-0123456).")
-            return render(request, 'delivery/register.html')
-
-        if DeliveryBoy.objects.filter(email=email).exists():
-            messages.error(request, "A delivery boy with this email already exists.")
-            return render(request, 'delivery/register.html')
-
-        if DeliveryBoy.objects.filter(phone_number=phone_number).exists():
-            messages.error(request, "A delivery boy with this phone number already exists.")
-            return render(request, 'delivery/register.html')
-
-        import random
-        from django.contrib.auth.hashers import make_password
-        otp = str(random.randint(100000, 999999))
-
-        boy = DeliveryBoy.objects.create(
-            name=name,
-            image=image,
-            license_number=license_number,
-            type_of_bike=type_of_bike,
-            bike_number=bike_number,
-            email=email,
-            phone_number=phone_number,
-            aadhar_card_image=aadhar_card_image,
-            password=make_password(password),
-            otp=otp,
-            is_verified=False
-        )
-
-        request.session['delivery_verify_email'] = email
-        
-        # Send actual verification email
         try:
-            subject = 'Foodeat - Delivery Partner Verification Code'
-            message = f'Hello {name},\n\nThank you for registering as a Delivery Partner with Foodeat.\n\nYour 6-digit OTP code is: {otp}\n\nPlease enter this code to verify your profile and open your dashboard.\n\nRegards,\nFoodeat Logistics Team'
-            send_mail(subject, message, settings.EMAIL_HOST_USER, [email], fail_silently=False)
-            messages.success(request, "Registration details submitted! Verification OTP has been sent to your email address.")
-        except Exception:
-            messages.warning(request, f"Registration details submitted! For local testing, your verification OTP code is: {otp}")
+            name = request.POST.get('name', '').strip()
+            image = request.FILES.get('image')
+            license_number = request.POST.get('license_number', '').strip()
+            type_of_bike = request.POST.get('type_of_bike', '').strip()
+            bike_number = request.POST.get('bike_number', '').strip()
+            email = request.POST.get('email', '').strip()
+            phone_number = request.POST.get('phone_number', '').strip()
+            aadhar_card_image = request.FILES.get('aadhar_card_image')
+            password = request.POST.get('password', '').strip()
+            confirm_password = request.POST.get('confirm_password', '').strip()
+
+            if not (name and image and license_number and type_of_bike and bike_number and email and phone_number and aadhar_card_image and password and confirm_password):
+                messages.error(request, "All fields (including profile picture, driving license, vehicle plate, and Aadhaar card photo) are required.")
+                return render(request, 'delivery/register.html')
+
+            import re
+
+            # 1. Password validation
+            if len(password) < 6:
+                messages.error(request, "Password must be at least 6 characters long.")
+                return render(request, 'delivery/register.html')
+
+            if password != confirm_password:
+                messages.error(request, "Passwords do not match.")
+                return render(request, 'delivery/register.html')
+
+            # 2. Email format validation
+            if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
+                messages.error(request, "Please enter a valid email address.")
+                return render(request, 'delivery/register.html')
+
+            # 3. Mobile validation (exactly 10 digits)
+            if not re.match(r'^\d{10}$', phone_number):
+                messages.error(request, "Mobile number must be a valid 10-digit number.")
+                return render(request, 'delivery/register.html')
+
+            # 4. Vehicle/Bike Number validation (Standard RTO format)
+            clean_bike_num = bike_number.replace(" ", "").replace("-", "").upper()
+            if not re.match(r'^[A-Z]{2}\d{2}[A-Z]{1,2}\d{4}$', clean_bike_num):
+                messages.error(request, "Invalid Vehicle Number. It should match RTO format (e.g. GJ05AB1234 or GJ-05-AB-1234).")
+                return render(request, 'delivery/register.html')
+
+            # 5. Driving License Number validation (Standard DL format)
+            clean_license = license_number.replace(" ", "").replace("-", "").upper()
+            if not re.match(r'^[A-Z]{2}\d{2}\d{4}\d{7}$', clean_license):
+                messages.error(request, "Invalid Driving License. It should match RTO format (e.g. GJ0520120123456 or GJ-05-2012-0123456).")
+                return render(request, 'delivery/register.html')
+
+            if DeliveryBoy.objects.filter(email=email).exists():
+                messages.error(request, "A delivery boy with this email already exists.")
+                return render(request, 'delivery/register.html')
+
+            if DeliveryBoy.objects.filter(phone_number=phone_number).exists():
+                messages.error(request, "A delivery boy with this phone number already exists.")
+                return render(request, 'delivery/register.html')
+
+            import random
+            from django.contrib.auth.hashers import make_password
+            otp = str(random.randint(100000, 999999))
+
+            boy = DeliveryBoy.objects.create(
+                name=name,
+                image=image,
+                license_number=license_number,
+                type_of_bike=type_of_bike,
+                bike_number=bike_number,
+                email=email,
+                phone_number=phone_number,
+                aadhar_card_image=aadhar_card_image,
+                password=make_password(password),
+                otp=otp,
+                is_verified=False
+            )
+
+            request.session['delivery_verify_email'] = email
             
-        return redirect('delivery_verify_otp')
+            # Send actual verification email
+            try:
+                subject = 'Foodeat - Delivery Partner Verification Code'
+                message = f'Hello {name},\n\nThank you for registering as a Delivery Partner with Foodeat.\n\nYour 6-digit OTP code is: {otp}\n\nPlease enter this code to verify your profile and open your dashboard.\n\nRegards,\nFoodeat Logistics Team'
+                send_mail(subject, message, settings.EMAIL_HOST_USER, [email], fail_silently=False)
+                messages.success(request, "Registration details submitted! Verification OTP has been sent to your email address.")
+            except Exception:
+                messages.warning(request, f"Registration details submitted! For local testing, your verification OTP code is: {otp}")
+                
+            return redirect('delivery_verify_otp')
+        except Exception as e:
+            import traceback
+            return HttpResponse(f"<h3>Registration Debug Traceback:</h3><pre>{traceback.format_exc()}</pre>", status=500)
 
     return render(request, 'delivery/register.html')
 
