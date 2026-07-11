@@ -83,14 +83,20 @@
                                     </span>
                                 </td>
                                 <td class="py-4 pr-4 text-center">
-                                    <form method="POST" action="{% url 'super_delivery_tasks' %}" class="inline">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="action" value="toggle">
-                                        <input type="hidden" name="task_id" value="{{ task.id }}">
-                                        <button type="submit" class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold transition-colors {% if task.is_active %}bg-emerald-50 text-emerald-600 hover:bg-emerald-100{% else %}bg-slate-100 text-slate-500 hover:bg-slate-200{% endif %}">
-                                            {% if task.is_active %}Active{% else %}Inactive{% endif %}
+                                    {% if task.is_active %}
+                                        <form method="POST" action="{% url 'super_delivery_tasks' %}" class="inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="toggle">
+                                            <input type="hidden" name="task_id" value="{{ task.id }}">
+                                            <button type="submit" class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors" title="Click to deactivate">
+                                                Active
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <button type="button" onclick="openChangeDateModal('{{ task.id }}', '{{ task.title|escapejs }}', '{{ task.end_date|date:"Y-m-d" }}')" class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors" title="Click to change date & activate">
+                                            Inactive
                                         </button>
-                                    </form>
+                                    {% endif %}
                                 </td>
                                 <td class="py-4 text-center">
                                     <button type="button" 
@@ -169,11 +175,11 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Start Date</label>
-                        <input type="date" name="start_date" required class="w-full px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all">
+                        <input type="date" name="start_date" required min="{{ today_str }}" class="w-full px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">End Date</label>
-                        <input type="date" name="end_date" required class="w-full px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all">
+                        <input type="date" name="end_date" required min="{{ today_str }}" class="w-full px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all">
                     </div>
                 </div>
                 
@@ -232,11 +238,11 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">Start Date</label>
-                        <input type="date" name="start_date" id="edit_start_date" required class="w-full px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all">
+                        <input type="date" name="start_date" id="edit_start_date" required min="{{ today_str }}" class="w-full px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">End Date</label>
-                        <input type="date" name="end_date" id="edit_end_date" required class="w-full px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all">
+                        <input type="date" name="end_date" id="edit_end_date" required min="{{ today_str }}" class="w-full px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all">
                     </div>
                 </div>
                 
@@ -244,6 +250,47 @@
                 <div class="flex items-center justify-end gap-3 pt-2">
                     <button type="button" onclick="closeEditModal()" class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50 transition shadow-sm">Cancel</button>
                     <button type="submit" class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:scale-102 active:scale-98 transition shadow-lg shadow-orange-500/20">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Date Modal -->
+    <div id="changeDateModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-slate-950/40 backdrop-blur-sm transition-opacity duration-300">
+        <div class="bg-white rounded-2xl w-full max-w-sm shadow-xl overflow-hidden transform transition-all duration-300 scale-95 opacity-0" id="changeDateModalContent">
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100 text-orange-600">
+                        <i class="fa-solid fa-calendar-days text-xs"></i>
+                    </span>
+                    <h3 class="text-sm font-bold text-slate-800">Extend & Activate Task</h3>
+                </div>
+                <button type="button" onclick="closeChangeDateModal()" class="text-slate-400 hover:text-slate-600 transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <!-- Body -->
+            <form method="POST" action="{% url 'super_delivery_tasks' %}" class="p-6 space-y-4">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="change_date">
+                <input type="hidden" name="task_id" id="change_date_task_id">
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Task Title</label>
+                    <div id="change_date_task_title" class="text-xs font-bold text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100"></div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5">New End Date</label>
+                    <input type="date" name="end_date" id="change_date_end_date" required min="{{ today_str }}" class="w-full px-4 py-2 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all">
+                </div>
+                
+                <!-- Footer -->
+                <div class="flex items-center justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeChangeDateModal()" class="px-4 py-2 border border-slate-200 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-50 transition shadow-sm">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-orange-500 to-amber-500 hover:scale-102 active:scale-98 transition shadow-lg shadow-orange-500/20">Activate Task</button>
                 </div>
             </form>
         </div>
@@ -304,6 +351,40 @@
         function closeEditModal() {
             const modal = document.getElementById('editModal');
             const content = document.getElementById('editModalContent');
+            
+            modal.classList.remove('opacity-100');
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function openChangeDateModal(id, title, end_date) {
+            document.getElementById('change_date_task_id').value = id;
+            document.getElementById('change_date_task_title').textContent = title;
+            
+            const dateInput = document.getElementById('change_date_end_date');
+            dateInput.value = end_date;
+
+            const modal = document.getElementById('changeDateModal');
+            const content = document.getElementById('changeDateModalContent');
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            void modal.offsetWidth;
+            
+            modal.classList.add('opacity-100');
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }
+
+        function closeChangeDateModal() {
+            const modal = document.getElementById('changeDateModal');
+            const content = document.getElementById('changeDateModalContent');
             
             modal.classList.remove('opacity-100');
             content.classList.remove('scale-100', 'opacity-100');

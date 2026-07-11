@@ -158,22 +158,44 @@
   class="super-sidebar-surface fixed left-0 top-0 z-[60] flex h-screen w-[270px] -translate-x-full flex-col overflow-hidden text-slate-100 transition-transform duration-300 lg:translate-x-0"
 >
   <!-- Brand / Header -->
-  <div class="flex h-20 shrink-0 items-center gap-3 border-b border-white/10 px-6">
-    <div class="logo-glow-box flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-white">
-      <i class="fa-solid fa-utensils text-lg"></i>
+  <div class="flex h-24 shrink-0 flex-col justify-center border-b border-white/10 px-6 bg-slate-950/20 relative overflow-hidden">
+    <!-- Subtle Background Glow -->
+    <div class="absolute -left-10 -top-10 w-24 h-24 rounded-full bg-orange-500/10 blur-xl"></div>
+    <div class="absolute right-0 bottom-0 w-20 h-20 rounded-full bg-cyan-500/5 blur-lg"></div>
+
+    <div class="flex items-center gap-3 relative z-10">
+      <a href="/super_profile/" class="logo-glow-box group flex h-11 w-11 shrink-0 overflow-hidden rounded-xl text-white relative hover:scale-105 active:scale-95 transition-all duration-300" title="View Profile">
+        {% if super_user.profile_img %}
+          <img src="{{ super_user.profile_img.url }}" alt="Admin Profile" class="h-full w-full object-cover group-hover:scale-110 transition-transform duration-500">
+        {% else %}
+          <img src="{% static 'images/default-profile.png' %}" alt="Default Profile" class="h-full w-full object-cover">
+        {% endif %}
+        <!-- Little pulsating active dot -->
+        <span class="absolute -top-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-400 ring-2 ring-slate-900 animate-pulse z-20"></span>
+        <!-- Subtle inner hover border glow -->
+        <span class="absolute inset-0 border border-orange-500/0 group-hover:border-orange-500/50 rounded-xl transition-all duration-300"></span>
+      </a>
+      
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center gap-1.5">
+          <h3 class="truncate text-base font-black leading-tight tracking-tight text-white hover:text-orange-400 transition duration-200">
+            <a href="/super_profile/">Foodeat</a>
+          </h3>
+          <span class="inline-flex items-center rounded-md bg-orange-500/20 px-1.5 py-0.5 text-[8px] font-black uppercase tracking-widest text-orange-400 border border-orange-500/30 animate-pulse">HQ</span>
+        </div>
+        <p class="truncate text-[10px] font-extrabold uppercase tracking-widest text-cyan-400 mt-1 flex items-center gap-1">
+          <i class="fa-solid fa-shield-halved text-[9px]"></i> Super Admin Panel
+        </p>
+      </div>
+      <button
+        type="button"
+        id="superSidebarClose"
+        class="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 text-slate-400 transition hover:bg-white/5 hover:text-white lg:hidden"
+        aria-label="Close super admin menu"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
     </div>
-    <div class="min-w-0">
-      <h3 class="truncate text-base font-extrabold leading-tight tracking-tight text-white">Foodeat</h3>
-      <p class="truncate text-[10px] font-bold uppercase tracking-wider text-orange-400">Super Administrator</p>
-    </div>
-    <button
-      type="button"
-      id="superSidebarClose"
-      class="ml-auto inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 text-slate-400 transition hover:bg-white/5 hover:text-white lg:hidden"
-      aria-label="Close super admin menu"
-    >
-      <i class="fa-solid fa-xmark"></i>
-    </button>
   </div>
 
   <!-- Navigation Menu -->
@@ -192,6 +214,15 @@
           <a href="/show_orders/" class="super-menu-link flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-400 {% if request.path == '/show_orders/' %}is-active{% endif %}">
             <i class="fa-solid fa-receipt w-5 text-center text-base"></i>
             <span>Orders Log</span>
+          </a>
+        </li>
+        <li>
+          <a href="/super_admin/notifications_page/" class="super-menu-link flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-slate-400 {% if request.path == '/super_admin/notifications_page/' %}is-active{% endif %}">
+            <i class="fa-solid fa-bell w-5 text-center text-base"></i>
+            <span>Notifications</span>
+            {% if super_unread_count %}
+              <span class="ml-auto inline-flex items-center justify-center px-2 py-0.5 text-[10px] font-bold text-white bg-rose-500 rounded-full leading-none">{{ super_unread_count }}</span>
+            {% endif %}
           </a>
         </li>
       </ul>
@@ -289,28 +320,14 @@
 
   <!-- Right Side: User Dropdown & Notifications -->
   <div class="flex items-center gap-4 shrink-0">
-    <!-- Notification Dropdown -->
-    <div class="sm:relative" id="superNotificationMenu">
-      <button type="button" id="superNotificationToggle" class="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-505 hover:bg-slate-50 hover:text-slate-700 transition focus:outline-none">
+    <!-- Notification Bell Link -->
+    <div class="relative">
+      <a href="/super_admin/notifications_page/" class="relative flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200/80 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition" title="Notifications">
         <i class="fa-regular fa-bell text-base"></i>
-        <span id="superNotificationBadge" class="hidden absolute right-2.5 top-2.5 h-2.5 w-2.5 rounded-full bg-orange-500 ring-2 ring-white animate-pulse"></span>
-      </button>
-      
-      <!-- Dropdown Items -->
-      <div id="superNotificationDropdown" class="hidden absolute right-4 left-4 sm:left-auto sm:right-0 mt-2 w-auto sm:w-80 origin-top-right overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl ring-1 ring-black/5 focus:outline-none z-50">
-        <!-- Header -->
-        <div class="px-4 py-3 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-          <span class="text-xs font-extrabold text-slate-800">Notifications</span>
-          <span id="superNotificationCount" class="px-2 py-0.5 text-[10px] font-bold text-orange-600 bg-orange-50 rounded-full">0 New</span>
-        </div>
-        
-        <!-- List container -->
-        <div id="superNotificationList" class="max-h-64 overflow-y-auto divide-y divide-slate-100">
-          <div class="p-4 text-center text-xs text-slate-400 font-semibold py-8">
-            <i class="fa-regular fa-bell-slash text-lg mb-1 block text-slate-300"></i> No new notifications
-          </div>
-        </div>
-      </div>
+        {% if super_unread_count %}
+          <span class="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[8px] font-black h-4 w-4 rounded-full flex items-center justify-center border border-white">{{ super_unread_count }}</span>
+        {% endif %}
+      </a>
     </div>
 
     <!-- Profile Menu Dropdown -->
@@ -382,11 +399,8 @@
 
     if (profileToggle && profileDropdown) {
       profileToggle.addEventListener("click", function(event) {
-        event.stopPropagation();
+        // Profile dropdown click logic
         profileDropdown.classList.toggle("hidden");
-        if (superNotificationDropdown) {
-          superNotificationDropdown.classList.add("hidden");
-        }
       });
 
       document.addEventListener("click", function(event) {
@@ -411,218 +425,6 @@
       });
     }
 
-    // Notifications Dropdown toggle and loader
-    const superNotificationToggle = document.getElementById("superNotificationToggle");
-    const superNotificationDropdown = document.getElementById("superNotificationDropdown");
-    const superNotificationBadge = document.getElementById("superNotificationBadge");
-    const superNotificationCount = document.getElementById("superNotificationCount");
-    const superNotificationList = document.getElementById("superNotificationList");
-    let currentlyDisplayedIds = [];
-    let loadedNotificationIds = new Set();
-    let isInitialLoad = true;
-    const soundFile = "{% static 'audio/notification.mp3' %}";
-    let globalAudio = null;
-
-    const unlockAudio = () => {
-        if (globalAudio) return;
-        try {
-            globalAudio = new Audio(soundFile);
-            globalAudio.volume = 0; // mute
-            globalAudio.play().then(() => {
-                globalAudio.pause();
-                globalAudio.volume = 1;
-                console.log("Super Admin Audio context unlocked!");
-                document.removeEventListener('click', unlockAudio);
-                document.removeEventListener('touchstart', unlockAudio);
-            }).catch(err => {
-                console.log("Audio unlock failed, retrying on next click:", err);
-                globalAudio = null;
-            });
-        } catch (e) {
-            console.log("Audio unlock exception:", e);
-        }
-    };
-    document.addEventListener('click', unlockAudio);
-    document.addEventListener('touchstart', unlockAudio);
-
-    function playAlarmSound() {
-        try {
-            const playSoundWithLoop = (audioObj) => {
-                audioObj.currentTime = 0;
-                audioObj.volume = 1;
-                let playCount = 0;
-                audioObj.onended = function() {
-                    playCount++;
-                    if (playCount < 3) {
-                        audioObj.currentTime = 0;
-                        audioObj.play().catch(e => console.log("Loop play failed:", e));
-                    }
-                };
-                audioObj.play().catch(err => {
-                    console.log("Audio play failed, retrying on gesture:", err);
-                    const playOnNextClick = () => {
-                        audioObj.play().then(() => {
-                            document.removeEventListener('click', playOnNextClick);
-                        }).catch(e => console.log("Fallback play failed:", e));
-                    };
-                    document.addEventListener('click', playOnNextClick);
-                });
-            };
-
-            if (globalAudio) {
-                playSoundWithLoop(globalAudio);
-            } else {
-                const audioFallback = new Audio(soundFile);
-                playSoundWithLoop(audioFallback);
-            }
-        } catch (e) {
-            console.error("Audio playback error:", e);
-        }
-    }
-
-    function getClearedIds() {
-      try {
-        return JSON.parse(localStorage.getItem('super_cleared_notifications') || '[]');
-      } catch (e) {
-        return [];
-      }
-    }
-
-    function clearIds(ids) {
-      const currentCleared = getClearedIds();
-      const updatedCleared = Array.from(new Set([...currentCleared, ...ids]));
-      localStorage.setItem('super_cleared_notifications', JSON.stringify(updatedCleared));
-    }
-
-    function onDropdownClose() {
-      if (currentlyDisplayedIds.length > 0) {
-        clearIds(currentlyDisplayedIds);
-        loadNotifications();
-      }
-    }
-
-    if (superNotificationToggle && superNotificationDropdown) {
-      superNotificationToggle.addEventListener("click", function(event) {
-        event.stopPropagation();
-        const willBeHidden = !superNotificationDropdown.classList.contains("hidden");
-        superNotificationDropdown.classList.toggle("hidden");
-        if (profileDropdown) profileDropdown.classList.add("hidden");
-        
-        if (willBeHidden) {
-          onDropdownClose();
-        } else {
-          if (superNotificationBadge) superNotificationBadge.classList.add("hidden");
-        }
-      });
-      document.addEventListener("click", function(event) {
-        if (!superNotificationDropdown.contains(event.target) && !superNotificationToggle.contains(event.target)) {
-          const wasOpen = !superNotificationDropdown.classList.contains("hidden");
-          superNotificationDropdown.classList.add("hidden");
-          if (wasOpen) {
-            onDropdownClose();
-          }
-        }
-      });
-    }
-
-    // Load notifications from API
-    async function loadNotifications() {
-      try {
-        const response = await fetch('/super_admin/notifications/');
-        if (response.ok) {
-          const data = await response.json();
-          if (data.status === 'success') {
-            const clearedList = getClearedIds();
-            const activeNotifications = data.notifications.filter(n => !clearedList.includes(n.id));
-
-            if (activeNotifications.length > 0) {
-              let hasNewUnseen = false;
-              activeNotifications.forEach(n => {
-                if (!loadedNotificationIds.has(n.id)) {
-                  loadedNotificationIds.add(n.id);
-                  hasNewUnseen = true;
-                }
-              });
-
-              if (hasNewUnseen && !isInitialLoad) {
-                playAlarmSound();
-                setTimeout(() => {
-                  window.location.reload();
-                }, 3000);
-              }
-              isInitialLoad = false;
-
-              currentlyDisplayedIds = activeNotifications.map(n => n.id);
-
-              if (superNotificationBadge) {
-                const isDropdownOpen = !superNotificationDropdown.classList.contains("hidden");
-                if (isDropdownOpen) {
-                  superNotificationBadge.classList.add("hidden");
-                } else {
-                  superNotificationBadge.classList.remove("hidden");
-                }
-              }
-
-              if (superNotificationCount) {
-                superNotificationCount.textContent = `${activeNotifications.length} New`;
-              }
-              
-              if (superNotificationList) {
-                superNotificationList.innerHTML = '';
-                activeNotifications.forEach(n => {
-                  let iconHtml = '';
-                  if (n.type === 'owner') {
-                    iconHtml = '<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-orange-100 text-orange-600"><i class="fa-solid fa-store text-xs"></i></span>';
-                  } else if (n.type === 'contact') {
-                    iconHtml = '<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600"><i class="fa-solid fa-envelope text-xs"></i></span>';
-                  } else {
-                    iconHtml = '<span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-rose-100 text-rose-600"><i class="fa-solid fa-triangle-exclamation text-xs"></i></span>';
-                  }
-                  
-                  const row = document.createElement('a');
-                  row.href = n.link;
-                  row.className = "flex items-start gap-3 p-3.5 hover:bg-slate-50 transition text-left";
-                  row.addEventListener("click", () => {
-                    clearIds([n.id]);
-                  });
-                  row.innerHTML = `
-                    ${iconHtml}
-                    <div class="min-w-0 flex-1">
-                      <p class="text-xs font-bold text-slate-800">${n.title}</p>
-                      <p class="text-[11px] text-slate-555 font-semibold mt-0.5">${n.message}</p>
-                      <span class="text-[9px] text-slate-400 font-semibold block mt-1"><i class="fa-regular fa-clock mr-0.5"></i>${n.created_at}</span>
-                    </div>
-                  `;
-                  superNotificationList.appendChild(row);
-                });
-              }
-            } else {
-              currentlyDisplayedIds = [];
-              if (superNotificationBadge) superNotificationBadge.classList.add("hidden");
-              if (superNotificationCount) superNotificationCount.textContent = '0 New';
-              if (superNotificationList) {
-                superNotificationList.innerHTML = `
-                  <div class="p-4 text-center text-xs text-slate-400 font-semibold py-8">
-                    <i class="fa-regular fa-bell-slash text-lg mb-1 block text-slate-300"></i> No new notifications
-                  </div>
-                `;
-              }
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching notifications:', error);
-      }
-    }
-
-    loadNotifications();
-    setInterval(loadNotifications, 5000);
-
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-            loadNotifications();
-        }
-    });
   });
 </script>
 

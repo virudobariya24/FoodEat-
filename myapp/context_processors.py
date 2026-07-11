@@ -55,3 +55,31 @@ def delivery_boy_notifications(request):
         'boy': boy,
         'unread_notifications_count': unread_count
     }
+
+
+def owner_notifications_count(request):
+    admin_id = request.session.get('admin_id')
+    unread_count = 0
+    if admin_id:
+        try:
+            from .models import AdminOwner, RestaurantNotification
+            admin_user = AdminOwner.objects.get(id=admin_id)
+            unread_count = RestaurantNotification.objects.filter(
+                restaurant_name__iexact=admin_user.restaurant_name,
+                is_read=False
+            ).count()
+        except Exception:
+            pass
+    return {'owner_unread_count': unread_count}
+
+
+def super_notifications_count(request):
+    super_id = request.session.get('super_id')
+    unread_count = 0
+    if super_id:
+        try:
+            from .models import SuperAdminNotification
+            unread_count = SuperAdminNotification.objects.filter(is_read=False).count()
+        except Exception:
+            pass
+    return {'super_unread_count': unread_count}

@@ -57,41 +57,14 @@
 
             <!-- Right Side: Notifications & User Profile Dropdown -->
             <div class="flex items-center gap-4">
-                <!-- Notifications Dropdown -->
-                <div class="relative" id="adminNotificationDropdownContainer">
-                    <button id="adminNotificationBtn" class="relative w-10 h-10 rounded-full hover:bg-slate-100 flex items-center justify-center transition-all duration-200 focus:outline-none text-slate-500 hover:text-brand-500">
+                <!-- Notifications Bell Link -->
+                <div class="relative">
+                    <a href="{% url 'owner_notifications' %}" class="relative w-10 h-10 rounded-full hover:bg-slate-100 flex items-center justify-center transition-all duration-200 focus:outline-none text-slate-500 hover:text-brand-500" title="Notifications">
                         <i class="fa-solid fa-bell text-lg"></i>
-                        <span id="notificationBadge" class="{% if not has_unread %}hidden{% endif %} absolute top-2 right-2.5 w-2.5 h-2.5 rounded-full bg-brand-500 border-2 border-white animate-pulse"></span>
-                    </button>
-
-                    <!-- Notifications Dropdown Menu -->
-                    <div id="adminNotificationMenu" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-slate-100 py-3 z-50 transform origin-top-right transition-all duration-200">
-                        <div class="px-4 pb-2.5 border-b border-slate-100 flex items-center justify-between">
-                            <h4 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
-                                <i class="fa-solid fa-bell text-brand-500"></i>
-                                Notifications
-                            </h4>
-                            <span class="bg-orange-50 text-brand-600 text-[10px] font-bold px-2 py-0.5 rounded-full border border-brand-100">Live</span>
-                        </div>
-                        <div id="notificationList" class="max-h-[300px] overflow-y-auto divide-y divide-slate-50">
-                            {% for notif in notifications %}
-                                <div class="px-4 py-3 hover:bg-slate-50/50 transition-colors flex items-start justify-between gap-2">
-                                    <div>
-                                        <p class="text-xs font-semibold text-slate-800 leading-snug">{{ notif.message }}</p>
-                                        <p class="text-[9px] text-slate-400 mt-1 font-medium">{{ notif.created_at|localtime|date:"d M, h:i A" }}</p>
-                                    </div>
-                                    {% if not notif.is_read %}
-                                        <span class="unread-dot w-2 h-2 rounded-full bg-brand-500 flex-shrink-0 mt-1.5 animate-pulse"></span>
-                                    {% endif %}
-                                </div>
-                            {% empty %}
-                                <div id="emptyNotificationMessage" class="py-8 text-center text-slate-400">
-                                    <i class="fa-solid fa-bell-slash text-xl text-slate-200"></i>
-                                    <p class="text-xs mt-2 font-medium">No notifications yet.</p>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
+                        {% if owner_unread_count %}
+                            <span class="absolute top-2 right-2.5 w-2.5 h-2.5 rounded-full bg-brand-500 border-2 border-white animate-pulse"></span>
+                        {% endif %}
+                    </a>
                 </div>
 
                 <!-- User Profile Dropdown -->
@@ -510,59 +483,12 @@
             const dropdownMenu = document.getElementById('adminDropdownMenu');
             const dropdownArrow = document.getElementById('dropdownArrow');
 
-            // Notification Dropdown
-            const notifBtn = document.getElementById('adminNotificationBtn');
-            const notifMenu = document.getElementById('adminNotificationMenu');
-            const notifBadge = document.getElementById('notificationBadge');
-            const notifList = document.getElementById('notificationList');
-            const emptyNotifMsg = document.getElementById('emptyNotificationMessage');
-
             if (profileBtn && dropdownMenu) {
                 profileBtn.addEventListener('click', function(e) {
                     e.stopPropagation();
                     dropdownMenu.classList.toggle('hidden');
-                    if (notifMenu) {
-                        notifMenu.classList.add('hidden');
-                    }
                     if (dropdownArrow) {
                         dropdownArrow.classList.toggle('rotate-180');
-                    }
-                });
-            }
-
-            function clearNotifListUI() {
-                if (window.currentlyDisplayedOwnerIds && window.currentlyDisplayedOwnerIds.length > 0) {
-                    window.clearOwnerIds(window.currentlyDisplayedOwnerIds);
-                    if (window.pollGlobalNotifications) {
-                        window.pollGlobalNotifications();
-                    }
-                }
-            }
-
-            if (notifBtn && notifMenu) {
-                notifBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    const isOpening = notifMenu.classList.contains('hidden');
-                    notifMenu.classList.toggle('hidden');
-                    if (dropdownMenu) {
-                        dropdownMenu.classList.add('hidden');
-                        if (dropdownArrow) {
-                            dropdownArrow.classList.remove('rotate-180');
-                        }
-                    }
-                    if (isOpening) {
-                        // Hide the notification badge when dropdown is opened
-                        if (notifBadge) {
-                            notifBadge.classList.add('hidden');
-                        }
-                        // Hide all unread dots inside the dropdown list
-                        const unreadDots = document.querySelectorAll('.unread-dot');
-                        unreadDots.forEach(dot => {
-                            dot.classList.add('hidden');
-                        });
-                    } else {
-                        // It is closing. Clear the notifications!
-                        clearNotifListUI();
                     }
                 });
             }
@@ -572,13 +498,6 @@
                     dropdownMenu.classList.add('hidden');
                     if (dropdownArrow) {
                         dropdownArrow.classList.remove('rotate-180');
-                    }
-                }
-                if (notifBtn && notifMenu && !notifBtn.contains(e.target) && !notifMenu.contains(e.target)) {
-                    const wasOpen = !notifMenu.classList.contains('hidden');
-                    notifMenu.classList.add('hidden');
-                    if (wasOpen) {
-                        clearNotifListUI();
                     }
                 }
             });

@@ -684,11 +684,35 @@
         align-items: center !important;
         flex-direction: row !important;
         justify-content: space-between !important;
+        gap: 4px !important;
       }
 
-      .add-to-cart-btn,
+      .card-footer form {
+        margin: 0;
+        display: inline-block;
+      }
+
+      .add-to-cart-btn {
+        min-width: 64px !important;
+        height: 32px !important;
+        font-size: 0.78rem !important;
+        padding: 0 8px !important;
+        border-radius: 10px !important;
+      }
+
       .unavailable-pill {
-        width: auto !important;
+        height: 32px !important;
+        font-size: 0.75rem !important;
+        padding: 0 8px !important;
+        border-radius: 10px !important;
+      }
+
+      .discounted-price {
+        font-size: 0.92rem !important;
+      }
+
+      .original-price {
+        font-size: 0.72rem !important;
       }
     }
 
@@ -761,7 +785,7 @@
         <h1 class="menu-title">Our Menu</h1>
         <p class="menu-subtitle">Explore our wide selection of delicious meals prepared with the freshest ingredients by our expert chefs.</p>
       </div>
-      <div class="menu-count">
+      <div class="menu-count" style="display: none;">
         <strong id="visible-count">{{ food_items.count }}</strong>
         <span>Dishes</span>
       </div>
@@ -811,10 +835,9 @@
 
     <div id="menu-grid-container">
       {% for category in categories %}
-      <section class="menu-category" data-category-section="{{ category.grouper|slugify }}">
+      <section class="menu-category" data-category-section="{{ category.grouper|slugify }}" data-original-order="{{ forloop.counter }}">
         <div class="category-header">
           <h2>{{ category.grouper }}</h2>
-          <span class="category-visible-count"></span>
         </div>
         <div class="card-container">
           {% for p in category.list %}
@@ -1005,8 +1028,11 @@
 
       function sortVisibleCards() {
         const mode = sortSelect.value;
+        
+        // 1. Sort cards within each category container
         categories.forEach(function(category) {
           const container = category.querySelector('.card-container');
+          if (!container) return;
           const sortedCards = Array.from(container.querySelectorAll('.menu-card')).sort(function(a, b) {
             if (mode === 'price-low') return Number(a.dataset.price) - Number(b.dataset.price);
             if (mode === 'price-high') return Number(b.dataset.price) - Number(a.dataset.price);
@@ -1015,6 +1041,41 @@
           });
           sortedCards.forEach(function(card) { container.appendChild(card); });
         });
+
+        // 2. Sort the category sections themselves globally based on their items
+        const gridContainer = document.getElementById('menu-grid-container');
+        if (gridContainer) {
+          const categorySections = Array.from(gridContainer.querySelectorAll('.menu-category'));
+          const sortedSections = categorySections.sort(function(a, b) {
+            if (mode === 'default') {
+              return Number(a.dataset.originalOrder) - Number(b.dataset.originalOrder);
+            }
+            
+            const cardsA = Array.from(a.querySelectorAll('.menu-card'));
+            const cardsB = Array.from(b.querySelectorAll('.menu-card'));
+            
+            if (cardsA.length === 0) return 1;
+            if (cardsB.length === 0) return -1;
+            
+            if (mode === 'price-low') {
+              const minA = Math.min(...cardsA.map(c => Number(c.dataset.price)));
+              const minB = Math.min(...cardsB.map(c => Number(c.dataset.price)));
+              return minA - minB;
+            }
+            if (mode === 'price-high') {
+              const maxA = Math.max(...cardsA.map(c => Number(c.dataset.price)));
+              const maxB = Math.max(...cardsB.map(c => Number(c.dataset.price)));
+              return maxB - maxA;
+            }
+            if (mode === 'name') {
+              const nameA = a.querySelector('h2').textContent.trim().toLowerCase();
+              const nameB = b.querySelector('h2').textContent.trim().toLowerCase();
+              return nameA.localeCompare(nameB);
+            }
+            return 0;
+          });
+          sortedSections.forEach(function(section) { gridContainer.appendChild(section); });
+        }
       }
 
       function applyFilters() {

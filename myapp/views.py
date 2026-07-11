@@ -3500,16 +3500,7 @@ def show_orders(request):
 
 
 def showsuper_users(request):
-    if 'super_id' not in request.session:
-        return redirect('super_login')
-
-    super_user = None
-    try:
-        super_user = SuperRegister.objects.get(id=request.session['super_id'])
-    except SuperRegister.DoesNotExist:
-        request.session.flush()
-        return redirect('super_login')
-
+    super_user = SuperRegister.objects.first()
     users = Registration.objects.all()
 
     return render(request, 'super_admin/show_users.html', {
@@ -3556,6 +3547,48 @@ def super_manage_user_wallet(request, user_id):
                 )
                 messages.success(request, f"Successfully set {user.first_name}'s wallet balance to ₹{val:.2f}!")
             user.save()
+        except ValueError:
+            messages.error(request, "Invalid amount value.")
+            
+    return redirect('showsuper_users')
+
+
+def super_manage_all_wallets(request):
+    if 'super_id' not in request.session:
+        return redirect('super_login')
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        amount = request.POST.get('amount')
+        try:
+            val = float(amount)
+            users = Registration.objects.all()
+            
+            transaction_type_map = {
+                'add': 'Admin Add All',
+                'subtract': 'Admin Deduct All',
+                'set': 'Admin Set All'
+            }
+            t_type = transaction_type_map.get(action, 'Admin Edit All')
+            
+            updated_count = 0
+            for user in users:
+                if action == 'add':
+                    user.wallet_balance += Decimal(str(val))
+                elif action == 'subtract':
+                    user.wallet_balance = max(Decimal('0.00'), user.wallet_balance - Decimal(str(val)))
+                elif action == 'set':
+                    user.wallet_balance = Decimal(str(val))
+                user.save()
+                
+                WalletTransaction.objects.create(
+                    user=user,
+                    amount=Decimal(str(val)),
+                    transaction_type=t_type
+                )
+                updated_count += 1
+                
+            messages.success(request, f"Successfully processed ₹{val:.2f} ({action}) for all {updated_count} users' wallets!")
         except ValueError:
             messages.error(request, "Invalid amount value.")
             
@@ -4614,6 +4647,14 @@ def super_delivery_tasks(request):
     from .models import SuperRegister, DeliveryTask, DeliveryBoyTaskProgress
     super_user = get_object_or_404(SuperRegister, id=request.session['super_id'])
     
+    from django.utils import timezone
+    from datetime import datetime
+    today = timezone.localtime(timezone.now()).date()
+    today_str = today.strftime('%Y-%m-%d')
+    
+    # Auto-deactivate tasks that have expired (end_date in the past)
+    DeliveryTask.objects.filter(is_active=True, end_date__lt=today).update(is_active=False)
+    
     if request.method == 'POST':
         action = request.POST.get('action')
         if action == 'create':
@@ -4623,6 +4664,19 @@ def super_delivery_tasks(request):
             bonus_amount = request.POST.get('bonus_amount')
             start_date = request.POST.get('start_date')
             end_date = request.POST.get('end_date')
+            
+            try:
+                s_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+                e_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+                if s_date < today or e_date < today:
+                    messages.error(request, "Failed to create task: Start date and End date cannot be in the past!")
+                    return redirect('super_delivery_tasks')
+                if e_date < s_date:
+                    messages.error(request, "Failed to create task: End date cannot be earlier than Start date!")
+                    return redirect('super_delivery_tasks')
+            except (ValueError, TypeError):
+                messages.error(request, "Invalid date format!")
+                return redirect('super_delivery_tasks')
             
             try:
                 DeliveryTask.objects.create(
@@ -4648,6 +4702,19 @@ def super_delivery_tasks(request):
             end_date = request.POST.get('end_date')
             
             try:
+                s_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+                e_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+                if s_date < today or e_date < today:
+                    messages.error(request, "Failed to update task: Dates cannot be in the past!")
+                    return redirect('super_delivery_tasks')
+                if e_date < s_date:
+                    messages.error(request, "Failed to update task: End date cannot be earlier than Start date!")
+                    return redirect('super_delivery_tasks')
+            except (ValueError, TypeError):
+                messages.error(request, "Invalid date format!")
+                return redirect('super_delivery_tasks')
+            
+            try:
                 task.title = title
                 task.description = description
                 task.required_orders = int(required_orders)
@@ -4658,6 +4725,25 @@ def super_delivery_tasks(request):
                 messages.success(request, f"Task '{title}' updated successfully!")
             except Exception as e:
                 messages.error(request, f"Failed to update task: {str(e)}")
+                
+        elif action == 'change_date':
+            task_id = request.POST.get('task_id')
+            end_date = request.POST.get('end_date')
+            task = get_object_or_404(DeliveryTask, id=task_id)
+            
+            try:
+                e_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+                if e_date < today:
+                    messages.error(request, "Failed to activate task: New end date cannot be in the past!")
+                elif e_date < task.start_date:
+                    messages.error(request, "Failed to activate task: New end date cannot be earlier than start date!")
+                else:
+                    task.end_date = e_date
+                    task.is_active = True
+                    task.save()
+                    messages.success(request, f"Task '{task.title}' activated and extended successfully!")
+            except (ValueError, TypeError):
+                messages.error(request, "Invalid date format!")
                 
         elif action == 'toggle':
             task_id = request.POST.get('task_id')
@@ -4690,6 +4776,7 @@ def super_delivery_tasks(request):
         'page_title': 'Rider Milestone Tasks',
         'tasks': tasks,
         'total_delivery_boys': total_delivery_boys,
+        'today_str': today_str,
     }
     return render(request, 'super_admin/delivery_tasks.html', context)
 
@@ -4701,7 +4788,12 @@ def delivery_notifications(request):
 
     from .models import DeliveryBoy, DeliveryBoyNotification
     boy = get_object_or_404(DeliveryBoy, id=boy_id)
-    notifications = DeliveryBoyNotification.objects.filter(delivery_boy=boy).order_by('-created_at')
+    
+    # Fetch notifications first to preserve is_read status for the current rendering
+    notifications = list(DeliveryBoyNotification.objects.filter(delivery_boy=boy).order_by('-created_at'))
+    
+    # Mark them as read in the database so subsequent loads or other page counts are updated
+    DeliveryBoyNotification.objects.filter(delivery_boy=boy, is_read=False).update(is_read=True)
 
     context = {
         'boy': boy,
@@ -4745,16 +4837,22 @@ def owner_notifications(request):
         return redirect('adminlogin')
     from .models import AdminOwner, RestaurantNotification
     admin_user = AdminOwner.objects.get(id=request.session['admin_id'])
-    notifications = RestaurantNotification.objects.filter(
-        restaurant_name__iexact=admin_user.restaurant_name
-    ).order_by('-created_at')
     
-    unread_count = notifications.filter(is_read=False).count()
+    # Fetch notifications as list first to retain unread status for this page render
+    notifications = list(RestaurantNotification.objects.filter(
+        restaurant_name__iexact=admin_user.restaurant_name
+    ).order_by('-created_at'))
+    
+    # Mark them as read in the database
+    RestaurantNotification.objects.filter(
+        restaurant_name__iexact=admin_user.restaurant_name,
+        is_read=False
+    ).update(is_read=True)
     
     context = {
         'admin_user': admin_user,
         'notifications': notifications,
-        'unread_count': unread_count,
+        'unread_count': 0,
         'page_title': 'Notifications'
     }
     return render(request, 'admin_owner/notifications.html', context)
@@ -4790,14 +4888,17 @@ def super_notifications_page(request):
         return redirect('super_login')
     from .models import SuperRegister, SuperAdminNotification
     super_user = SuperRegister.objects.get(id=request.session['super_id'])
-    notifications = SuperAdminNotification.objects.all().order_by('-created_at')
     
-    unread_count = notifications.filter(is_read=False).count()
+    # Fetch notifications as list first to retain unread status for this page render
+    notifications = list(SuperAdminNotification.objects.all().order_by('-created_at'))
+    
+    # Mark them as read in the database
+    SuperAdminNotification.objects.filter(is_read=False).update(is_read=True)
     
     context = {
         'super_user': super_user,
         'notifications': notifications,
-        'unread_count': unread_count,
+        'unread_count': 0,
         'page_title': 'Notifications'
     }
     return render(request, 'super_admin/notifications.html', context)

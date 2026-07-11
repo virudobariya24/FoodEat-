@@ -1,0 +1,19 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Database
+db.sqlite3
+db.sqlite3-journal
+
+# Media and uploads
+media/
+
+# Logs
+*.log
+otp_log.txt
+
+# OS-specific files
+.DS_Store
+Thumbs.db

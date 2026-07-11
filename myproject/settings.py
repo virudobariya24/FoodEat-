@@ -9,11 +9,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-your-secret-key-here'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
-DEBUG = False
+DEBUG = True
 
-# ALLOWED_HOSTS = ['10.172.187.213', '127.0.0.1', 'localhost']
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['10.222.240.213','127.0.0.1' ,'localhost']
+
 
 # Installed apps
 INSTALLED_APPS = [
@@ -57,6 +56,8 @@ TEMPLATES = [
                 'myapp.context_processors.cart_item_count',
                 'myapp.context_processors.user_wallet',
                 'myapp.context_processors.delivery_boy_notifications',
+                'myapp.context_processors.owner_notifications_count',
+                'myapp.context_processors.super_notifications_count',
             ],
         },
     },

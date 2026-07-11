@@ -110,6 +110,7 @@ urlpatterns = [
     path('super_admin/users/send_email/<int:pk>/', views.send_email_to_user, name='send_email_to_user'),
     path('super_admin/users/toggle_block/<int:pk>/', views.toggle_user_block, name='toggle_user_block'),
     path('super_admin/users/manage_wallet/<int:user_id>/', views.super_manage_user_wallet, name='super_manage_user_wallet'),
+    path('super_admin/users/manage_wallet/all/', views.super_manage_all_wallets, name='super_manage_all_wallets'),
     path('super_admin/owners/toggle_block/<int:pk>/', views.toggle_owner_block, name='toggle_owner_block'),
     path('super_admin/owners/send_email/<int:pk>/', views.send_email_to_owner, name='send_email_to_owner'),
     path('admin_verify_otp/', views.admin_verify_otp, name='admin_verify_otp'),
