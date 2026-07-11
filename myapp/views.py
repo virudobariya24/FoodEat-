@@ -33,6 +33,18 @@ try:
 except ImportError:
     razorpay = None
 
+import threading
+
+def send_email_async(subject, message, from_email, recipient_list):
+    def _send():
+        try:
+            send_mail(subject, message, from_email, recipient_list, fail_silently=True)
+        except Exception as e:
+            print(f"Async email sending failed: {e}")
+    thread = threading.Thread(target=_send)
+    thread.daemon = True
+    thread.start()
+
 from myproject.views import food_add
 from .models import (
     Registration, AdminOwner, FoodItem, OrderItem, AddResto, Booking, 
@@ -4016,15 +4028,15 @@ def delivery_register(request):
 
             request.session['delivery_verify_email'] = email
             
-            # Send actual verification email
-            try:
-                subject = 'Foodeat - Delivery Partner Verification Code'
-                message = f'Hello {name},\n\nThank you for registering as a Delivery Partner with Foodeat.\n\nYour 6-digit OTP code is: {otp}\n\nPlease enter this code to verify your profile and open your dashboard.\n\nRegards,\nFoodeat Logistics Team'
-                send_mail(subject, message, settings.EMAIL_HOST_USER, [email], fail_silently=False)
-                messages.success(request, "Registration details submitted! Verification OTP has been sent to your email address.")
-            except Exception:
-                messages.warning(request, f"Registration details submitted! For local testing, your verification OTP code is: {otp}")
-                
+            # Print OTP to Render console logs so they can retrieve it if email fails
+            print(f"--- DELIVERY BOY OTP GENERATED FOR {email}: {otp} ---")
+            
+            # Send verification email asynchronously (in a background thread)
+            subject = 'Foodeat - Delivery Partner Verification Code'
+            message = f'Hello {name},\n\nThank you for registering as a Delivery Partner with Foodeat.\n\nYour 6-digit OTP code is: {otp}\n\nPlease enter this code to verify your profile and open your dashboard.\n\nRegards,\nFoodeat Logistics Team'
+            send_email_async(subject, message, settings.EMAIL_HOST_USER, [email])
+            
+            messages.success(request, "Registration details submitted! Verification OTP has been sent to your email address (also printed in server logs).")
             return redirect('delivery_verify_otp')
         except Exception as e:
             import traceback
@@ -4577,6 +4589,7 @@ def super_toggle_verify_boy(request, boy_id):
 
     boy = get_object_or_404(DeliveryBoy, id=boy_id)
     boy.is_verified = True
+    boy.is_email_verified = True  # Auto verify email when approved by Super Admin
     boy.save()
     
     messages.success(request, f"Delivery partner {boy.name} has been Verified successfully.")
