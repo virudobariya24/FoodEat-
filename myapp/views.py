@@ -2865,23 +2865,21 @@ def toggle_restaurant_accepting_orders(request):
     if request.method != 'POST':
         return redirect(next_url)
 
-    restaurants = AddResto.objects.filter(name__iexact=restaurant_name)
-    if not restaurants.exists():
-        restaurants = AddResto.objects.filter(email__iexact=admin_owner.email)
-
-    if not restaurants.exists():
-        messages.error(request, "Restaurant not found.")
-        return redirect(next_url)
-
     is_accepting = 'is_accepting_orders' in request.POST
     
     admin_owner.is_accepting_orders = is_accepting
     admin_owner.save()
     
-    restaurants.update(is_accepting_orders=is_accepting)
+    # Try to find and update associated restaurant in AddResto if it exists
+    restaurants = AddResto.objects.filter(name__iexact=restaurant_name)
+    if not restaurants.exists():
+        restaurants = AddResto.objects.filter(email__iexact=admin_owner.email)
+        
+    if restaurants.exists():
+        restaurants.update(is_accepting_orders=is_accepting)
 
     status = "Open" if is_accepting else "Closed"
-    messages.success(request, f"Restaurant booking and ordering is now {status}.")
+    messages.success(request, f"Restaurant is now {status}.")
     return redirect(next_url)
 
 
