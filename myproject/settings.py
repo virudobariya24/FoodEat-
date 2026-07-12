@@ -115,8 +115,6 @@ EMAIL_HOST_USER = 'virajdobariya61@gmail.com'
 EMAIL_HOST_PASSWORD = 'jsmzaqziqbzgwpwo'
 
 
-
-
 RAZORPAY_KEY_ID = 'rzp_test_RRohlnOxODtIQJ'
 RAZORPAY_SECRET = '10VV4TyI859blM7Pf9U70YTY'
 
