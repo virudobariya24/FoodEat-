@@ -113,6 +113,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'virajdobariya61@gmail.com'     
 EMAIL_HOST_PASSWORD = 'jsmzaqziqbzgwpwo'
+EMAIL_TIMEOUT = 5
 
 
 RAZORPAY_KEY_ID = 'rzp_test_RRohlnOxODtIQJ'
