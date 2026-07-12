@@ -1,17 +1,21 @@
 from pathlib import Path
 import os
 import dj_database_url
+from dotenv import load_dotenv
 
 # Base directory path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load .env file
+load_dotenv(BASE_DIR / '.env')
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-your-secret-key-here'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 't')
 
-ALLOWED_HOSTS = ['10.222.240.213','127.0.0.1' ,'localhost', 'foodeat-ebox.onrender.com']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 
 # Installed apps
@@ -111,13 +115,12 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'virajdobariya61@gmail.com'     
-EMAIL_HOST_PASSWORD = 'jsmzaqziqbzgwpwo'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')     
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 EMAIL_TIMEOUT = 5
 
-
-RAZORPAY_KEY_ID = 'rzp_test_RRohlnOxODtIQJ'
-RAZORPAY_SECRET = '10VV4TyI859blM7Pf9U70YTY'
+RAZORPAY_KEY_ID = os.environ.get('RAZORPAY_KEY_ID')
+RAZORPAY_SECRET = os.environ.get('RAZORPAY_SECRET')
 
 
  
