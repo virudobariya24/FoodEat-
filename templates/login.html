@@ -286,7 +286,7 @@
                     <div id="password-error" class="error-message">{% if form.password.errors %}{{ form.password.errors.0 }}{% endif %}</div>
                 </div>
                  <div style="text-align: right; margin-top: 6px;">
-                    <a href="{% url 'forgot_password' %}" style="font-size: 0.9rem; color: var(--accent-color); font-weight: 600; text-decoration: none;">
+                    <a href="{% url 'forgot_password' %}?reset=true" style="font-size: 0.9rem; color: var(--accent-color); font-weight: 600; text-decoration: none;">
                         Forgot password?
                     </a>
                 </div>

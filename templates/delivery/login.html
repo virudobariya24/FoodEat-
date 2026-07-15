@@ -158,7 +158,10 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Password</label>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Password</label>
+                        <a href="{% url 'delivery_forgot_password' %}?reset=true" class="text-[10px] font-bold text-brand-500 hover:text-brand-650 hover:underline transition-colors">Forgot Password?</a>
+                    </div>
                     <div class="relative flex items-center django-input-field">
                         <i class="fa-solid fa-lock absolute left-3.5 text-slate-500 text-xs"></i>
                         <input type="password" id="login-password" name="password" required placeholder="Enter password" class="w-full h-11 pl-9 pr-10 text-xs sm:text-sm bg-slate-950 bg-opacity-40 border border-slate-800 focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10 rounded-xl text-white placeholder-slate-600 transition-all duration-200">

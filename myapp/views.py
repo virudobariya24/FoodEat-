@@ -362,9 +362,10 @@ def send_otp(request):
                 return JsonResponse({"success": True, "message": "OTP sent successfully"})
             except Exception as e:
                 print(f"Email sending failed for {email}: {e}", flush=True)
+                print(f"\n========================================\nUSER REGISTRATION OTP FOR {email}: {otp}\n========================================\n", flush=True)
                 return JsonResponse({
                     "success": False,
-                    "message": f"Failed to send email. For testing/debugging, your OTP is: {otp} (Error: {str(e)})"
+                    "message": "Failed to send verification email. Please try again."
                 })
         
         return JsonResponse({"success": False, "message": "Invalid request"})
@@ -442,6 +443,10 @@ def login_page(request):
 
     else:
         form = LoginForm()
+        request.session.pop('otp_sent', None)
+        request.session.pop('otp_verified', None)
+        request.session.pop('otp_code', None)
+        request.session.pop('reset_email', None)
 
     return render(request, 'login.html', {'form': form})
 
@@ -492,7 +497,12 @@ def restaurant(request):
 
 
 def forgot_password(request):
-    
+    if request.GET.get('reset') == 'true':
+        request.session.pop('otp_sent', None)
+        request.session.pop('otp_verified', None)
+        request.session.pop('otp_code', None)
+        request.session.pop('reset_email', None)
+        return redirect('forgot_password')
     
     if 'otp_sent' not in request.session:
         request.session['otp_sent'] = False
@@ -505,16 +515,10 @@ def forgot_password(request):
         if form.is_valid():
             email = form.cleaned_data['email']
             try:
-                user = Registration.objects.get(email=email)
+                user = Registration.objects.filter(email=email).first()
+                if not user:
+                    raise Registration.DoesNotExist
                 otp = randint(100000, 999999)
-                request.session['reset_email'] = email
-                request.session['otp_code'] = str(otp)
-                request.session['otp_sent'] = True
-                request.session['otp_verified'] = False               
-                
-                # Print the OTP to console logs immediately
-                # print(f"\n========================================\nFORGOT PASSWORD OTP FOR {email}: {otp}\n========================================\n")
-
                 try:
                     send_mail(
                         'Your OTP for Foodeat Password Reset',
@@ -523,10 +527,15 @@ def forgot_password(request):
                         [email],
                         fail_silently=False,
                     )
+                    request.session['reset_email'] = email
+                    request.session['otp_code'] = str(otp)
+                    request.session['otp_sent'] = True
+                    request.session['otp_verified'] = False               
                     messages.success(request, "OTP has been sent to your email.")
+                    return redirect('forgot_password')
                 except Exception as e:
-                    messages.warning(request, f"Could not send email. For local testing, your OTP is: {otp} (Error: {str(e)})")
-                return redirect('forgot_password')
+                    messages.error(request, "Failed to send verification email. Please try again.")
+                    print(f"\n========================================\nFORGOT PASSWORD OTP FOR {email}: {otp}\n========================================\n", flush=True)
             except Registration.DoesNotExist:
                 messages.error(request, "Email not registered")
    
@@ -2075,9 +2084,10 @@ def adminregister(request):
             try:
                 send_mail(subject, message, settings.EMAIL_HOST_USER, [email], fail_silently=False)
                 messages.success(request, "An OTP has been sent to your email.")
+                return redirect('admin_verify_otp')
             except Exception as e:
-                messages.warning(request, f"Could not send email. For local testing, your OTP is: {otp} (Error: {str(e)})")
-            return redirect('admin_verify_otp')
+                messages.error(request, "Failed to send verification email. Please try again.")
+                print(f"\n========================================\nRESTAURANT OWNER OTP FOR {email}: {otp}\n========================================\n", flush=True)
     else:
         form = AdminOwnerRegisterForm()
 
@@ -2162,6 +2172,10 @@ def adminlogin(request):
                 messages.error(request, "Admin with this email does not exist")
     else:
         form = AdminLoginForm()
+        request.session.pop('admin_otp_sent', None)
+        request.session.pop('admin_otp_verified', None)
+        request.session.pop('admin_otp_code', None)
+        request.session.pop('admin_reset_email', None)
     return render(request, 'admin_owner/adminlogin.html', {'form': form})
 
 def adminlogout(request):
@@ -2177,6 +2191,13 @@ def adminlogout(request):
 
 
 def admin_forgot_password(request):
+    if request.GET.get('reset') == 'true':
+        request.session.pop('admin_otp_sent', None)
+        request.session.pop('admin_otp_verified', None)
+        request.session.pop('admin_otp_code', None)
+        request.session.pop('admin_reset_email', None)
+        return redirect('admin_forgot_password')
+
     if 'admin_otp_sent' not in request.session:
         request.session['admin_otp_sent'] = False
         request.session['admin_otp_verified'] = False
@@ -2190,11 +2211,6 @@ def admin_forgot_password(request):
                 try:
                     user = AdminOwner.objects.get(email=email)
                     otp = randint(100000, 999999)
-                    request.session['admin_reset_email'] = email
-                    request.session['admin_otp_code'] = str(otp)
-                    request.session['admin_otp_sent'] = True
-                    request.session['admin_otp_verified'] = False               
-                    
                     subject = 'Foodeat - Admin Owner Password Reset Code'
                     message_text = f'Your verification code is: {otp}'
                     html_message = f"""
@@ -2229,11 +2245,15 @@ def admin_forgot_password(request):
                             fail_silently=False,
                             html_message=html_message
                         )
+                        request.session['admin_reset_email'] = email
+                        request.session['admin_otp_code'] = str(otp)
+                        request.session['admin_otp_sent'] = True
+                        request.session['admin_otp_verified'] = False               
                         messages.success(request, f"OTP sent to {email}")
-                    except Exception:
-                        messages.warning(request, f"For local testing, your verification OTP code is: {otp}")
-                    
-                    return redirect('admin_forgot_password')
+                        return redirect('admin_forgot_password')
+                    except Exception as e:
+                        messages.error(request, "Failed to send verification email. Please try again.")
+                        print(f"\n========================================\nADMIN FORGOT PASSWORD OTP FOR {email}: {otp}\n========================================\n", flush=True)
                 except AdminOwner.DoesNotExist:
                     messages.error(request, "Email not registered as Restaurant Owner")
         
@@ -2929,6 +2949,10 @@ def super_login(request):
                 messages.error(request, 'No account found with this email.')
     else:
         form = SuperLoginForm()
+        request.session.pop('super_otp_sent', None)
+        request.session.pop('super_otp_verified', None)
+        request.session.pop('super_otp_code', None)
+        request.session.pop('super_reset_email', None)
 
     return render(request, 'super_admin/super_login.html', {
         'form': form,
@@ -2937,6 +2961,13 @@ def super_login(request):
 
 
 def super_forgot_password(request):
+    if request.GET.get('reset') == 'true':
+        request.session.pop('super_otp_sent', None)
+        request.session.pop('super_otp_verified', None)
+        request.session.pop('super_otp_code', None)
+        request.session.pop('super_reset_email', None)
+        return redirect('super_forgot_password')
+
     if 'super_otp_sent' not in request.session:
         request.session['super_otp_sent'] = False
         request.session['super_otp_verified'] = False
@@ -2950,11 +2981,6 @@ def super_forgot_password(request):
                 try:
                     user = SuperRegister.objects.get(email=email)
                     otp = randint(100000, 999999)
-                    request.session['super_reset_email'] = email
-                    request.session['super_otp_code'] = str(otp)
-                    request.session['super_otp_sent'] = True
-                    request.session['super_otp_verified'] = False               
-                    
                     subject = 'Your OTP for Super Admin Password Reset'
                     message_text = f'Your OTP is: {otp}'
                     html_message = f"""
@@ -2989,11 +3015,15 @@ def super_forgot_password(request):
                             fail_silently=False,
                             html_message=html_message
                         )
+                        request.session['super_reset_email'] = email
+                        request.session['super_otp_code'] = str(otp)
+                        request.session['super_otp_sent'] = True
+                        request.session['super_otp_verified'] = False               
                         messages.success(request, f"OTP sent to {email}")
-                    except Exception:
-                        messages.warning(request, f"For local testing, your verification OTP code is: {otp}")
-                    
-                    return redirect('super_forgot_password')
+                        return redirect('super_forgot_password')
+                    except Exception as e:
+                        messages.error(request, "Failed to send verification email. Please try again.")
+                        print(f"\n========================================\nSUPER FORGOT PASSWORD OTP FOR {email}: {otp}\n========================================\n", flush=True)
                 except SuperRegister.DoesNotExist:
                     messages.error(request, "Email not registered as Super Admin")
         
@@ -4023,10 +4053,10 @@ def delivery_register(request):
             try:
                 send_mail(subject, message, settings.EMAIL_HOST_USER, [email], fail_silently=False)
                 messages.success(request, "Registration details submitted! Verification OTP has been sent to your email address.")
+                return redirect('delivery_verify_otp')
             except Exception as e:
-                messages.warning(request, f"Could not send verification email. For local testing, your verification OTP is: {otp} (Error: {str(e)})")
-            
-            return redirect('delivery_verify_otp')
+                messages.error(request, "Failed to send verification email. Please try again.")
+                print(f"--- DELIVERY BOY OTP GENERATED FOR {email}: {otp} ---", flush=True)
         except Exception as e:
             import traceback
             return HttpResponse(f"<h3>Registration Debug Traceback:</h3><pre>{traceback.format_exc()}</pre>", status=500)
@@ -4101,8 +4131,122 @@ def delivery_login(request):
                 messages.error(request, "Incorrect password. Please try again.")
         else:
             messages.error(request, "No registered delivery partner found with these credentials.")
+    else:
+        # Reset forgot password session state if navigating to login page
+        request.session.pop('delivery_otp_sent', None)
+        request.session.pop('delivery_otp_verified', None)
+        request.session.pop('delivery_otp_code', None)
+        request.session.pop('delivery_reset_email', None)
 
     return render(request, 'delivery/login.html')
+
+
+def delivery_forgot_password(request):
+    if request.GET.get('reset') == 'true':
+        request.session.pop('delivery_otp_sent', None)
+        request.session.pop('delivery_otp_verified', None)
+        request.session.pop('delivery_otp_code', None)
+        request.session.pop('delivery_reset_email', None)
+        return redirect('delivery_forgot_password')
+
+    if 'delivery_otp_sent' not in request.session:
+        request.session['delivery_otp_sent'] = False
+        request.session['delivery_otp_verified'] = False
+
+    form = None
+    if request.method == 'POST':
+        if not request.session['delivery_otp_sent']:
+            form = ForgotPasswordForm(request.POST)
+            if form.is_valid():
+                email = form.cleaned_data['email']
+                try:
+                    user = DeliveryBoy.objects.get(email=email)
+                    otp = randint(100000, 999999)
+                    subject = 'Foodeat - Delivery Partner Password Reset Code'
+                    message_text = f'Your verification code is: {otp}'
+                    html_message = f"""
+                    <div style="font-family: 'Plus Jakarta Sans', 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; border-radius: 24px; background: #ffffff; border: 1px solid #e2e8f0; color: #1e293b; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+                        <div style="text-align: center; margin-bottom: 25px;">
+                            <span style="font-size: 28px; font-weight: 800; color: #0ea5e9; letter-spacing: -1px;">Foodeat</span>
+                            <span style="display: block; font-size: 10px; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 2px; margin-top: 5px;">Delivery Partner Security Verification</span>
+                        </div>
+                        <div style="border-top: 3px solid #0ea5e9; padding-top: 25px;">
+                            <p style="font-size: 16px; line-height: 1.6; margin: 0 0 20px 0;">Hello {user.name},</p>
+                            <p style="font-size: 14px; line-height: 1.6; margin: 0 0 25px 0; color: #475569;">We received a request to reset your delivery partner account password. Use the following security verification code to proceed. This code is active for 10 minutes.</p>
+                            
+                            <div style="text-align: center; margin: 30px 0; background: #f8fafc; border-radius: 16px; padding: 25px; border: 1px dashed #cbd5e1;">
+                                <span style="display: block; font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 1.5px; margin-bottom: 8px;">Your Verification Code</span>
+                                <span style="font-family: monospace; font-size: 36px; font-weight: 900; color: #0f172a; letter-spacing: 6px; padding-left: 6px;">{otp}</span>
+                            </div>
+                            
+                            <p style="font-size: 12px; line-height: 1.6; color: #64748b; margin: 25px 0 0 0;">If you did not request a password reset, please ignore this email or contact support immediately.</p>
+                        </div>
+                        <div style="border-top: 1px solid #e2e8f0; margin-top: 35px; padding-top: 20px; text-align: center; font-size: 11px; color: #94a3b8;">
+                            &copy; 2026 Foodeat. All rights reserved.
+                        </div>
+                    </div>
+                    """
+                    
+                    try:
+                        send_mail(
+                            subject,
+                            message_text,
+                            settings.EMAIL_HOST_USER,
+                            [email],
+                            fail_silently=False,
+                            html_message=html_message
+                        )
+                        request.session['delivery_reset_email'] = email
+                        request.session['delivery_otp_code'] = str(otp)
+                        request.session['delivery_otp_sent'] = True
+                        request.session['delivery_otp_verified'] = False               
+                        messages.success(request, f"OTP sent to {email}")
+                        return redirect('delivery_forgot_password')
+                    except Exception as e:
+                        messages.error(request, "Failed to send verification email. Please try again.")
+                        print(f"\n========================================\nDELIVERY FORGOT PASSWORD OTP FOR {email}: {otp}\n========================================\n", flush=True)
+                except DeliveryBoy.DoesNotExist:
+                    messages.error(request, "Email not registered as Delivery Partner")
+        
+        elif request.session.get('delivery_otp_sent') and not request.session.get('delivery_otp_verified'):
+            form = OTPForm(request.POST)
+            if form.is_valid():
+                otp_input = form.cleaned_data['otp']
+                if otp_input == request.session.get('delivery_otp_code'):
+                    request.session['delivery_otp_verified'] = True
+                    messages.success(request, "OTP verified. Please set your new password.")
+                    return redirect('delivery_forgot_password')
+                else:
+                    messages.error(request, "Invalid OTP. Try again.")    
+        
+        elif request.session.get('delivery_otp_verified'):
+            form = ResetPasswordForm(request.POST)
+            if form.is_valid():
+                password = form.cleaned_data['password']
+                email = request.session.get('delivery_reset_email')
+                try:
+                    user = DeliveryBoy.objects.get(email=email)
+                    from django.contrib.auth.hashers import make_password
+                    user.password = make_password(password)
+                    user.save()
+                    messages.success(request, "Password reset successful!")               
+                    
+                    request.session.pop('delivery_otp_sent', None)
+                    request.session.pop('delivery_otp_verified', None)
+                    request.session.pop('delivery_otp_code', None)
+                    request.session.pop('delivery_reset_email', None)
+                    return redirect('delivery_login')
+                except DeliveryBoy.DoesNotExist:
+                    messages.error(request, "Something went wrong. Try again.")   
+    else:
+        if not request.session.get('delivery_otp_sent'):
+            form = ForgotPasswordForm()
+        elif request.session.get('delivery_otp_sent') and not request.session.get('delivery_otp_verified'):
+            form = OTPForm()
+        else:
+            form = ResetPasswordForm()
+
+    return render(request, 'delivery/forgot_password.html', {'form': form})
 
 
 def delivery_dashboard(request):

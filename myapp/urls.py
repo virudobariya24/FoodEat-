@@ -126,6 +126,7 @@ urlpatterns = [
     path('delivery/register/', views.delivery_register, name='delivery_register'),
     path('delivery/verify-otp/', views.delivery_verify_otp, name='delivery_verify_otp'),
     path('delivery/login/', views.delivery_login, name='delivery_login'),
+    path('delivery/forgot-password/', views.delivery_forgot_password, name='delivery_forgot_password'),
     path('delivery/dashboard/', views.delivery_dashboard, name='delivery_dashboard'),
     path('delivery/check_orders/', views.delivery_check_orders, name='delivery_check_orders'),
     path('delivery/accept/<int:order_id>/', views.delivery_accept_order, name='delivery_accept'),
