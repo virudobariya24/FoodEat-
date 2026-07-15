@@ -2651,10 +2651,6 @@ def toggle_resto_status(request, id):
         restaurant.is_accepting_orders = not restaurant.is_accepting_orders
         restaurant.save()
         
-        # Sync with AdminOwner
-        admin_owner.is_accepting_orders = restaurant.is_accepting_orders
-        admin_owner.save()
-        
         status = "Open" if restaurant.is_accepting_orders else "Closed"
         messages.success(request, f"{restaurant.name} is now {status}.")
 
