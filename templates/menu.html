@@ -391,6 +391,42 @@
       box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
     }
 
+    .card-badges-left {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 10;
+    }
+
+    .card-badges-left .offer-badge {
+      position: static;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.16);
+    }
+
+    .veg-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #10B981;
+      background: #ffffff;
+      padding: 2px;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.16);
+      flex-shrink: 0;
+    }
+
+    .veg-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #10B981;
+      border-radius: 50%;
+    }
+
     .offer-badge {
       left: 12px;
       top: 12px;
@@ -716,6 +752,19 @@
       }
     }
 
+    @media (max-width: 420px) {
+      .card-container {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+      .card-image-container {
+        height: 180px !important;
+      }
+      .menu-card {
+        min-height: auto !important;
+      }
+    }
+
     /* --- Menu Page Dark Mode Overrides --- */
     body[data-theme="dark"] {
       --page-bg: #0A0F1D;
@@ -863,14 +912,20 @@
                 <i class="fa-solid fa-utensils text-5xl opacity-40"></i>
               </div>
               {% endif %}
-              {% if p.active_discount %}
-              <span class="offer-badge"><i class="fa-solid fa-tag"></i>{{ p.active_discount.discount_percentage }}% OFF</span>
-              {% endif %}
+              <!-- Left badges container containing green veg badge and offer badge -->
+              <div class="card-badges-left">
+                {% if p.is_veg %}
+                <div class="veg-badge" title="Vegetarian">
+                  <span class="veg-dot"></span>
+                </div>
+                {% endif %}
+                {% if p.active_discount %}
+                <span class="offer-badge"><i class="fa-solid fa-tag"></i>{{ p.active_discount.discount_percentage }}% OFF</span>
+                {% endif %}
+              </div>
 
               {% if p.is_spicy %}
               <span class="type-badge spicy"><i class="fa-solid fa-pepper-hot"></i> Spicy</span>
-              {% elif p.is_veg %}
-              <span class="type-badge"><i class="fa-solid fa-leaf"></i> Veg</span>
               {% endif %}
 
               <span class="availability-badge {% if not p.is_available or not p.restaurant_is_accepting_orders %}off{% endif %}">
