@@ -2385,8 +2385,8 @@ def edit_food(request, food_id):
 
     return render(request, 'admin_owner/edit_food.html', {'form': form})
 
-def delete_food(request, id):
-    food = get_object_or_404(FoodItem, id=id)
+def delete_food(request, food_id):
+    food = get_object_or_404(FoodItem, id=food_id)
     if request.method == 'POST':
         try:
             with transaction.atomic():
