@@ -16,17 +16,17 @@ services:
       - key: DATABASE_URL
         sync: false # Connect your Supabase Connection String here
       - key: EMAIL_HOST_USER
-        sync: false
+        value: virajdobariya61@gmail.com
       - key: EMAIL_HOST_PASSWORD
-        sync: false
+        value: jsmzaqziqbzgwpwo
       - key: RAZORPAY_KEY_ID
-        sync: false
+        value: rzp_test_RRohlnOxODtIQJ
       - key: RAZORPAY_SECRET
-        sync: false
+        value: 10VV4TyI859blM7Pf9U70YTY
       - key: CLOUDINARY_CLOUD_NAME
-        sync: false
+        value: dgjt0orlv
       - key: CLOUDINARY_API_KEY
-        sync: false
+        value: "384832215337237"
       - key: CLOUDINARY_API_SECRET
-        sync: false
+        value: DFOkprOynhkBWD-5iNtxoek4fcw
 
